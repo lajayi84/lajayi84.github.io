@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lanre Ajayi — Films &amp; Stories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121016; --bg2:#0c0a10; --panel:#1a1520; --panel2:#211a29;
+    --edge:rgba(255,255,255,.09); --edge2:rgba(255,255,255,.14);
+    --bone:#ece6df; --mut:#948b98; --dim:#6f6776; --gold:#e5b24e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    font-family:'Newsreader',Georgia,serif;
+    background:var(--bg); color:var(--bone);
+    min-height:100dvh; line-height:1.5;
+    background-image:radial-gradient(120% 80% at 50% -10%, rgba(229,178,78,.10), transparent 55%),
+                     radial-gradient(100% 60% at 50% 120%, rgba(70,40,90,.18), transparent 60%);
+    background-attachment:fixed;
+  }
+  body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(130% 100% at 50% 42%, transparent 58%, rgba(6,4,9,.6));}
+  .wrap{position:relative;z-index:2;max-width:660px;margin:0 auto;padding:0 22px 72px;}
+
+  header{padding:64px 0 40px;text-align:center;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);opacity:.85;}
+  .bulbs{display:flex;justify-content:center;gap:11px;margin:22px 0 18px;}
+  .bulbs span{width:7px;height:7px;border-radius:50%;background:var(--gold);
+    box-shadow:0 0 8px 1px rgba(229,178,78,.7);animation:blink 2.4s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}45%{opacity:.28;}}
+  .marquee{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:clamp(44px,15vw,92px);line-height:.9;letter-spacing:-.02em;text-transform:uppercase;
+    color:var(--bone);text-shadow:0 4px 34px rgba(0,0,0,.55);}
+  .marquee .amp{color:var(--gold);}
+  .tag-under{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:clamp(15px,3.4vw,19px);
+    letter-spacing:.02em;color:var(--bone);margin-top:14px;}
+  .instruct{font-style:italic;color:var(--mut);font-size:15px;margin-top:8px;}
+
+  .sec{display:flex;align-items:center;gap:14px;margin:38px 2px 14px;}
+  .sec h2{font-family:'Space Mono',monospace;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--mut);white-space:nowrap;}
+  .sec .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent);}
+  .sec .count{font-family:'Space Mono',monospace;font-size:12px;color:var(--dim);}
+
+  .film{position:relative;display:flex;gap:0;border:1px solid var(--edge);border-radius:14px;
+    background:linear-gradient(180deg,var(--panel),var(--panel2));overflow:hidden;margin-bottom:14px;
+    transition:transform .22s cubic-bezier(.2,.8,.3,1),border-color .22s,box-shadow .22s;}
+  .film:hover,.film:focus-within{transform:translateY(-3px);border-color:var(--edge2);box-shadow:0 12px 34px rgba(0,0,0,.4);}
+  .spine{width:6px;flex:0 0 6px;background:var(--c);box-shadow:0 0 0 rgba(0,0,0,0);transition:box-shadow .22s,width .22s;}
+  .film:hover .spine,.film:focus-within .spine{width:9px;box-shadow:0 0 18px 1px var(--c);}
+  .body{flex:1;min-width:0;padding:18px 20px 16px;}
+  .watch{display:block;text-decoration:none;color:inherit;}
+  .watch:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:6px;}
+  .film h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(20px,5vw,25px);
+    line-height:1.05;color:var(--bone);letter-spacing:-.01em;}
+  .film .log{font-style:italic;color:#cabfc5;font-size:15.5px;line-height:1.45;margin-top:7px;max-width:42ch;}
+  .meta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;}
+  .chip{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--mut);border:1px solid var(--edge);border-radius:20px;padding:5px 11px;}
+  .chip.c{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,transparent);}
+  .actions{display:flex;gap:8px;margin-left:auto;}
+  .btn{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.5px;text-decoration:none;
+    padding:8px 14px;border-radius:20px;transition:background .18s,transform .12s,border-color .18s;white-space:nowrap;}
+  .btn.play{background:var(--c);color:#0c0a10;font-weight:700;}
+  .btn.play:hover{filter:brightness(1.08);}
+  .btn.auto{border:1px solid var(--edge2);color:var(--bone);}
+  .btn.auto:hover{border-color:var(--c);color:var(--c);}
+  .btn:active{transform:scale(.96);}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+
+  footer{margin-top:44px;padding-top:26px;border-top:1px solid var(--edge);text-align:center;color:var(--dim);}
+  footer .note{font-style:italic;font-size:14px;color:var(--mut);max-width:44ch;margin:0 auto 14px;line-height:1.5;}
+  footer .credit{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
+  footer .credit b{color:var(--mut);font-weight:400;}
+
+  @media (max-width:520px){
+    .actions{margin-left:0;width:100%;margin-top:12px;}
+    .btn{flex:1;text-align:center;}
+    .meta{gap:8px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .bulbs span{animation:none;} .film{transition:none;} body{background-attachment:scroll;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Selected short films &amp; stories</div>
+    <div class="bulbs" aria-hidden="true">
+      <span style="animation-delay:0s"></span><span style="animation-delay:.2s"></span><span style="animation-delay:.4s"></span>
+      <span style="animation-delay:.6s"></span><span style="animation-delay:.8s"></span><span style="animation-delay:1s"></span>
+      <span style="animation-delay:1.2s"></span>
+    </div>
+    <h1 class="marquee">Lanre <span class="amp">·</span> Ajayi</h1>
+    <div class="tag-under">A collection of animated shorts &amp; a bedtime story</div>
+    <div class="instruct">Tap any title to play. Best with sound, in a dark room.</div>
+  </header>
+
+  <section>
+    <div class="sec"><h2>The Films</h2><div class="rule"></div><span class="count">8</span></div>
+
+    <article class="film" style="--c:#f2c66a">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="n14.html">
+          <h3>N14</h3>
+          <p class="log">The last shift, on a route cancelled nine years ago &mdash; and stop by stop, the lights go out. Your tap rings the bell.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Night service &middot; Drama</span>
+          <div class="actions">
+            <a class="btn play" href="n14.html">Watch &#9656;</a>
+            <a class="btn auto" href="n14-auto.html">Auto-play</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#e78a3c">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="getin.html">
+          <h3>Get In, Get Done, Get Out</h3>
+          <p class="log">A cold-blooded job, executed to the letter. Wrong flat. Wrong day. Wrong everything.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Comedy &middot; Heist</span>
+          <div class="actions">
+            <a class="btn play" href="getin.html">Watch &#9656;</a>
+            <a class="btn auto" href="getin-auto.html">Auto-play</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#e0a43c">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="calls.html">
+          <h3>Calls</h3>
+          <p class="log">A night shift, a taxi office, and one phone call that really should have stayed funny.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Dark comedy</span>
+          <div class="actions">
+            <a class="btn play" href="calls.html">Watch &#9656;</a>
+            <a class="btn auto" href="calls-auto.html">Auto-play</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#7aa8d6">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="inevitabilis.html">
+          <h3>Inevitabilis</h3>
+          <p class="log">A family, a house that won&rsquo;t let go, and a debt that always, always collects.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Thriller</span>
+          <div class="actions">
+            <a class="btn play" href="inevitabilis.html">Watch &#9656;</a>
+            <a class="btn auto" href="inevitabilis-auto.html">Auto-play</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#4f9e8c">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="housecall.html">
+          <h3>House Call</h3>
+          <p class="log">A routine visit turns, in broad daylight, into something you don&rsquo;t walk away from.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Thriller</span>
+          <div class="actions">
+            <a class="btn play" href="housecall.html">Watch &#9656;</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#c85040">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="uncivility.html">
+          <h3>(Un)Civility</h3>
+          <p class="log">A soldier, a stranger under the boxes, and a flickering bulb with one mercy left in it.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">War drama</span>
+          <div class="actions">
+            <a class="btn play" href="uncivility.html">Watch &#9656;</a>
+            <a class="btn auto" href="uncivility-auto.html">Auto-play</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#c99a4a">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="three-knocks.html">
+          <h3>Three Knocks</h3>
+          <p class="log">A knock at the wrong hour, and a night that refuses to stay quiet.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Noir</span>
+          <div class="actions">
+            <a class="btn play" href="three-knocks.html">Watch &#9656;</a>
+            <a class="btn auto" href="three-knocks-auto.html">Auto-play</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+    <article class="film" style="--c:#e8a24c">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="td-chapters.html">
+          <h3>Today&rsquo;s Date <span style="font-weight:400;opacity:.6">(an anthology)</span></h3>
+          <p class="log">One story in fifteen chapters, told by five people and a dog &mdash; each of whom sees only their own piece of it. A lockdown romance that turns out to be something else entirely.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">15 chapters</span>
+          <div class="actions">
+            <a class="btn play" href="td-chapters.html">Read in order &#9656;</a>
+            <a class="btn auto" href="todays-date.html">Chapter 1</a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="film" style="--c:#8ec66a">
+      <div class="spine"></div>
+      <div class="body">
+        <a class="watch" href="tapping-window.html">
+          <h3>The Tapping at the Window</h3>
+          <p class="log">A gentle bedtime story about being ready &mdash; and the small, curious thing at the glass.</p>
+        </a>
+        <div class="meta">
+          <span class="chip c">Picture book</span>
+          <div class="actions">
+            <a class="btn play" href="tapping-window.html">Read &#9656;</a>
+            <a class="btn auto" href="tapping-window-auto.html">Read to me</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <footer>
+    <p class="note">Every title opens in any web browser, on a phone or a laptop, and keeps playing even with no internet. Turn the sound on.</p>
+    <p class="credit">Written by <b>Lanre Ajayi</b></p>
+  </footer>
+</div>
+</body>
+</html>

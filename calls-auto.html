@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calls</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Karla:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#12110d;--fluor:#e8dcc0;--screen:#e0a43c;--night:#3a5680;--mug:#c8783a;--red:#d2342a;--bone:#efe8d8;--mut:#8d8878;--line:rgba(255,255,255,.1);}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:'Karla',system-ui,sans-serif;color:var(--bone);background:#05070a;display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:540px;height:100dvh;max-height:900px;overflow:hidden;background:#0a0d10;cursor:pointer;}
+  #stage{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;}
+  #app::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(135% 115% at 50% 42%,transparent 56%,rgba(4,6,9,.72));}
+  #flash{position:absolute;inset:0;z-index:7;background:#fff;opacity:0;pointer-events:none;}
+  #slug{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;gap:9px;padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--bone);text-shadow:0 1px 10px rgba(0,0,0,.95);pointer-events:none;transition:opacity .5s;opacity:.85;}
+  #slug .no{color:rgba(255,255,255,.5);}
+  #slug.dim{opacity:0;}
+  #cap{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:0 26px calc(54px + env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:flex-end;gap:9px;min-height:32%;background:linear-gradient(180deg,transparent,rgba(8,11,14,.32) 44%,rgba(8,11,14,.92));pointer-events:none;}
+  .blk{opacity:0;transform:translateY(8px);animation:rise .55s cubic-bezier(.2,.8,.3,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .narr{font-style:italic;font-size:17.5px;line-height:1.5;color:#d6d2c6;text-shadow:0 2px 16px rgba(0,0,0,.95);max-width:30em;}
+  .line{font-size:18px;line-height:1.38;color:var(--bone);text-shadow:0 2px 16px rgba(0,0,0,.95);max-width:30em;}
+  .line .who{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:2px;opacity:.9;}
+  .line.dotty .who{color:#e6b36a;} .line.jason .who{color:#7fc0d8;}
+  .line.vo{font-family:'IBM Plex Mono',monospace;font-size:16px;padding-left:11px;border-left:2px solid var(--mut);}
+  .line.vo .who{display:flex;align-items:center;gap:7px;}
+  .line.edison{color:#f0d9b0;} .line.edison .who{color:#e6b36a;}
+  .line.toby{color:#d8cdaa;} .line.toby .who{color:#c2b06a;}
+  .line.joy{color:#d9cce4;} .line.joy .who{color:#b79ad0;}
+  .line.vo .who::before{content:"";width:16px;height:9px;background:currentColor;clip-path:polygon(0 50%,10% 30%,20% 60%,30% 12%,40% 78%,50% 38%,60% 64%,70% 22%,80% 70%,90% 46%,100% 50%);}
+  #hint{position:absolute;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom));z-index:6;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mut);pointer-events:none;animation:hb 2.1s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.32;}50%{opacity:.8;}}
+  #hint.hide{display:none;} #hint.call{color:var(--screen);}
+  .screen{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 28px;}
+  .screen.hide{display:none;}
+  .kick{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--screen);margin-bottom:14px;opacity:0;animation:rise .8s .3s forwards;}
+  .ttl{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(80px,26vw,160px);line-height:.86;letter-spacing:3px;color:var(--bone);text-shadow:0 6px 40px rgba(0,0,0,.6);opacity:0;animation:rise 1s .2s forwards;}
+  .ttl .dot{color:var(--screen);}
+  .sub{font-family:'IBM Plex Mono',monospace;font-style:italic;font-size:14px;color:var(--mut);margin-top:4px;opacity:0;animation:rise .9s .7s forwards;}
+  .by{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-top:24px;opacity:0;animation:rise .9s 1s forwards;} .by b{color:#c6bba6;font-weight:400;}
+  .epi{font-style:italic;font-size:16px;color:#d4cabb;max-width:25em;margin-top:6px;line-height:1.5;opacity:0;animation:rise .9s .6s forwards;}
+  .start{margin-top:30px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--screen);opacity:0;animation:rise .9s 1.4s forwards;} .start .p{animation:hb 2.1s ease-in-out infinite;display:inline-block;}
+  .replay{margin-top:26px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);border:1px solid var(--line);border-radius:30px;padding:11px 22px;background:rgba(255,255,255,.03);pointer-events:auto;cursor:pointer;opacity:0;animation:rise .9s 1.6s forwards;}
+  .replay:active{transform:scale(.97);}
+  #mute{position:absolute;top:12px;right:14px;z-index:9;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:50%;background:rgba(14,17,20,.7);border:1px solid var(--line);backdrop-filter:blur(5px);pointer-events:auto;}
+  #prog{position:absolute;top:0;left:0;right:0;height:3px;z-index:9;background:rgba(255,255,255,.07);pointer-events:none;}
+  #progfill{height:100%;width:0;background:linear-gradient(90deg,var(--screen),#e6b36a);box-shadow:0 0 8px rgba(79,208,200,.6);transition:width .18s linear;}
+  body.paused #progfill{box-shadow:none;opacity:.5;}
+  @media (prefers-reduced-motion: reduce){.blk,.kick,.by,.epi,.sub,.start,.replay,.ttl{animation-duration:.01s;}#hint,.start .p,.line.vo .who::before{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="stage"></canvas>
+  <div id="flash"></div>
+  <div id="prog"><div id="progfill"></div></div>
+  <div id="mute">&#128266;</div>
+  <div id="slug" class="dim"></div>
+  <div id="cap"></div>
+  <div id="hint" class="hide">tap to continue</div>
+  <div class="screen" id="titleScr">
+    <div class="kick">A short film &middot; take two</div>
+    <div class="ttl">CALL<span class="dot">S</span></div>
+    <div class="sub">Toucan Travel Services &middot; the night desk</div>
+    <div class="by">Written by <b>Lanre Ajayi</b></div>
+    <div class="start"><span class="p">&#9656; tap once to begin &middot; then it plays itself</span></div>
+  </div>
+  <div class="screen hide" id="endScr">
+    <div class="ttl" style="font-size:clamp(56px,18vw,104px);">CALL<span class="dot">S</span></div>
+    <div class="epi">Same office. Same night. Every call is a stranger in the room.</div>
+    <div class="by" style="animation-delay:.9s">Written by <b>Lanre Ajayi</b></div>
+    <div class="replay" id="replayBtn">&#8634; Watch again</div>
+  </div>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const app=$('app'),cv=$('stage'),ctx=cv.getContext('2d');
+const cap=$('cap'),slug=$('slug'),hint=$('hint'),flashEl=$('flash');
+let W=0,H=0,DPR=1;
+function resize(){const r=app.getBoundingClientRect();W=r.width;H=r.height;DPR=Math.min(2,window.devicePixelRatio||1);cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',resize);
+let grainCv=null;
+function buildGrain(){grainCv=document.createElement('canvas');grainCv.width=150;grainCv.height=150;const g=grainCv.getContext('2d');const im=g.createImageData(150,150);for(let i=0;i<im.data.length;i+=4){const v=128+(Math.random()*2-1)*52;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255;}g.putImageData(im,0,0);}
+
+const N=s=>({k:'narr',s});
+const D=(who,s,cls)=>({k:'line',who,s,cls});
+const callers={
+ edison:{line:1,label:'MRS EDISON',col:[230,180,110],voice:'edison'},
+ wrong:{line:1,label:'WRONG NUMBER',col:[150,200,160],voice:'edison'},
+ toby:{line:2,label:'UNKNOWN',col:[200,180,120],voice:'toby'},
+ tobyN:{line:2,label:'\u201cTOBY\u201d',col:[200,180,120],voice:'toby'},
+ joy:{line:3,label:'MRS JOY',col:[183,154,208],voice:'joy'}
+};
+const SCENES=[
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit'},bed:['office'],
+  text:[N("A non-descript room. A calendar months out of date. A clock that stopped just as long ago. And, though we can\u2019t see it yet, a window."),
+        N("At the desk sits Dorothy Lomax \u2014 Dotty, to you and me. Headset on, stubby pencil between her fingers, eyes fixed on nowhere. She listens. The half-smile becomes a whole one.")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',caller:'edison'},bed:['office'],sfx:'vox',
+  text:[D("Dotty","\u201cWell, I hope you give him a piece of your mind!\u201d","dotty"),
+        D("Dotty","(laughs) \u201cI\u2019d love to see that. Let me know how it goes, Mrs Edison.\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',mugs:1},bed:['office'],sfx:'clink',
+  text:[N("Jason Shift joins her \u2014 her eyes light up, not for him, but for the mug in his hand."),
+        D("Dotty","\u201cOk, darling. Mind how you go. Bye now.\u201d","dotty"),
+        N("She sips, frowns at the mug, and swaps it for Jason\u2019s. That\u2019s the one. He drinks his rightful drink, content.")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',mugs:1},bed:['office'],
+  text:[D("Jason","\u201cHow\u2019s the old dear? Still waiting for her husband to come home?\u201d","jason"),
+        N("Dotty\u2019s rueful look is his answer."),
+        D("Jason","\u201cYou should tell her, Dotty.\u201d","jason"),
+        D("Dotty","\u201cWhat\u2019s the point? She\u2019ll only call again, bless her.\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',caller:'wrong',active:'jason'},bed:['office'],sfx:'ringO',
+  text:[D("Jason","\u201cToucan Travel Services, Jason speaking, how may I help?\u201d","jason"),
+        N("He rolls his eyes."),
+        D("Jason","\u201cNo \u2014 you want 227 for the restaurant. Not 277!\u201d","jason")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',caller:'toby'},bed:['office'],sfx:'ringO',
+  text:[D("Dotty","\u201cToucan Travel Services, this is Dotty, how may I help?\u201d","dotty"),
+        N("A silence \u2014 but she can hear something. Then a soft, almost inaudible voice."),
+        D("Man","\u201c(V.O.) Hello? Is this where I can order a taxi?\u201d","vo toby"),
+        D("Dotty","\u201cYes it is.\u201d","dotty"),
+        D("Man","\u201c(V.O.) Oh, good.\u201d","vo toby")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',caller:'toby'},bed:['office','unease'],sfx:'vox',
+  text:[D("Dotty","\u201cWhere do you want to go, please?\u201d","dotty"),
+        D("Man","\u201c(V.O.) Can I tell the driver when he gets to me? I\u2019m not far from your office.\u201d","vo toby"),
+        D("Dotty","\u201cNo can do, I\u2019m afraid. We need a pickup and a destination to make pricing estimations.\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',caller:'toby'},bed:['office','unease'],
+  text:[D("Dotty","\u201cSo where are you going?\u201d","dotty"),
+        D("Man","\u201c(V.O.) I\u2019m sorry. I\u2019d rather not. It\u2019s better that way.\u201d","vo toby"),
+        D("Dotty","\u201cThen unfortunately, we can\u2019t help you, sir. Goodnight.\u201d","dotty"),
+        N("She ends the call. Jason gives her a curious look. She just shrugs."),
+        D("Dotty","\u201cI have no idea, Jase\u2026\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{jason:'sit',dottyAway:1},bed:['office'],sfx:'ringM',
+  text:[N("Two phones ring at once \u2014 her headset and her mobile. She takes the mobile, and steps away."),
+        D("Jason","(laughs) \u201cTell that partner of yours I\u2019m still waiting for my tenner!\u201d","jason")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{jason:'sit',dottyAway:1,caller:'toby',active:'jason'},bed:['office','unease'],sfx:'connect',
+  text:[D("Jason","\u201cToucan Travel\u2014\u201d","jason"),
+        D("Man","\u201c(V.O.) Where\u2019s the woman?!\u201d","vo toby"),
+        N("No hesitation this time. The opposite. Jason isn\u2019t entirely comfortable."),
+        D("Jason","\u201cShe\u2019s busy \u2014 talking to her fianc\u00e9! How can I help?\u201d","jason")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{jason:'sit',dottyAway:1,caller:'toby'},bed:['office','unease'],sfx:'vox',
+  text:[D("Man","\u201c(V.O.) Look, I\u2019ll level with you. Bloke to bloke. I need a car to make a delivery.\u201d","vo toby"),
+        D("Jason","\u201cWe\u2019re a courier service as well\u2014\u201d","jason"),
+        D("Man","\u201c(V.O.) No, no. I\u2019ve got to be with this one. It\u2019s a \u2018personal delivery\u2019. And it needs to be off the books.\u201d","vo toby")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{jason:'sit',dottyAway:1,caller:'tobyN'},bed:['office','unease'],sfx:'vox',
+  text:[N("Jason hesitates. The man hears it."),
+        D("Man","\u201c(V.O.) There\u2019s some extra money in it for the driver.\u201d","vo toby"),
+        D("Jason","\u201cI can\u2019t get a driver to do that. But if you come to the counter in the office, I can sneak away and drop you off. Good?\u201d","jason"),
+        D("Man","\u201c(V.O.) Perfect. I know where it is. I really appreciate this, mate. The name\u2019s Toby.\u201d","vo toby")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jason:'sit',mugs:1},bed:['office'],
+  text:[N("Jason ends the call, and has to edit a wry smile off his face \u2014 Dotty is back, mobile in hand, a curious look of her own."),
+        D("Dotty","\u201cWas it that shifty man again?\u201d","dotty"),
+        D("Jason","\u201cYeah. I told him I\u2019d call the police. He won\u2019t call again.\u201d","jason")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonWindow:1,mugs:1},bed:['office'],sfx:'ringH',
+  text:[N("The headset rings."),
+        D("Jason","\u201cYou\u2019re up.\u201d","jason"),
+        N("Dotty puts on her headset. Jason drifts to the window to peek outside.")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonWindow:1,caller:'joy'},bed:['office'],sfx:'connect',
+  text:[D("Dotty","\u201cToucan Travel Services, my name is Dotty, how may I help?\u201d","dotty"),
+        D("Mrs Joy","\u201c(V.O.) Mrs Joy, here. I\u2019m wondering if you can help me.\u201d","vo joy"),
+        D("Dotty","\u201cIf you\u2019re after a taxi or a courier, then I\u2019m sure we can, darling.\u201d","dotty"),
+        D("Mrs Joy","\u201c(V.O.) That\u2019s wonderful.\u201d","vo joy")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonWindow:1,caller:'joy'},bed:['office'],sfx:'vox',
+  text:[D("Dotty","\u201cSo, which one do you want?\u201d","dotty"),
+        D("Mrs Joy","\u201c(V.O.) Oh \u2014 sorry. Taxi, please.\u201d","vo joy"),
+        D("Dotty","\u201cWhere to, my love?\u201d","dotty"),
+        D("Mrs Joy","\u201c(V.O.) I\u2019m not yet sure.\u201d","vo joy"),
+        D("Dotty","(under her breath) \u201cHere we go.\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonTurn:1,caller:'joy'},bed:['office','unease'],sfx:'vox',
+  text:[D("Mrs Joy","\u201c(V.O.) Oh, you must assist. I\u2019m looking for someone who has something I need to get back.\u201d","vo joy"),
+        D("Dotty","\u201cSounds like a police matter.\u201d","dotty"),
+        D("Mrs Joy","\u201c(V.O.) Oh, absolutely not! It\u2019s better I find Toby myself!\u201d","vo joy"),
+        D("Dotty","\u201cWho\u2019s Toby?\u201d","dotty"),
+        N("That turns Jason from the window. He comes closer. Dotty doesn\u2019t notice.")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonNear:1,caller:'joy'},bed:['office','unease'],
+  text:[D("Mrs Joy","\u201c(V.O.) He\u2019s helping me deliver cash to an \u2018individual\u2019\u2014\u201d","vo joy"),
+        D("Dotty","\u201cSorry \u2014 what does that have to do with us?\u201d","dotty"),
+        N("Dotty laughs, and ends the call. She turns, shaking her head. Jason isn\u2019t sharing the smile.")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonNear:1,mugs:1},bed:['office','unease'],
+  text:[D("Jason","\u201cWhat\u2019s that about Toby?\u201d","jason"),
+        D("Dotty","\u201cWe\u2019ve had it all tonight. Some crackpot woman says she sent this idiot out with a bag of cash \u2014 except he took the wrong bag!\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonNear:1,mugs:1},bed:['unease'],
+  text:[D("Jason","\u201cRight\u2026 what\u2019s so funny?\u201d","jason"),
+        D("Dotty","\u201cGet this. She says he\u2019s only gone and taken a bag with an unsteady bomb instead!\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'office',p:{dotty:'sit',jasonNear:1,smash:1},bed:['dread'],sfx:'smash',shake:1,
+  text:[N("Her laugh is matched only by the horror spreading across Jason\u2019s face. He doesn\u2019t even feel the mugs leave his hands."),
+        N("They smash on the floor. The drinks crawl across the lino. Dotty\u2019s laughter stops."),
+        D("Dotty","\u201cWhat\u2019s wrong?\u201d","dotty")]},
+ {slug:['INT. TAXI OFFICE','NIGHT'],set:'door',p:{},bed:['dread'],sfx:'door',shake:1,
+  text:[N("The front door to the office opens. Almost in slow motion."),
+        N("Jason turns towards it \u2014 his face a single thing now. Panic. And horror.")],last:1}
+];
+
+/* ---------- audio ---------- */
+let AC=null,master=null,muted=false,beds={};
+function audioInit(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.9;master.connect(AC.destination);}catch(e){AC=null;}}
+function now(){return AC?AC.currentTime:0;}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,Math.floor(sr*d),sr),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function tone(f,t,dur,amp,type){const o=AC.createOscillator();o.type=type||'sine';o.frequency.value=f;const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(amp,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.02);}
+function ringOffice(){if(!AC||muted)return;const t=now();for(let r=0;r<2;r++){const t0=t+r*0.4;tone(1100,t0,0.16,0.1,'square');tone(1400,t0,0.16,0.08,'square');tone(1100,t0+0.2,0.16,0.1,'square');tone(1400,t0+0.2,0.16,0.08,'square');}}
+function ringMobile(){if(!AC||muted)return;const t=now();[0,0.18,0.36].forEach(o=>{tone(1320,t+o,0.1,0.08,'triangle');tone(1760,t+o+0.05,0.1,0.06,'triangle');});}
+function ringHead(){if(!AC||muted)return;const t=now();tone(900,t,0.12,0.08,'sine');tone(900,t+0.2,0.12,0.08,'sine');}
+function connectS(){if(!AC||muted)return;const t=now();tone(2600,t,0.03,0.06,'square');tone(1900,t+0.05,0.03,0.05,'square');const s=AC.createBufferSource();s.buffer=nbuf(0.03);const g=AC.createGain();g.gain.setValueAtTime(0.16,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);s.connect(g);g.connect(master);s.start(t);s.stop(t+0.05);tone(640,t,0.05,0.05,'sine');}
+function clinkS(){if(!AC||muted)return;const t=now();tone(2100,t,0.08,0.05,'triangle');tone(2600,t+0.04,0.06,0.04,'triangle');}
+function voxEdison(){if(!AC||muted)return;const t=now();tone(523,t,0.3,0.07,'sine');tone(659,t+0.14,0.34,0.06,'sine');}
+function voxToby(){if(!AC||muted)return;const t=now();const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=72;const o2=AC.createOscillator();o2.type='sine';o2.frequency.value=72*1.49;const tr=AC.createOscillator();tr.type='sine';tr.frequency.value=6;const tg=AC.createGain();tg.gain.value=0.5;tr.connect(tg);const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.1,t+0.06);g.gain.setValueAtTime(0.1,t+0.55);g.gain.exponentialRampToValueAtTime(0.0001,t+0.85);tg.connect(g.gain);const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=620;o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(master);tr.start(t);o.start(t);o2.start(t);tr.stop(t+0.9);o.stop(t+0.9);o2.stop(t+0.9);}
+function voxJoy(){if(!AC||muted)return;const t=now();const o=AC.createOscillator();o.type='sine';o.frequency.value=340;const vib=AC.createOscillator();vib.type='sine';vib.frequency.value=6.5;const vg=AC.createGain();vg.gain.value=10;vib.connect(vg);vg.connect(o.frequency);const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.06,t+0.06);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g);g.connect(master);vib.start(t);o.start(t);vib.stop(t+0.62);o.stop(t+0.62);}
+function smashS(){if(!AC||muted)return;const t=now();const s=AC.createBufferSource();s.buffer=nbuf(0.3);const hp=AC.createBiquadFilter();hp.type='highpass';hp.frequency.value=1500;const g=AC.createGain();g.gain.setValueAtTime(0.5,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);s.connect(hp);hp.connect(g);g.connect(master);s.start(t);s.stop(t+0.3);for(let i=0;i<7;i++)tone(1800+Math.random()*3500,t+Math.random()*0.18,0.08,0.06,'triangle');const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(50,t+0.2);const g2=AC.createGain();g2.gain.setValueAtTime(0.4,t);g2.gain.exponentialRampToValueAtTime(0.0001,t+0.25);o.connect(g2);g2.connect(master);o.start(t);o.stop(t+0.26);}
+function doorS(){if(!AC||muted)return;const t=now();const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(140,t);o.frequency.linearRampToValueAtTime(90,t+0.9);const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.06,t+0.1);g.gain.setValueAtTime(0.06,t+0.7);g.gain.exponentialRampToValueAtTime(0.0001,t+1.0);const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=500;bp.Q.value=5;o.connect(bp);bp.connect(g);g.connect(master);o.start(t);o.stop(t+1.02);}
+function tickFade(){if(!AC||muted)return;const t=now();for(let i=0;i<6;i++){const tt=t+i*0.5;const s=AC.createBufferSource();s.buffer=nbuf(0.02);const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2400;bp.Q.value=4;const g=AC.createGain();g.gain.setValueAtTime(0.07,tt);g.gain.exponentialRampToValueAtTime(0.0001,tt+0.03);s.connect(bp);bp.connect(g);g.connect(master);s.start(tt);s.stop(tt+0.04);}}
+const SFX={vox:'__caller',ringO:ringOffice,ringM:ringMobile,ringH:ringHead,connect:connectS,clink:clinkS,smash:smashS,door:doorS};
+function startBeds(list){Object.keys(beds).forEach(k=>{if(list.indexOf(k)<0)stopBed(k);});list.forEach(k=>{if(!beds[k])beds[k]=makeBed(k);});}
+function stopBed(k){if(beds[k]){beds[k].stop();delete beds[k];}}
+function stopAllBeds(){Object.keys(beds).forEach(stopBed);}
+function makeBed(kind){let timer=null,alive=true,nodes=null;
+  function fluor(){if(!AC)return;const s=AC.createBufferSource();s.buffer=nbuf(2);s.loop=true;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=120;bp.Q.value=0.7;const g=AC.createGain();g.gain.value=muted?0:0.02;const o=AC.createOscillator();o.type='sine';o.frequency.value=100;const og=AC.createGain();og.gain.value=muted?0:0.012;s.connect(bp);bp.connect(g);g.connect(master);o.connect(og);og.connect(master);s.start();o.start();nodes={s,o,g,og};}
+  function drone(){if(!AC)return;const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=52;const o2=AC.createOscillator();o2.type='sine';o2.frequency.value=78;const g=AC.createGain();g.gain.value=0.0001;g.gain.linearRampToValueAtTime(muted?0.0001:0.07,now()+1.4);const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=200;o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(master);o.start();o2.start();nodes={o,o2,g};}
+  function distantPhone(){const step=()=>{if(!alive)return;if(AC&&!muted&&Math.random()>0.5){const t=now();const e=AC.createGain();e.gain.value=0.025;const o=AC.createOscillator();o.type='square';o.frequency.value=1000;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;o.connect(lp);lp.connect(e);e.connect(master);o.start(t);o.stop(t+0.12);}timer=setTimeout(step,3000+Math.random()*4000);};step();}
+  if(kind==='office'){fluor();distantPhone();}
+  else if(kind==='unease'){drone();}
+  else if(kind==='dread'){drone();}
+  return {stop(){alive=false;if(timer)clearTimeout(timer);if(nodes){try{nodes.g.gain.linearRampToValueAtTime(0.0001,now()+0.3);if(nodes.og)nodes.og.gain.linearRampToValueAtTime(0.0001,now()+0.3);setTimeout(()=>{try{nodes.o&&nodes.o.stop();nodes.o2&&nodes.o2.stop();nodes.s&&nodes.s.stop();}catch(e){}},320);}catch(e){}}}};
+}
+
+/* ---------- shading ---------- */
+const MAT={
+  dottySkin:{lit:[184,130,96],shadow:[66,42,32]}, dottyHair:{lit:[48,38,34],shadow:[14,11,10]}, dottyCloth:{lit:[210,190,160],shadow:[96,84,66]},
+  jasonSkin:{lit:[178,126,92],shadow:[58,39,31]}, jasonHair:{lit:[48,40,36],shadow:[14,11,10]}, jasonCloth:{lit:[46,56,86],shadow:[16,20,32]}
+};
+function rgb(c){return 'rgb('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+')';}
+function rgba(c,a){return 'rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a+')';}
+function mix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+let curSet='office',dread=false;
+function lightAt(){if(dread||curSet==='door')return {x:W*0.5,y:H*0.42,c:[170,130,128],i:0.42};return {x:W*0.5,y:H*0.06,c:[236,212,164],i:0.64};}
+function shade(build,cx,cy,litCol,shadow,L,span){ctx.save();build();ctx.clip();ctx.fillStyle=rgb(shadow);ctx.fillRect(cx-W,cy-H,2*W,2*H);const dx=L.x-cx,dy=L.y-cy,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const lc=mix(litCol,L.c,0.28);const g=ctx.createLinearGradient(cx+ux*span,cy+uy*span,cx-ux*span*0.75,cy-uy*span*0.75);g.addColorStop(0,rgba(lc,0.96*L.i));g.addColorStop(0.55,rgba(lc,0.16*L.i));g.addColorStop(1,rgba(lc,0));ctx.fillStyle=g;ctx.fillRect(cx-W,cy-H,2*W,2*H);ctx.restore();}
+function hairMass(hx,hy,r,dir,L,col){const lc=mix(col.lit,L.c,0.25);ctx.save();ctx.beginPath();ctx.arc(hx-dir*r*0.06,hy-r*0.08,r*1.22,0,7);ctx.fillStyle=rgb(col.shadow);ctx.fill();ctx.clip();const dx=L.x-hx,dy=L.y-hy,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const g=ctx.createLinearGradient(hx+ux*r,hy+uy*r,hx-ux*r,hy-uy*r);g.addColorStop(0,rgba(lc,0.55*L.i));g.addColorStop(1,rgba(lc,0));ctx.fillStyle=g;ctx.fillRect(hx-r*2,hy-r*2,r*4,r*4);ctx.restore();}
+function paintFace(hx,hy,r,dir,skin,L,opts){opts=opts||{};const el=opts.el||0;const lc=mix(skin.lit,L.c,0.28);const fcx=hx+dir*r*0.18,fcy=hy+r*0.04;const dx=L.x-hx,dy=L.y-hy,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const cs=Math.sign(ux)||dir;ctx.save();ctx.beginPath();ctx.ellipse(fcx,fcy,r*0.82,r*0.98,0,0,7);ctx.clip();ctx.fillStyle=rgb(skin.shadow);ctx.fillRect(hx-r*2,hy-r*2,r*4,r*4);const g=ctx.createLinearGradient(fcx+ux*r*1.2,fcy+uy*r*1.2,fcx-ux*r,fcy-uy*r);g.addColorStop(0,rgba(lc,0.95*L.i));g.addColorStop(0.6,rgba(lc,0.14*L.i));g.addColorStop(1,rgba(lc,0));ctx.fillStyle=g;ctx.fillRect(hx-r*2,hy-r*2,r*4,r*4);const hi=mix(lc,[255,255,255],0.26);ctx.fillStyle=rgba(hi,0.5*L.i);ctx.beginPath();ctx.ellipse(fcx+cs*r*0.26,fcy+r*0.18,r*0.26,r*0.18,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(fcx+cs*r*0.06,fcy-r*0.42,r*0.30,r*0.16,0,0,7);ctx.fill();ctx.fillStyle=rgba(skin.shadow,0.14);ctx.beginPath();ctx.ellipse(fcx,fcy-r*0.06,r*0.66,r*0.15,0,0,7);ctx.fill();const eyeY=fcy-r*0.04;const E=opts.expr||(opts.smile?'smile':(opts.worry?'worry':'neutral'));const upR=(E==='eyeRoll');
+ctx.strokeStyle='rgba(30,18,12,0.5)';ctx.lineWidth=Math.max(1.2,r*0.07);ctx.lineCap='round';const _bY=eyeY-r*0.28,_bt=(E==='worry')?r*0.06:(E==='laugh'?-r*0.03:0);ctx.beginPath();ctx.moveTo(fcx-r*0.4,_bY+_bt);ctx.quadraticCurveTo(fcx-r*0.26,_bY-r*0.05+_bt*0.5,fcx-r*0.12,_bY-r*0.01);ctx.stroke();ctx.beginPath();ctx.moveTo(fcx+r*0.12,_bY-r*0.01);ctx.quadraticCurveTo(fcx+r*0.26,_bY-r*0.05+_bt*0.5,fcx+r*0.4,_bY+_bt);ctx.stroke();
+if(E==='laugh'){ctx.strokeStyle='rgba(8,6,6,0.62)';ctx.lineWidth=Math.max(1.4,r*0.085);ctx.lineCap='round';ctx.beginPath();ctx.arc(fcx-r*0.27,eyeY+r*0.04,r*0.15,Math.PI+0.35,2*Math.PI-0.35);ctx.stroke();ctx.beginPath();ctx.arc(fcx+r*0.26,eyeY+r*0.04,r*0.14,Math.PI+0.35,2*Math.PI-0.35);ctx.stroke();}
+else{for(const ex of [fcx-r*0.26,fcx+r*0.26]){const ew=r*0.155,eh=r*(opts.wide?0.13:0.105);ctx.fillStyle='rgba(236,230,218,0.62)';ctx.beginPath();ctx.ellipse(ex,eyeY,ew,eh,0,0,7);ctx.fill();const ix=ex+cs*r*0.02,iy=eyeY+(upR?-eh*0.5:0);ctx.fillStyle='rgba(70,44,28,0.96)';ctx.beginPath();ctx.arc(ix,iy,r*0.072,0,7);ctx.fill();ctx.fillStyle='rgba(14,9,6,0.96)';ctx.beginPath();ctx.arc(ix,iy,r*0.038,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.92)';ctx.beginPath();ctx.arc(ix-r*0.025,iy-r*0.03,r*0.022,0,7);ctx.fill();ctx.strokeStyle='rgba(28,17,12,0.5)';ctx.lineWidth=Math.max(1,r*0.05);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ex-ew,eyeY-eh*0.7);ctx.quadraticCurveTo(ex,eyeY-eh*1.6,ex+ew,eyeY-eh*0.7);ctx.stroke();}}
+ctx.strokeStyle='rgba(8,6,6,0.34)';ctx.lineWidth=Math.max(1,r*0.07);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(fcx-cs*r*0.02,fcy-r*0.04);ctx.lineTo(fcx-cs*r*0.07,fcy+r*0.26);ctx.stroke();
+if(E==='laugh'){ctx.fillStyle='rgba(74,30,32,0.9)';ctx.beginPath();ctx.ellipse(fcx,fcy+r*0.54,r*0.2,r*0.15,0,0,7);ctx.fill();ctx.fillStyle='rgba(250,250,250,0.85)';ctx.beginPath();ctx.ellipse(fcx,fcy+r*0.48,r*0.16,r*0.05,0,0,7);ctx.fill();ctx.fillStyle='rgba(185,85,85,0.55)';ctx.beginPath();ctx.ellipse(fcx,fcy+r*0.6,r*0.09,r*0.05,0,0,7);ctx.fill();}
+else{ctx.strokeStyle='rgba(122,58,52,0.8)';ctx.lineWidth=Math.max(1.4,r*0.09);ctx.lineCap='round';const mb=E==='smile'?-r*0.12:(E==='wry'?-r*0.06:(E==='worry'?r*0.11:r*0.01));ctx.beginPath();if(E==='wry'){ctx.moveTo(fcx-r*0.17,fcy+r*0.54);ctx.quadraticCurveTo(fcx,fcy+r*0.5,fcx+r*0.2,fcy+r*0.45);}else{ctx.moveTo(fcx-r*0.18,fcy+r*0.5);ctx.quadraticCurveTo(fcx,fcy+r*0.5+mb,fcx+r*0.18,fcy+r*0.5);}ctx.stroke();if(E==='smile'){ctx.fillStyle='rgba(250,248,244,0.55)';ctx.beginPath();ctx.moveTo(fcx-r*0.12,fcy+r*0.48);ctx.quadraticCurveTo(fcx,fcy+r*0.49,fcx+r*0.12,fcy+r*0.48);ctx.quadraticCurveTo(fcx,fcy+r*0.53,fcx-r*0.12,fcy+r*0.48);ctx.closePath();ctx.fill();}}
+ctx.restore();if(opts.beard){const bc=opts.beardCol||[44,34,28];ctx.fillStyle=rgb(mix(bc,L.c,0.14));ctx.beginPath();ctx.moveTo(fcx-r*0.78,fcy+r*0.04);ctx.quadraticCurveTo(fcx-r*0.68,fcy+r*0.96,fcx,fcy+r*1.02);ctx.quadraticCurveTo(fcx+r*0.68,fcy+r*0.96,fcx+r*0.78,fcy+r*0.04);ctx.quadraticCurveTo(fcx+r*0.5,fcy+r*0.58,fcx,fcy+r*0.6);ctx.quadraticCurveTo(fcx-r*0.5,fcy+r*0.58,fcx-r*0.78,fcy+r*0.04);ctx.fill();ctx.beginPath();ctx.ellipse(fcx,fcy+r*0.34,r*0.3,r*0.085,0,0,7);ctx.fill();}if(opts.sweat&&!reduceMotion){const sp=(el*0.5)%1;const sy=hy-r*0.5+sp*r*1.3;ctx.fillStyle=rgba([235,238,240],0.45*(1-sp));ctx.beginPath();ctx.ellipse(fcx+cs*r*0.6,sy,r*0.04,r*0.07,0,0,7);ctx.fill();}}
+function hand(hx,hy,r,skin,L){const lc=mix(skin.lit,L.c,0.28);const dx=L.x-hx,dy=L.y-hy,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;ctx.fillStyle=rgb(skin.shadow);ctx.beginPath();ctx.arc(hx,hy,r,0,7);ctx.fill();ctx.fillStyle=rgba(lc,0.75*L.i);ctx.beginPath();ctx.arc(hx+ux*r*0.3,hy+uy*r*0.3,r*0.72,0,7);ctx.fill();}
+function person(x,baseY,h,pose,M,L,opts){opts=opts||{};const dir=opts.dir||-1;const el=opts.el||0;const seated=opts.seated;const breath=reduceMotion?0:Math.sin(el*1.5+(opts.ph||0))*h*0.012;const headR=h*0.11,shW=h*0.22,hipW=h*0.16;const shY=(seated?baseY-h*0.42:baseY-h*0.70)+breath,hdY=(seated?baseY-h*0.58:baseY-h*0.86)+breath,hemY=baseY-h*0.30;ctx.save();ctx.lineJoin='round';ctx.lineCap='round';if(!seated){const sg=ctx.createRadialGradient(x,baseY+2,0,x,baseY+2,h*0.34);sg.addColorStop(0,'rgba(0,0,0,0.3)');sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.beginPath();ctx.ellipse(x,baseY+2,h*0.30,h*0.05,0,0,7);ctx.fill();}const body=()=>{ctx.beginPath();if(seated){ctx.moveTo(x-shW,shY);ctx.quadraticCurveTo(x-shW*1.04,baseY-h*0.04,x-shW*0.92,baseY+h*0.03);ctx.lineTo(x+shW*0.92,baseY+h*0.03);ctx.quadraticCurveTo(x+shW*1.04,baseY-h*0.04,x+shW,shY);ctx.quadraticCurveTo(x,shY-h*0.05,x-shW,shY);ctx.closePath();}else{ctx.moveTo(x-shW,shY);ctx.quadraticCurveTo(x-hipW*1.1,baseY-h*0.40,x-hipW,hemY);ctx.lineTo(x-h*0.07,baseY);ctx.lineTo(x-h*0.01,baseY);ctx.lineTo(x,hemY-h*0.10);ctx.lineTo(x+h*0.01,baseY);ctx.lineTo(x+h*0.07,baseY);ctx.lineTo(x+hipW,hemY);ctx.quadraticCurveTo(x+hipW*1.1,baseY-h*0.40,x+shW,shY);ctx.quadraticCurveTo(x,shY-h*0.055,x-shW,shY);ctx.closePath();}};shade(body,x,shY+h*0.14,M.cloth.lit,M.cloth.shadow,L,h*0.5);ctx.fillStyle=rgb(M.skin.shadow);ctx.fillRect(x-headR*0.42,hdY+headR*0.4,headR*0.84,shY-hdY);hairMass(x,hdY,headR,dir,L,M.hair);paintFace(x,hdY,headR,dir,M.skin,L,{el,wide:opts.wide,worry:opts.worry,smile:opts.smile,expr:opts.expr,sweat:opts.sweat,beard:opts.beard,beardCol:opts.beardCol});const sx=x+shW*0.55,sy=shY+h*0.07;ctx.strokeStyle=rgb(M.cloth.shadow);function arm(tx,ty,w){ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(sx-shW*0.15,sy);ctx.lineTo(tx,ty);ctx.stroke();}if(opts.handTo){const ht=opts.handTo;arm(ht[0],ht[1],h*0.075);hand(ht[0],ht[1],h*0.05,M.skin,L);arm(x-dir*shW*0.8,sy+h*0.2,h*0.07);}else{arm(x-shW*0.8,sy+h*0.2,h*0.07);hand(x-shW*0.8,sy+h*0.2,h*0.05,M.skin,L);arm(x+shW*0.8,sy+h*0.2,h*0.07);hand(x+shW*0.8,sy+h*0.2,h*0.05,M.skin,L);}return {hx:x,hy:hdY,hr:headR,dir};}
+function headset(hx,hy,r,dir,L){ctx.strokeStyle='#1a1d22';ctx.lineWidth=Math.max(2.5,r*0.22);ctx.lineCap='round';ctx.beginPath();ctx.arc(hx,hy-r*0.1,r*1.18,Math.PI+0.5,2*Math.PI-0.5);ctx.stroke();
+  const ex=hx-dir*r*0.9,ey=hy+r*0.1;ctx.fillStyle='#20242a';ctx.beginPath();ctx.ellipse(ex,ey,r*0.28,r*0.34,0,0,7);ctx.fill();
+  ctx.strokeStyle='#23272d';ctx.lineWidth=Math.max(1.6,r*0.1);ctx.beginPath();ctx.moveTo(ex,ey+r*0.2);ctx.quadraticCurveTo(hx+dir*r*0.4,hy+r*0.84,hx+dir*r*0.36,hy+r*0.54);ctx.stroke();
+  ctx.fillStyle='#3a3f46';ctx.beginPath();ctx.arc(hx+dir*r*0.36,hy+r*0.54,r*0.08,0,7);ctx.fill();}
+function roundr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+/* ---------- backgrounds ---------- */
+function wall(){const g=ctx.createLinearGradient(0,0,0,H);if(dread){g.addColorStop(0,'#241a1a');g.addColorStop(1,'#100a0a');}else{g.addColorStop(0,'#33301f');g.addColorStop(0.6,'#232113');g.addColorStop(1,'#14130b');}ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  if(!dread){const fl=ctx.createRadialGradient(W*0.5,H*0.02,0,W*0.5,H*0.02,H*0.6);fl.addColorStop(0,'rgba(238,206,140,0.15)');fl.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=fl;ctx.fillRect(0,0,W,H*0.6);}}
+function calendarWall(){ctx.save();ctx.translate(W*0.13,H*0.14);ctx.rotate(-0.02);ctx.fillStyle=rgba([207,200,180],0.85);ctx.fillRect(0,0,W*0.16,H*0.18);ctx.fillStyle=rgba([150,60,50],0.7);ctx.fillRect(0,0,W*0.16,H*0.04);ctx.fillStyle='rgba(40,30,24,0.5)';ctx.font='8px "IBM Plex Mono"';ctx.fillText('MARCH',W*0.03,H*0.028);for(let r=0;r<3;r++)for(let c=0;c<6;c++){ctx.fillStyle='rgba(40,30,24,0.3)';ctx.fillRect(W*0.012+c*W*0.024,H*0.055+r*H*0.038,W*0.016,H*0.026);}ctx.strokeStyle=rgba([180,40,30],0.8);ctx.lineWidth=2;ctx.beginPath();ctx.arc(W*0.012+2*W*0.024+W*0.008,H*0.055+H*0.013,W*0.016,0,7);ctx.stroke();ctx.restore();}
+function brokenClock(x,y){ctx.strokeStyle=rgba([200,200,196],dread?0.3:0.5);ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,W*0.05,0,7);ctx.stroke();ctx.fillStyle=dread?'rgba(30,20,20,0.6)':'rgba(20,24,24,0.6)';ctx.beginPath();ctx.arc(x,y,W*0.05,0,7);ctx.fill();ctx.strokeStyle=rgba([210,210,206],0.7);ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-W*0.034);ctx.moveTo(x,y);ctx.lineTo(x+W*0.026,y+W*0.012);ctx.stroke();ctx.fillStyle=rgba([210,210,206],0.7);ctx.beginPath();ctx.arc(x,y,2.5,0,7);ctx.fill();}
+function windowNight(x,y,w,h,bright){ctx.fillStyle=bright?'rgba(120,150,200,0.35)':'rgba(40,64,100,0.55)';ctx.fillRect(x,y,w,h);ctx.fillStyle='rgba(245,240,220,0.7)';ctx.beginPath();ctx.arc(x+w*0.74,y+h*0.26,w*0.07,0,7);ctx.fill();for(let i=0;i<8;i++){ctx.fillStyle='rgba(220,228,255,0.5)';ctx.beginPath();ctx.arc(x+((i*53)%100)/100*w,y+((i*37)%100)/100*h,1,0,7);ctx.fill();}ctx.fillStyle='#15191c';ctx.fillRect(x-5,y-5,w+10,7);ctx.fillRect(x-5,y+h-2,w+10,7);ctx.fillRect(x-5,y-5,7,h+10);ctx.fillRect(x+w-2,y-5,7,h+10);ctx.fillRect(x+w/2-3,y,6,h);}
+function monitor(x,y,w,h,el){ctx.fillStyle='#0a0d10';roundr(x-6,y-6,w+12,h+12,6);ctx.fill();const sg=ctx.createLinearGradient(x,y,x,y+h);sg.addColorStop(0,'#403413');sg.addColorStop(1,'#2a220c');ctx.fillStyle=sg;ctx.fillRect(x,y,w,h);ctx.fillStyle=rgba([224,164,60],0.5);ctx.font='7px "IBM Plex Mono"';for(let i=0;i<5;i++)ctx.fillText('> line '+(i+1)+'  ....  ready',x+8,y+16+i*13);const gl=ctx.createRadialGradient(x+w/2,y+h/2,0,x+w/2,y+h/2,w*0.9);gl.addColorStop(0,rgba([224,164,60],0.12));gl.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gl;ctx.fillRect(x-w,y-h,w*3,h*3);}
+function monitorFaceGlow(){const g=ctx.createRadialGradient(W*0.5,H*0.62,0,W*0.5,H*0.62,H*0.5);g.addColorStop(0,'rgba(224,164,60,0.10)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,H*0.2,W,H*0.6);}
+function mug(x,y,s,col){ctx.fillStyle=rgb(col);roundr(x-s*0.5,y-s*0.6,s,s*0.7,s*0.12);ctx.fill();ctx.strokeStyle=rgb(col);ctx.lineWidth=s*0.12;ctx.beginPath();ctx.arc(x+s*0.55,y-s*0.25,s*0.2,-1.1,1.1);ctx.stroke();ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(x,y-s*0.6,s*0.4,s*0.1,0,0,7);ctx.fill();if(!reduceMotion){ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=s*0.05;ctx.beginPath();ctx.moveTo(x,y-s*0.66);ctx.quadraticCurveTo(x+s*0.1,y-s*0.86,x,y-s*1.0);ctx.stroke();}}
+function smashedMugs(x,y,s){ctx.fillStyle='rgba(120,70,30,0.4)';ctx.beginPath();ctx.ellipse(x,y,s*1.4,s*0.4,0,0,7);ctx.fill();ctx.fillStyle=rgb([200,120,60]);for(let i=0;i<6;i++){const a=Math.random()*6.28,rr=s*(0.6+Math.random());ctx.save();ctx.translate(x+Math.cos(a)*rr,y+Math.sin(a)*rr*0.4);ctx.rotate(a);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(s*0.3,-s*0.1);ctx.lineTo(s*0.25,s*0.12);ctx.closePath();ctx.fill();ctx.restore();}}
+function callerPanel(c,el,p){const side=(p&&(p.stage==='jasonCall'||p.stage==='jasonToby'||p.active==='jason'))?'L':'R';
+  const pw=Math.min(W*0.36,210), x0=side==='L'?0:W-pw;
+  ctx.save();
+  // void
+  ctx.fillStyle='rgba(9,9,12,0.9)';ctx.fillRect(x0,0,pw,H);
+  const wash=ctx.createLinearGradient(x0,0,x0+pw,0);
+  const a=side==='L'?0.22:0.0, b=side==='L'?0.0:0.22;
+  wash.addColorStop(0,rgba(c.col,a));wash.addColorStop(1,rgba(c.col,b));
+  ctx.fillStyle=wash;ctx.fillRect(x0,0,pw,H);
+  // inner seam
+  const seamX=side==='L'?x0+pw:x0;ctx.strokeStyle=rgba(c.col,0.65);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(seamX,0);ctx.lineTo(seamX,H);ctx.stroke();
+  // silhouette: head + shoulders, rim-lit on office side
+  const cx=x0+pw*0.5, hy=H*0.34, hr=pw*0.2;
+  ctx.fillStyle='rgb(14,13,16)';
+  ctx.beginPath();ctx.arc(cx,hy,hr,0,7);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx-pw*0.36,H*0.56);ctx.quadraticCurveTo(cx,H*0.42,cx+pw*0.36,H*0.56);ctx.lineTo(cx+pw*0.36,H*0.62);ctx.lineTo(cx-pw*0.36,H*0.62);ctx.closePath();ctx.fill();
+  const rim=side==='L'?1:-1;
+  ctx.strokeStyle=rgba(c.col,0.85);ctx.lineWidth=Math.max(2,hr*0.09);ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(cx,hy,hr*1.02,rim>0?-0.9:Math.PI-0.9,rim>0?0.9:Math.PI+0.9);ctx.stroke();
+  // handset silhouette at the ear
+  ctx.fillStyle='rgb(16,15,18)';ctx.save();ctx.translate(cx+rim*hr*0.95,hy+hr*0.1);ctx.rotate(rim*0.5);roundr(-hr*0.14,-hr*0.55,hr*0.28,hr*1.1,hr*0.14);ctx.fill();ctx.restore();
+  ctx.strokeStyle=rgba(c.col,0.5);ctx.lineWidth=Math.max(1.5,hr*0.06);ctx.beginPath();ctx.moveTo(cx+rim*hr*0.9,hy+hr*0.7);
+  for(let k=1;k<=6;k++){const ky=hy+hr*0.7+k*(H*0.5-hy-hr*0.7)/6;ctx.quadraticCurveTo(cx+rim*hr*(0.9+(k%2?0.35:-0.1)),ky-H*0.02,cx+rim*hr*0.9,ky);}ctx.stroke();
+  // voice rings pulsing from the head
+  for(let i=0;i<3;i++){const ph=reduceMotion?0.5:((el*0.7+i/3)%1);ctx.strokeStyle=rgba(c.col,0.5*(1-ph));ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,hy,hr*(1.15+ph*1.3),rim>0?-1.1:Math.PI-1.1,rim>0?1.1:Math.PI+1.1);ctx.stroke();}
+  // labels
+  ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font='10px "IBM Plex Mono"';ctx.textAlign='center';ctx.fillText('LINE '+c.line,cx,H*0.09);
+  ctx.fillStyle=rgb(mix(c.col,[255,255,255],0.35));ctx.font='700 20px "Big Shoulders Display"';ctx.fillText(c.label,cx,H*0.12+16);
+  // live dot
+  const pulse=reduceMotion?0.7:(0.5+0.5*Math.sin(el*5));ctx.fillStyle=rgba(c.col,0.5+pulse*0.5);ctx.beginPath();ctx.arc(cx,H*0.155+22,4,0,7);ctx.fill();
+  ctx.textAlign='left';ctx.restore();}
+
+function dottyExtras(r,dx,dfy,dh,deskY,L){const hx=r.hx,hy=r.hy,hr=r.hr;
+  ctx.fillStyle=rgb(mix(MAT.dottyHair.shadow,L.c,0.14));
+  for(const o of [[-0.2,-1.12,0.5],[0.2,-1.18,0.44],[0,-1.4,0.4],[-0.02,-0.98,0.5]]){ctx.beginPath();ctx.arc(hx+o[0]*hr,hy+o[1]*hr,hr*o[2],0,7);ctx.fill();}
+  ctx.strokeStyle=rgb(MAT.dottyHair.shadow);ctx.lineWidth=hr*0.15;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(hx-hr*0.85,hy-hr*0.1);ctx.lineTo(hx-hr*1.0,hy+hr*1.1);ctx.stroke();ctx.beginPath();ctx.moveTo(hx+hr*0.85,hy-hr*0.1);ctx.lineTo(hx+hr*1.0,hy+hr*1.0);ctx.stroke();
+  ctx.strokeStyle=rgb([216,180,98]);ctx.lineWidth=Math.max(1.5,hr*0.09);
+  ctx.beginPath();ctx.arc(hx-hr*0.9,hy+hr*0.44,hr*0.2,0,7);ctx.stroke();ctx.beginPath();ctx.arc(hx+hr*0.9,hy+hr*0.44,hr*0.18,0,7);ctx.stroke();
+  ctx.strokeStyle=rgba([216,180,98],0.8);ctx.lineWidth=Math.max(1,hr*0.05);ctx.beginPath();ctx.moveTo(hx-hr*0.5,hy+hr*1.85);ctx.quadraticCurveTo(hx,hy+hr*2.35,hx+hr*0.5,hy+hr*1.85);ctx.stroke();ctx.fillStyle=rgb([216,180,98]);ctx.beginPath();ctx.arc(hx,hy+hr*2.3,hr*0.07,0,7);ctx.fill();
+  ctx.save();ctx.beginPath();ctx.ellipse(dx,dfy-dh*0.16,dh*0.23,dh*0.28,0,0,7);ctx.clip();ctx.fillStyle='rgba(38,26,20,0.72)';
+  for(let i=0;i<18;i++){const sx=dx-dh*0.22+((i*53)%100)/100*dh*0.44;const sy=(dfy-dh*0.42)+((i*41)%100)/100*dh*0.42;ctx.beginPath();ctx.ellipse(sx,sy,dh*0.019,dh*0.013,i*1.1,0,7);ctx.fill();}
+  ctx.restore();}
+function jasonCollar(r,L){const nx=r.hx,ny=r.hy+r.hr*1.7,hr=r.hr;ctx.fillStyle=rgb(mix([150,160,172],L.c,0.2));ctx.beginPath();ctx.moveTo(nx-hr*0.42,ny-hr*0.1);ctx.lineTo(nx-hr*0.12,ny+hr*0.5);ctx.lineTo(nx,ny+hr*0.2);ctx.lineTo(nx+hr*0.12,ny+hr*0.5);ctx.lineTo(nx+hr*0.42,ny-hr*0.1);ctx.lineTo(nx,ny+hr*0.12);ctx.closePath();ctx.fill();}
+function bgOffice(p,el){const L=lightAt();wall();calendarWall();brokenClock(W*0.62,H*0.16);
+  const st=p.stage||'banter';
+  const winB=(st==='window'||st==='turn');
+  if(st!=='joyCall')windowNight(W*0.80,H*0.12,W*0.17,H*0.26,winB);
+  const deskTopY=H*0.70;
+  function deskFront(withMonitor,mx){ctx.fillStyle='#241d10';ctx.fillRect(0,deskTopY,W,H*0.05);const g=ctx.createLinearGradient(0,deskTopY+H*0.05,0,H);g.addColorStop(0,'#16120a');g.addColorStop(1,'#0d0b06');ctx.fillStyle=g;ctx.fillRect(0,deskTopY+H*0.05,W,H*0.3);if(withMonitor)monitor(W*(mx||0.44),deskTopY-H*0.145,W*0.18,H*0.13,el);}
+  function chairEmpty(x){ctx.fillStyle='#181510';roundr(W*x-W*0.05,H*0.52,W*0.1,H*0.16,8);ctx.fill();ctx.fillStyle='#131009';ctx.fillRect(W*x-W*0.06,H*0.67,W*0.12,H*0.02);}
+  function dotty(x,baseY,h,o){o=o||{};const r=person(W*x,H*baseY,H*h,'',{skin:MAT.dottySkin,hair:MAT.dottyHair,cloth:MAT.dottyCloth},L,Object.assign({dir:1,el,expr:p.dE||'neutral'},o));dottyExtras(r,W*x,H*baseY,H*h,deskTopY,L);if(!o.noHead)headset(r.hx,r.hy,r.hr,r.dir,L);return r;}
+  function jason(x,baseY,h,o){o=o||{};const r=person(W*x,H*baseY,H*h,'',{skin:MAT.jasonSkin,hair:MAT.jasonHair,cloth:MAT.jasonCloth},L,Object.assign({dir:-1,el,expr:p.jE||'neutral',beard:true,beardCol:[48,40,36]},o));jasonCollar(r,L);if(!o.noHead)headset(r.hx,r.hy,r.hr,r.dir,L);return r;}
+  function mugsAt(r,tilt){const y=H*0.62;mugTilt(r.hx-H*0.07,y,H*0.024,[200,120,60],tilt||0);mugTilt(r.hx+H*0.07,y,H*0.024,[120,160,180],-(tilt||0));}
+  function mugTilt(x,y,s,col,rot){ctx.save();ctx.translate(x,y);ctx.rotate(rot||0);mug(0,0,s,col);ctx.restore();}
+  function mobileAt(x,y){ctx.fillStyle='#0c0f12';roundr(x-H*0.012,y-H*0.026,H*0.024,H*0.052,4);ctx.fill();ctx.fillStyle='rgba(224,180,110,0.7)';roundr(x-H*0.008,y-H*0.02,H*0.016,H*0.04,2);ctx.fill();}
+  switch(st){
+    case 'dottyIntro': case 'dottyCall': case 'joyCall': {
+      // Dotty alone at the desk, on the line; empty chair beside her
+      chairEmpty(0.72);
+      const r=dotty(0.34,0.88,0.6,{});
+      // stubby pencil in her hand on the desk edge
+      deskFront(true,0.5);
+      hand(W*0.46,deskTopY+H*0.012,H*0.022,MAT.dottySkin,L);
+      ctx.strokeStyle='#caa040';ctx.lineWidth=H*0.008;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(W*0.46,deskTopY+H*0.008);ctx.lineTo(W*0.505,deskTopY-H*0.012);ctx.stroke();
+      monitorFaceGlow();break;}
+    case 'dottyCall2': {
+      // Dotty on the shifty call; Jason at his seat behind, listening in
+      const rj=jason(0.58,0.84,0.44,{seated:true,ph:1.1});
+      const r=dotty(0.30,0.88,0.58,{});
+      deskFront(true,0.47);monitorFaceGlow();break;}
+    case 'swap': {
+      // the mug swap: both standing, arms crossed mid-exchange
+      const rd=dotty(0.34,0.92,0.62,{handTo:[W*0.5,H*0.6]});
+      const rj=jason(0.66,0.92,0.62,{handTo:[W*0.5,H*0.63]});
+      mugTilt(W*0.5,H*0.585,H*0.026,[120,160,180],0);
+      mugTilt(W*0.5,H*0.645,H*0.026,[200,120,60],0);
+      ctx.fillStyle='rgba(6,7,5,0.35)';ctx.fillRect(0,H*0.92,W,H*0.08);break;}
+    case 'banter': {
+      const rd=dotty(0.30,0.86,0.52,{seated:true,ph:0.3});
+      const rj=jason(0.70,0.86,0.52,{seated:true,ph:1.1});
+      deskFront(true,0.44);
+      if(p.mugs){mug(W*0.2,deskTopY,H*0.022,[200,120,60]);mug(W*0.62,deskTopY,H*0.022,[120,160,180]);}
+      monitorFaceGlow();break;}
+    case 'jasonCall': {
+      // Jason featured on the wrong-number call; Dotty's chair empty of drama
+      const rj=jason(0.62,0.88,0.6,{});
+      chairEmpty(0.22);
+      deskFront(true,0.36);monitorFaceGlow();break;}
+    case 'twoPhones': {
+      // Dotty steps away, mobile at her ear; Jason holds the desk
+      const rj=jason(0.68,0.86,0.5,{seated:true});
+      const hd={x:0.16,baseY:0.94,h:0.6};
+      const rd=dotty(hd.x,hd.baseY,hd.h,{handTo:[W*hd.x+H*hd.h*0.16,H*hd.baseY-H*hd.h*0.78]});
+      mobileAt(W*hd.x+H*hd.h*0.16,H*hd.baseY-H*hd.h*0.78);
+      deskFront(true,0.5);break;}
+    case 'jasonToby': {
+      // alone in the office, leaning into the deal — the empty room is the point
+      chairEmpty(0.2);
+      ctx.save();ctx.translate(W*0.62,H*0.88);ctx.rotate(-0.06);ctx.translate(-W*0.62,-H*0.88);
+      const rj=jason(0.62,0.88,0.6,{});
+      ctx.restore();
+      deskFront(true,0.36);monitorFaceGlow();break;}
+    case 'wry': {
+      // caught mid-tidy: Jason standing with both mugs; Dotty back in the doorway, mobile lowered
+      const rj=jason(0.58,0.92,0.6,{});mugsAt({hx:W*0.58},0);
+      ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,H*0.1,W*0.06,H*0.84);
+      const rd=dotty(0.12,0.94,0.55,{handTo:[W*0.12+H*0.05,H*0.72]});
+      mobileAt(W*0.12+H*0.05,H*0.72);break;}
+    case 'window': {
+      // Jason parting the blinds; Dotty pulling her headset on
+      const rj=jason(0.72,0.92,0.58,{handTo:[W*0.83,H*0.24],noHead:true});
+      ctx.strokeStyle='rgba(20,24,28,0.9)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*0.805,H*0.23);ctx.lineTo(W*0.86,H*0.21);ctx.moveTo(W*0.805,H*0.27);ctx.lineTo(W*0.86,H*0.27);ctx.stroke();
+      const rd=dotty(0.28,0.88,0.54,{seated:true,handTo:[W*0.28-H*0.06,H*0.55]});
+      deskFront(true,0.42);break;}
+    case 'turn': {
+      // Jason turned from the window, mid-step back toward the desk
+      const rd=dotty(0.26,0.88,0.54,{seated:true});
+      const rj=jason(0.56,0.92,0.58,{});
+      deskFront(true,0.4);break;}
+    case 'near': {
+      // looming at her shoulder
+      const rd=dotty(0.3,0.88,0.56,{seated:true});
+      ctx.save();ctx.translate(W*0.52,H*0.9);ctx.rotate(-0.1);ctx.translate(-W*0.52,-H*0.9);
+      const rj=jason(0.52,0.9,0.6,{sweat:true});
+      ctx.restore();deskFront(true,0.4);break;}
+    case 'nearMugs': {
+      const rd=dotty(0.3,0.88,0.56,{seated:true});
+      const rj=jason(0.62,0.92,0.6,{});mugsAt({hx:W*0.62},0);
+      deskFront(true,0.4);break;}
+    case 'laughHorror': {
+      // her head back laughing; the mugs tilting in his loosening grip
+      ctx.save();ctx.translate(W*0.3,H*0.88);ctx.rotate(-0.07);ctx.translate(-W*0.3,-H*0.88);
+      const rd=dotty(0.3,0.88,0.56,{seated:true});
+      ctx.restore();
+      const rj=jason(0.62,0.92,0.6,{sweat:true});mugsAt({hx:W*0.62},0.45);
+      deskFront(true,0.4);break;}
+    case 'smash': {
+      // hands empty and open; one mug mid-air, one already in pieces
+      const rd=dotty(0.3,0.88,0.56,{seated:true});
+      const rj=jason(0.62,0.92,0.6,{sweat:true});
+      mugTilt(W*0.56,H*0.8,H*0.026,[120,160,180],1.3);
+      ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;
+      for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(W*0.56-4+i*4,H*0.68+i*8);ctx.lineTo(W*0.56-4+i*4,H*0.74+i*8);ctx.stroke();}
+      smashedMugs(W*0.66,H*0.93,H*0.03);
+      ctx.fillStyle='rgba(120,70,30,0.35)';ctx.beginPath();ctx.ellipse(W*0.6,H*0.95,W*0.14,H*0.014,0,0,7);ctx.fill();
+      break;}
+    default: {
+      const rd=dotty(0.30,0.86,0.52,{seated:true,ph:0.3});
+      const rj=jason(0.70,0.86,0.52,{seated:true,ph:1.1});
+      deskFront(true,0.44);monitorFaceGlow();}
+  }
+  if(p.caller)callerPanel(callers[p.caller],el,p);
+  vign();}
+
+function bgDoor(p,el){const L=lightAt();wall();brokenClock(W*0.5,H*0.14);
+  // the front door opening — cold slab widening on the left
+  const open=reduceMotion?0.5:Math.min(0.6,el*0.12);
+  ctx.fillStyle='#0a0d12';ctx.fillRect(W*0.04,H*0.16,W*0.34,H*0.66);
+  const dg=ctx.createLinearGradient(W*0.04,0,W*0.04+W*0.34*open,0);dg.addColorStop(0,'rgba(60,86,130,0.5)');dg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=dg;ctx.fillRect(W*0.04,H*0.16,W*0.5,H*0.7);
+  // a cold silhouette beginning to fill the gap
+  ctx.fillStyle='rgba(8,10,14,0.85)';ctx.beginPath();ctx.ellipse(W*0.16,H*0.55,W*0.07*open*2,H*0.3,0,0,7);ctx.fill();
+  ctx.strokeStyle='#05070a';ctx.lineWidth=5;ctx.strokeRect(W*0.04,H*0.16,W*0.34,H*0.66);
+  // desk + smashed mugs
+  const deskY=H*0.66;ctx.fillStyle='#161a1d';ctx.fillRect(0,deskY,W,H*0.06);ctx.fillStyle='#0f1316';ctx.fillRect(0,deskY+H*0.06,W,H*0.28);
+  smashedMugs(W*0.5,H*0.9,H*0.032);
+  // Jason turned to the door, horror
+  const r=person(W*0.66,deskY+H*0.02,H*0.5,'sit',{skin:MAT.jasonSkin,hair:MAT.jasonHair,cloth:MAT.jasonCloth},L,{dir:1,el,seated:true,worry:true,sweat:true,beard:true,beardCol:[48,40,36]});jasonCollar(r,L);headset(r.hx,r.hy,r.hr,r.dir,L);
+  // red dread vignette
+  const rv=ctx.createRadialGradient(W*0.5,H*0.5,H*0.2,W*0.5,H*0.5,H*0.8);rv.addColorStop(0,'rgba(0,0,0,0)');rv.addColorStop(1,rgba([180,40,30],0.3));ctx.fillStyle=rv;ctx.fillRect(0,0,W,H);
+  vign();}
+function vign(){if(dread){ctx.fillStyle='rgba(60,20,16,0.12)';ctx.fillRect(0,0,W,H);}}
+const BG={office:bgOffice,door:bgDoor};
+
+/* ---------- runner ---------- */
+let idx=-1,sceneT0=0,running=false,shakeEnd=0,finishing=false,toBlack=false,transStart=0,camDir=1;
+let auto=true,paused=false,dwell=13,prevTs=0;const progFill=$("progfill");
+function renderText(s){cap.innerHTML='';s.text.forEach((b,i)=>{const el=document.createElement('div');el.className='blk';el.style.animationDelay=(0.15+i*0.5)+'s';
+  if(b.k==='narr'){const p=document.createElement('p');p.className='narr';p.textContent=b.s;el.appendChild(p);}
+  else{const p=document.createElement('p');p.className='line'+(b.cls?' '+b.cls:'');p.innerHTML='<span class="who">'+esc(b.who)+'</span>'+esc(b.s);el.appendChild(p);}
+  cap.appendChild(el);});}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function playCaller(c){const v=callers[c]&&callers[c].voice;if(v==='edison')voxEdison();else if(v==='toby')voxToby();else if(v==='joy')voxJoy();}
+const STAGE_IDX=['dottyIntro','dottyCall','swap','banter','jasonCall','dottyCall2','dottyCall2','dottyCall2','twoPhones','jasonToby','jasonToby','jasonToby','wry','window','joyCall','joyCall','turn','near','nearMugs','laughHorror','smash'];
+const DE_IDX=['smile','smile','deadpan','deadpan',null,'neutral','neutral','deadpan',null,null,null,null,'neutral',null,'smile','eyeRoll','neutral','laugh','smile','laugh','worry'];
+const JE_IDX=[null,null,null,'neutral','eyeRoll',null,null,null,'smile','worry','neutral','wry','wry','neutral',null,null,'neutral','worry','worry','worry','worry'];
+function enter(i){idx=i;const s=SCENES[i];if(s.set==='office'){s.p.stage=STAGE_IDX[i]||'banter';if(DE_IDX[i])s.p.dE=DE_IDX[i];if(JE_IDX[i])s.p.jE=JE_IDX[i];}curSet=s.set;dread=(s.bed&&s.bed.indexOf('dread')>=0)||s.set==='door';transStart=performance.now();camDir=(i%2)?1:-1;
+  slug.classList.remove('dim');slug.innerHTML='<span class="no">'+s.slug[0]+'</span> &middot; '+s.slug[1];
+  renderText(s);sceneT0=performance.now();
+  if(s.shake)shakeEnd=performance.now()+700;
+  if(s.sfx){if(s.sfx==='vox')playCaller(s.p.caller);else if(SFX[s.sfx])SFX[s.sfx]();}
+  else if(s.p&&s.p.caller&&!s.sfx){/* no auto */}
+  startBeds(s.bed||[]);
+  dwell=calcDwell(s);if(progFill)progFill.style.width='0%';paused=false;document.body.classList.remove('paused');
+  hint.classList.remove('hide');hint.classList.toggle('call',!!s.p.caller);hint.textContent='\u23f8 tap to pause';}
+function calcDwell(s){let words=0;const n=s.text.length;s.text.forEach(b=>{words+=((b.s||'').split(/\s+/).filter(Boolean)).length;});const appear=0.45+0.15+n*0.5+0.5;const read=words*0.3;return Math.max(10,Math.min(16,appear+read+2));}
+function togglePause(){if(idx<0||finishing)return;paused=!paused;document.body.classList.toggle('paused',paused);hint.textContent=paused?'\u25b6 tap to resume':'\u23f8 tap to pause';}
+function advance(){if(finishing)return;if(idx>=SCENES.length-1){finalSequence();return;}enter(idx+1);}
+function finalSequence(){finishing=true;hint.classList.add('hide');cap.innerHTML='';slug.classList.add('dim');tickFade();setTimeout(()=>{flashScreen(0.12);toBlack=true;},700);setTimeout(()=>{stopAllBeds();$('endScr').classList.remove('hide');},1700);}
+function flashScreen(a){flashEl.style.transition='none';flashEl.style.opacity=a;requestAnimationFrame(()=>{flashEl.style.transition='opacity .4s';flashEl.style.opacity=0;});}
+function start(){$('titleScr').classList.add('hide');$('endScr').classList.add('hide');audioInit();if(AC&&AC.state==='suspended')AC.resume();toBlack=false;finishing=false;dread=false;enter(0);if(!running){running=true;requestAnimationFrame(frame);}}
+function frame(ts){if(!running)return;const dt=ts-(prevTs||ts);prevTs=ts;if(paused&&idx>=0){sceneT0+=dt;transStart+=dt;shakeEnd+=dt;}const el=(ts-sceneT0)/1000;if(auto&&!paused&&!finishing&&idx>=0&&!toBlack){if(progFill)progFill.style.width=(Math.min(1,el/dwell)*100)+'%';if(el>=dwell)advance();}
+  ctx.save();
+  /* camera locked: every beat is its own staged tableau */
+  if(ts<shakeEnd&&!reduceMotion){const k=(shakeEnd-ts)/700;const m=6*k;ctx.translate((Math.random()-0.5)*m,(Math.random()-0.5)*m);}
+  if(toBlack){ctx.fillStyle='#06080b';ctx.fillRect(-60,-60,W+120,H+120);}
+  else if(idx<0){curSet='office';dread=false;bgOffice({dotty:'sit',jason:'sit'},el);}
+  else{const s=SCENES[idx];if(s)(BG[s.set]||bgOffice)(s.p,el);}
+  ctx.restore();
+  if(grainCv&&!toBlack){ctx.save();ctx.globalAlpha=0.05;ctx.globalCompositeOperation='overlay';const ox=reduceMotion?0:(Math.random()*150)|0,oy=reduceMotion?0:(Math.random()*150)|0;for(let yy=-oy;yy<H;yy+=150)for(let xx=-ox;xx<W;xx+=150)ctx.drawImage(grainCv,xx,yy);ctx.restore();}
+  if(!toBlack){const tr=Math.max(0,1-(ts-transStart)/450);if(tr>0){ctx.save();ctx.globalAlpha=tr*tr;ctx.fillStyle='#06080b';ctx.fillRect(0,0,W,H);ctx.restore();}}
+  requestAnimationFrame(frame);}
+
+app.addEventListener('click',(e)=>{if(e.target.id==='mute'||e.target.id==='replayBtn')return;if(!$('titleScr').classList.contains('hide')){start();return;}if(!$('endScr').classList.contains('hide'))return;togglePause();});
+document.addEventListener('keydown',(e)=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!$('titleScr').classList.contains('hide'))start();else if($('endScr').classList.contains('hide'))togglePause();}});
+$('replayBtn').addEventListener('click',(e)=>{e.stopPropagation();start();});
+$('mute').addEventListener('click',(e)=>{e.stopPropagation();muted=!muted;$('mute').innerHTML=muted?'&#128263;':'&#128266;';if(master)master.gain.value=muted?0:0.9;if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+resize();curSet='office';transStart=performance.now();running=true;requestAnimationFrame(frame);
+</script>
+</body>
+</html>

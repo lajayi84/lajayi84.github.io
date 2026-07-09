@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Three Knocks</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a0a0c;--sodium:#d99a44;--blood:#a8302a;--cold:#5a6b82;--bone:#e8e3d8;--mut:#7c7a72;--line:rgba(255,255,255,.1);}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:'Newsreader',Georgia,serif;color:var(--bone);background:#050506;display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:540px;height:100dvh;max-height:920px;overflow:hidden;background:#08080a;cursor:pointer;}
+  #stage{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;}
+  #app::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(130% 110% at 50% 42%,transparent 52%,rgba(3,3,4,.82));}
+  #flash{position:absolute;inset:0;z-index:7;background:#fff;opacity:0;pointer-events:none;}
+  #slug{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;gap:9px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--bone);text-shadow:0 1px 10px rgba(0,0,0,.95);pointer-events:none;transition:opacity .5s;opacity:.8;}
+  #slug .no{color:var(--sodium);}
+  #slug.dim{opacity:0;}
+  #cap{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:0 26px calc(52px + env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:flex-end;gap:9px;min-height:31%;background:linear-gradient(180deg,transparent,rgba(5,5,6,.34) 44%,rgba(5,5,6,.94));pointer-events:none;}
+  .blk{opacity:0;transform:translateY(8px);animation:rise .5s cubic-bezier(.2,.8,.3,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .narr{font-style:italic;font-size:17px;line-height:1.5;color:#cfcabd;text-shadow:0 2px 16px rgba(0,0,0,.95);max-width:30em;}
+  .line{font-size:18px;line-height:1.36;color:var(--bone);text-shadow:0 2px 16px rgba(0,0,0,.95);max-width:30em;}
+  .line .who{font-family:'Space Mono',monospace;font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:2px;opacity:.9;}
+  .line.zee .who{color:#e0a850;} .line.sam .who{color:#9fb0c4;} .line.man .who,.line.bowden .who{color:#c98a84;}
+  .msg{font-family:'Space Mono',monospace;font-size:15px;line-height:1.4;color:#f0d9a0;background:rgba(40,30,14,.6);border:1px solid rgba(217,154,68,.4);border-radius:12px 12px 12px 3px;padding:11px 14px;max-width:22em;text-shadow:none;}
+  .msg .from{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sodium);margin-bottom:5px;opacity:.85;}
+  .msg.threat{color:#f2b0aa;background:rgba(50,16,14,.6);border-color:rgba(168,48,42,.5);}
+  .msg.threat .from{color:#d2665e;}
+  #hint{position:absolute;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom));z-index:6;text-align:center;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mut);pointer-events:none;animation:hb 2.1s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.3;}50%{opacity:.8;}}
+  #hint.hide{display:none;} #hint.knock{color:var(--blood);}
+  .screen{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 26px;}
+  .screen.hide{display:none;}
+  .kicker{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--cold);margin-bottom:18px;opacity:0;animation:rise .8s .3s forwards;}
+  .ttl{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(52px,16vw,92px);line-height:.92;text-transform:uppercase;letter-spacing:1px;text-shadow:0 6px 40px rgba(0,0,0,.6);}
+  .ttl .three{color:var(--bone);opacity:0;animation:rise .7s .3s forwards;}
+  .ttl .knocks{color:var(--sodium);opacity:0;animation:rise .7s .5s forwards;display:block;}
+  .marks{display:flex;gap:12px;justify-content:center;margin:22px 0;}
+  .marks i{width:12px;height:12px;border-radius:50%;background:var(--blood);opacity:0;animation:pop .3s forwards;}
+  .marks i:nth-child(1){animation-delay:.7s;} .marks i:nth-child(2){animation-delay:.95s;} .marks i:nth-child(3){animation-delay:1.2s;}
+  @keyframes pop{from{opacity:0;transform:scale(.3);}to{opacity:.9;transform:scale(1);}}
+  .sub{font-style:italic;font-size:15px;color:var(--mut);margin-top:6px;opacity:0;animation:rise .9s 1.4s forwards;}
+  .by{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-top:22px;opacity:0;animation:rise .9s 1.6s forwards;} .by b{color:#c6bba6;font-weight:400;}
+  .endline{font-style:italic;font-size:16px;color:#cfc7b8;max-width:24em;margin-top:8px;line-height:1.5;opacity:0;animation:rise .9s .6s forwards;}
+  .start{margin-top:26px;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--sodium);opacity:0;animation:rise .9s 1.8s forwards;} .start .p{animation:hb 2.1s ease-in-out infinite;display:inline-block;}
+  .replay{margin-top:24px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);border:1px solid var(--line);border-radius:30px;padding:11px 22px;background:rgba(255,255,255,.03);pointer-events:auto;cursor:pointer;opacity:0;animation:rise .9s .9s forwards;}
+  .replay:active{transform:scale(.97);}
+  #mute{position:absolute;top:12px;right:14px;z-index:9;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:50%;background:rgba(10,10,12,.7);border:1px solid var(--line);backdrop-filter:blur(5px);pointer-events:auto;}
+  @media (prefers-reduced-motion: reduce){.blk,.kicker,.by,.endline,.sub,.start,.replay,.ttl .three,.ttl .knocks,.marks i{animation-duration:.01s;}#hint,.start .p{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="stage"></canvas>
+  <div id="flash"></div>
+  <div id="mute">&#128266;</div>
+  <div id="slug" class="dim"></div>
+  <div id="cap"></div>
+  <div id="hint" class="hide">tap to continue</div>
+  <div class="screen" id="titleScr">
+    <div class="kicker">A thriller in one night</div>
+    <div class="ttl"><span class="three">Three</span><span class="knocks">Knocks</span></div>
+    <div class="marks"><i></i><i></i><i></i></div>
+    <div class="sub">Some doors you should never open.</div>
+    <div class="by">Written by <b>Lanre Ajayi</b></div>
+    <div class="start"><span class="p">&#9656; tap to begin</span></div>
+  </div>
+  <div class="screen hide" id="endScr">
+    <div class="ttl" style="font-size:clamp(40px,13vw,68px);"><span class="three">Three</span><span class="knocks">Knocks</span></div>
+    <div class="marks"><i></i><i></i><i></i></div>
+    <div class="endline">Some doors you should never open. Some you have no choice.</div>
+    <div class="by" style="animation-delay:.9s">Written by <b>Lanre Ajayi</b></div>
+    <div class="replay" id="replayBtn">&#8634; Watch again</div>
+  </div>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const app=$('app'),cv=$('stage'),ctx=cv.getContext('2d');
+const cap=$('cap'),slug=$('slug'),hint=$('hint'),flashEl=$('flash');
+let W=0,H=0,DPR=1;
+function resize(){const r=app.getBoundingClientRect();W=r.width||540;H=r.height||900;DPR=Math.min(2,window.devicePixelRatio||1);cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',resize);
+let grainCv=null;
+function buildGrain(){grainCv=document.createElement('canvas');grainCv.width=150;grainCv.height=150;const g=grainCv.getContext('2d');const im=g.createImageData(150,150);for(let i=0;i<im.data.length;i+=4){const v=128+(Math.random()*2-1)*46;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255;}g.putImageData(im,0,0);}
+
+/* text builders */
+const N=s=>({k:'narr',s});
+const D=(who,s,cls)=>({k:'line',who,s,cls});
+const M=(from,s,threat)=>({k:'msg',from,s,threat});
+
+/* ===== THREE KNOCKS — v4.2 FULL, every line restored ===== */
+const SCENES=[
+ // 1 — street, phone to Mum
+ {stage:'street',p:{zeeWalk:1,phone:1,ze:'worry'},bed:['night'],
+  text:[N("A quiet street in a quiet area. Virtually deserted. Zee Alexander, 23, walks at pace, phone to her ear \u2014 nervous in the empty road, but keeping it calm and low on the call."),
+        D("Zee","\u201cI don\u2019t know how they found out, Mum, but I\u2019m glad they did. Yeah \u2014 nearly there now.\u201d","zee")]},
+ // 2 — the ignored buzz, ends the call
+ {stage:'street',p:{zeeWalk:1,phone:1,ze:'neutral',buzz:1},bed:['night'],sfx:'buzz',
+  text:[N("A buzz from the phone \u2014 almost certainly a message. She ignores it."),
+        D("Zee","\u201cThey\u2019re sending someone tonight. I\u2019ll call you when they move me. Speak to you soon \u2014 and don\u2019t panic!\u201d","zee"),
+        N("She ends the call, looks to either side, puts the phone away. A text notification sounds. She sighs."),
+        D("Zee","\u201cOh, Mum!\u201d","zee")]},
+ // 3 — the threat message (a second one arrives unnoticed)
+ {stage:'street',p:{zeeStop:1,ze:'fear',hold:1},bed:['night'],sfx:'sting',
+  text:[N("Out comes the phone. One look, and she freezes in fear."),
+        M("Unknown number","KNOCK, KNOCK, KNOCK! Your life\u2019s on the clock!",true),
+        N("Another notification arrives beneath it \u2014 but she is far too horrified to notice.")]},
+ // 4 — the man appears
+ {stage:'street',p:{zeeStop:1,man:1,ze:'fear'},bed:['night'],
+  text:[N("No sooner does she gasp than a male voice comes from behind."),
+        D("Man","(O.S.) \u201cExcuse me!\u201d","man"),
+        N("She turns. A tall, built man comes into focus \u2014 a jacket, a serious face, clearly bigger than her. She steps back, terrified."),
+        D("Zee","\u201cNo\u2026 no!\u201d","zee")]},
+ // 5 — the chase
+ {stage:'chase',p:{},bed:['night','chase'],sfx:'whoosh',shake:1,
+  text:[N("She turns and runs off down the street. The man watches a second \u2014 then\u2014"),
+        D("Man","\u201cHey!\u201d","man"),
+        N("\u2014 and sets off after her.")]},
+ // 6 — into the flat, barricade
+ {stage:'barricade',p:{ze:'panic'},bed:['clock'],sfx:'door',
+  text:[N("A dark, nondescript hallway in a tiny flat. No pictures. Stacked boxes. As we near the front door it bursts open with such force that a couple of boxes topple. Zee slams it, locks it, and leans back against it, breathing heavily.")]},
+ // 7 — the dead call
+ {stage:'barricade',p:{ze:'panic',phone:1},bed:['clock'],
+  text:[N("She gets out the mobile, breaths deep and quick, presses a button and raises it. Ringing, in the silence."),
+        D("Zee","\u201cC\u2019mon \u2014 don\u2019t ignore me now! Pick up!\u201d","zee"),
+        N("The line cuts. Her voice breaks."),
+        D("Zee","\u201cDamn it!\u201d","zee")]},
+ // 8 — orchestra of fear
+ {stage:'barricade',p:{ze:'fear',sweat:1,orchestra:1},bed:['clock','heart','drip'],
+  text:[N("Sweat forms on her forehead. Then a sound like a heart beating. Then the drip of a tap, at slow, deliberate intervals. Couple that with the tick of a clock, and a brief orchestra of fear is made. And then\u2014")]},
+ // 9 — three knocks
+ {stage:'door',p:{ze:'fear',knock:1},bed:['clock','heart'],sfx:'knock',
+  text:[N("KNOCK. The silence breaks."),
+        N("KNOCK. Her breathing goes deeper, slower \u2014 as if it might convince the dark she isn\u2019t there."),
+        N("KNOCK. The breathing halts. She is frozen still."),
+        D("Man","(O.S.) \u201cOpen the door, please.\u201d","man"),
+        N("She doesn\u2019t move. Then \u2014 three more knocks.")]},
+ // 10 — the man outside (communal hallway)
+ {stage:'communal',p:{man:1,me:'stern'},bed:['clock'],sfx:'knock',
+  text:[N("The other side of the door. The man, jacket, serious, facing the wood."),
+        D("Man","\u201cYou were sent a message, so you knew I was coming.\u201d","man")]},
+ // 11 — letterbox / resignation
+ {stage:'door',p:{ze:'tears',letterbox:1},bed:['clock','heart'],
+  text:[N("She still doesn\u2019t respond \u2014 the vanity of it is obvious. Tears start to form."),
+        D("Man","(O.S.) \u201cWe can\u2019t do this through the door \u2014 and you know that.\u201d","man"),
+        N("Her body language betrays resignation. The letterbox flaps. She pushes it shut, and steps slowly back."),
+        D("Zee","\u201cOK. Just a second.\u201d","zee")]},
+ // 12 — the candlestick
+ {stage:'candlestick',p:{ze:'resolve'},bed:['clock'],
+  text:[N("Something in the corner catches her eye. She turns to it, reaches into the shadows \u2014 and produces a heavy candlestick.")]},
+ // 13 — the strike (dark)
+ {stage:'strike',p:{dark:1},bed:['clock'],sfx:'thud',shake:1,
+  text:[N("The door opens. The man, full in the doorway \u2014 jeans, jacket. Almost at once the door slams shut, and it\u2019s dark again. A thud. Something hits the ground.")]},
+ // 14 — flick, check, drag, tie to radiator
+ {stage:'radiator',p:{ze:'grim',manDown:1},bed:['clock'],sfx:'flick',
+  text:[N("A flick \u2014 the lights come on, revealing the man on the floor, not moving. She stands the stick against the wall, wipes her tears, keeps her breathing under control, and checks his responses with a foot."),
+        N("Tentatively she takes his legs and drags him further down the hall. A trainer comes off, nearly unbalancing her. She looks at the shoe, at the man \u2014 then takes the laces and ties his foot to the radiator.")]},
+ // 15 — second knocks, Sam
+ {stage:'door',p:{ze:'fear',knock:1,dark:1},bed:['clock','heart'],sfx:'knock',
+  text:[N("No sooner has she started through one of his side pockets \u2014 three knocks. She halts. Quicker this time \u2014 off go the lights."),
+        D("Zee","\u201cWho is it?!\u201d","zee"),
+        D("Sam","(O.S.) \u201cZee, open the door. It\u2019s Sam.\u201d","sam")]},
+ // 16 — Sam pulled inside
+ {stage:'samDoor',p:{ze:'relief',sam:1,se:'hesitant'},bed:['clock'],sfx:'door',
+  text:[N("She sighs with relief and opens the door quickly. Her old friend Sam Marcus, 25, stands almost static \u2014 looking at her, then past her into the flat, hesitant. She has to pull him inside."),
+        D("Zee","\u201cGet in! And don\u2019t say my name!\u201d","zee"),
+        N("The door is quickly shut.")]},
+ // 17 — Sam sees the body
+ {stage:'reveal-body',p:{ze:'grim',sam:1,se:'shock'},bed:['clock'],sfx:'flick',
+  text:[D("Sam","\u201cBloody hell, I hope the police have a better place in mind\u2014\u201d","sam"),
+        N("She turns the lights on, revealing the man tied to the radiator. Sam stops dead \u2014 stunned and scared."),
+        D("Zee","\u201cI know! This is bad!\u201d","zee"),
+        D("Sam","\u201cWhy have you dragged me into this?!\u201d","sam"),
+        D("Zee","\u201cI had no-one else to turn to.\u201d","zee")]},
+ // 18 — why she's sure / the phone
+ {stage:'twoShot',p:{ze:'plead',sam:1,se:'pained',phone:1},bed:['clock'],
+  text:[N("He appears pained, and struggles to look at her."),
+        D("Zee","\u201cThose men know the police moved me here.\u201d","zee"),
+        D("Sam","\u201cWhy are you so sure?\u201d","sam"),
+        N("She produces the mobile again, opens the message, and gives it to him."),
+        D("Zee","\u201cI\u2019m not being moved again for no reason! And look \u2014 I got this just now. Then he turns up!\u201d","zee"),
+        N("Sam taps the screen, hands the phone back with a shaking hand, and scans the flat, still conflicted.")]},
+ // 19 — Sam wants out / the sleeve  (FULL)
+ {stage:'twoShot',p:{ze:'plead',sam:1,se:'pained'},bed:['clock','heart'],
+  text:[D("Sam","\u201cZee, I don\u2019t want to be here. I shouldn\u2019t even know. Pretend you never saw me\u2014\u201d","sam"),
+        N("He moves towards the door. She grabs his sleeve."),
+        D("Zee","\u201cDon\u2019t go! I\u2019m sorry we lost contact before, but I need you more than ever now!\u201d","zee"),
+        D("Sam","\u201cLook\u2014\u201d","sam")]},
+ // 20 — the pocket search (RESTORED)
+ {stage:'search',p:{ze:'grim',sam:1,se:'pained'},bed:['clock'],
+  text:[N("She remembers the task from earlier."),
+        D("Zee","\u201cThank you! Help me check his pockets before he wakes up.\u201d","zee"),
+        N("She nudges the man to be sure he\u2019s still out, and checks the other outside pocket."),
+        D("Sam","\u201cLeave him! He doesn\u2019t matter!\u201d","sam"),
+        N("The search moves to the inside jacket pocket. There\u2019s something. Sam starts to back off."),
+        D("Sam","\u201cI don\u2019t think he\u2019s one\u2014\u201d","sam"),
+        D("Zee","\u201cGet your phone out and call the\u2014\u201d","zee")]},
+ // 21 — the warrant card + the knife
+ {stage:'warrant',p:{ze:'shock',sam:1,se:'cold',knife:1},bed:['clock'],sfx:'flick',
+  text:[N("A folded wallet is produced. She opens it to reveal \u2014 a warrant card. She\u2019s stunned."),
+        D("Zee","\u201cPolice!\u201d","zee"),
+        N("She turns \u2014 Sam is holding a metal object that has just flicked open. A knife. She\u2019s frozen in confusion."),
+        D("Zee","\u201cWhat\u2019s going on?\u201d","zee"),
+        D("Sam","\u201cYou should have let me go. I don\u2019t want to be doing this!\u201d","sam")]},
+ // 22 — "You can leave" / "come after me and my mum" (RESTORED)
+ {stage:'twoShot',p:{ze:'plead',sam:1,se:'torn',knife:1},bed:['clock','heart'],
+  text:[N("She looks wide-eyed at the knife, then up at Sam."),
+        D("Zee","\u201cYou can leave. I won\u2019t say anything.\u201d","zee"),
+        D("Sam","\u201cBut then they\u2019ll come after me and my mum!\u201d","sam")]},
+ // 23 — the vanished message / Bowden revealed
+ {stage:'phoneReveal',p:{},bed:['drone'],sfx:'sting',
+  text:[N("She looks at the phone. The threatening message is gone. All that remains is one sent earlier:"),
+        M("Protection Unit","New threat ID\u2019d. You\u2019re being moved tonight. Detective on way."),
+        N("And beneath it, a missed message sent after \u2014 a photo of the man on her floor."),
+        M("Protection Unit","Detective Sgt Bowden."),
+        D("Zee","\u201cMy God \u2014 they got to you!\u201d","zee")]},
+ // 24 — the moral argument (FULL)
+ {stage:'twoShot',p:{ze:'plead',sam:1,se:'torn',knife:1},bed:['drone','heart'],
+  text:[D("Sam","\u201cNot just me! Everyone\u2019s terrified. You know they run the estate \u2014 so why would you go to the police?!\u201d","sam"),
+        D("Zee","\u201cLook, we\u2019ve all let the drugs slide. But snatching girls?! Nah! She had a future. College, Uni? That could have been me!\u201d","zee"),
+        N("She fights back tears, and hammers it home to a conflicted Sam."),
+        D("Zee","\u201cOr your sister\u2014\u201d","zee"),
+        D("Sam","\u201cThat\u2019s not fair!\u201d","sam"),
+        D("Zee","\u201cIsn\u2019t it? C\u2019mon, Sam. I wish more than anyone I\u2019d taken a cab home that night. But please \u2014 let me have the life that girl won\u2019t have!\u201d","zee")]},
+ // 25 — Sam wavers / folds the knife
+ {stage:'twoShot',p:{ze:'plead',sam:1,se:'torn',knife:1},bed:['drone','heart'],
+  text:[N("Beat. Sam wipes a tear from his cheek and looks at the knife in his shaking hand. Up, down, around \u2014 always back to the knife."),
+        D("Zee","\u201cDon\u2019t do this!\u201d","zee"),
+        N("Sam folds the knife and puts it away.")]},
+ // 26 — the window / Bowden stirs
+ {stage:'window',p:{ze:'fear',sam:1,se:'pained',bowdenWake:1},bed:['clock','drip'],
+  text:[N("She takes the chance to turn and look at a window. Closed \u2014 but not locked. Her breathing intensifies; the clock, the tap, audible again."),
+        N("Just then, a groan. DS Bowden has started to move \u2014 groggy, getting up. She turns back to the window, and hasn\u2019t seen Sam bring the knife back out.")]},
+ // 27 — "Look out!" / the exchange (RESTORED)
+ {stage:'finale',p:{ze:'fear',sam:1,se:'anguish',knife:1,bowden:1},bed:['drone','heart','clock'],
+  text:[D("Sam","(tearful) \u201cI\u2019m sorry, Zee\u2014\u201d","sam"),
+        D("Zee","\u201cIt\u2019s alright\u2014\u201d","zee"),
+        D("Bowden","\u201cLook out!\u201d","bowden"),
+        N("That forces her to turn \u2014 and see Sam shaking, knife in hand. She\u2019s shaking too. Both have tears in their eyes."),
+        D("Sam","\u201cMum is everything to me.\u201d","sam"),
+        D("Zee","\u201cSam. Please!\u201d","zee")]},
+ // 28 — the ambiguous end
+ {stage:'finale',p:{ze:'fear',sam:1,se:'anguish',knife:1,bowden:1,bowdenTerror:1,lunge:1},bed:['drone','heart','clock'],sfx:'',last:1,
+  text:[D("Sam","(tearfully) \u201cI hope I can be forgiven for this.\u201d","sam"),
+        N("Her breathing is fast and heavy now. The candlestick against the wall comes into view. Sam closes his eyes \u2014 opens them, focused. Bowden is on his feet, fully alert."),
+        N("As Sam moves forward, Zee lunges for the candlestick. Bowden is the last person we see \u2014 his face panicked, horrified, full of terror."),
+        D("Bowden","\u201cNooooo!\u201d","bowden")]}
+];
+
+/* ===== THREE KNOCKS — engine core (pass 2) ===== */
+const MAT={
+  // Zee: young Black woman, dark hair up in a puff/bun, gold hoops, black padded hooded coat
+  zee:{skin:{lit:[150,102,74],shadow:[46,30,24]},hair:{lit:[40,32,30],shadow:[12,10,9]},cloth:{lit:[38,40,46],shadow:[12,13,16]}},
+  // Sam: light-brown tousled hair, stubble, grey hoodie under dark jacket
+  sam:{skin:{lit:[212,176,150],shadow:[92,64,52]},hair:{lit:[150,118,80],shadow:[60,44,28]},cloth:{lit:[46,48,54],shadow:[16,17,20]}},
+  // Bowden: 48, grizzled, salt-and-pepper beard, worn dark field jacket
+  bowden:{skin:{lit:[196,158,134],shadow:[80,58,48]},hair:{lit:[128,124,118],shadow:[54,52,50]},cloth:{lit:[58,56,50],shadow:[20,19,17]}}
+};
+function rgb(c){return 'rgb('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+')';}
+function rgba(c,a){return 'rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a+')';}
+function mix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+/* lighting: sodium street vs cold flat vs dark; set by stage via curSet */
+let curSet='street', lightsOn=true;
+function lightAt(){
+  if(curSet==='street') return {x:W*0.7,y:H*0.12,c:[230,168,90],i:0.6};
+  if(curSet==='communal') return {x:W*0.5,y:H*0.1,c:[150,168,190],i:0.5};
+  if(!lightsOn) return {x:W*0.5,y:H*0.2,c:[90,104,126],i:0.28}; // dark flat, window spill
+  return {x:W*0.42,y:H*0.14,c:[224,186,120],i:0.56}; // bare bulb in the flat
+}
+function shade(build,cx,cy,litCol,shadow,L,span){ctx.save();build();ctx.clip();ctx.fillStyle=rgb(shadow);ctx.fillRect(cx-W,cy-H,2*W,2*H);const dx=L.x-cx,dy=L.y-cy,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const lc=mix(litCol,L.c,0.26);const g=ctx.createLinearGradient(cx+ux*span,cy+uy*span,cx-ux*span*0.75,cy-uy*span*0.75);g.addColorStop(0,rgba(lc,0.96*L.i));g.addColorStop(0.55,rgba(lc,0.16*L.i));g.addColorStop(1,rgba(lc,0));ctx.fillStyle=g;ctx.fillRect(cx-W,cy-H,2*W,2*H);ctx.restore();}
+function hairMass(hx,hy,r,dir,L,col){const lc=mix(col.lit,L.c,0.22);ctx.save();ctx.beginPath();ctx.arc(hx-dir*r*0.05,hy-r*0.1,r*1.2,0,7);ctx.fillStyle=rgb(col.shadow);ctx.fill();ctx.clip();const g=ctx.createLinearGradient(hx,hy-r,hx,hy+r);g.addColorStop(0,rgba(lc,0.5*L.i));g.addColorStop(1,rgba(lc,0));ctx.fillStyle=g;ctx.fillRect(hx-r*2,hy-r*2,r*4,r*4);ctx.restore();}
+function paintFace(hx,hy,r,dir,skin,L,opts){opts=opts||{};const lc=mix(skin.lit,L.c,0.28);const fcx=hx+dir*r*0.18,fcy=hy+r*0.04;const dx=L.x-hx,dy=L.y-hy,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const cs=Math.sign(ux)||dir;ctx.save();ctx.beginPath();ctx.ellipse(fcx,fcy,r*0.82,r*0.98,0,0,7);ctx.clip();ctx.fillStyle=rgb(skin.shadow);ctx.fillRect(hx-r*2,hy-r*2,r*4,r*4);const g=ctx.createLinearGradient(fcx+ux*r*1.2,fcy+uy*r*1.2,fcx-ux*r,fcy-uy*r);g.addColorStop(0,rgba(lc,0.95*L.i));g.addColorStop(0.6,rgba(lc,0.14*L.i));g.addColorStop(1,rgba(lc,0));ctx.fillStyle=g;ctx.fillRect(hx-r*2,hy-r*2,r*4,r*4);const hi=mix(lc,[255,255,255],0.24);ctx.fillStyle=rgba(hi,0.5*L.i);ctx.beginPath();ctx.ellipse(fcx+cs*r*0.26,fcy+r*0.18,r*0.26,r*0.18,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(fcx+cs*r*0.06,fcy-r*0.42,r*0.30,r*0.16,0,0,7);ctx.fill();
+const eyeY=fcy-r*0.04;const E=opts.expr||'neutral';const wide=(E==='fear'||E==='shock'||E==='panic'||E==='anguish');
+ctx.strokeStyle='rgba(24,14,10,0.55)';ctx.lineWidth=Math.max(1.2,r*0.07);ctx.lineCap='round';
+const _bY=eyeY-r*0.28,_bt=(E==='worry'||E==='fear'||E==='panic'||E==='shock'||E==='plead'||E==='anguish')?r*0.07:((E==='grim'||E==='cold'||E==='stern'||E==='resolve')?-r*0.04:(E==='out'?r*0.03:0));
+ctx.beginPath();ctx.moveTo(fcx-r*0.4,_bY+_bt);ctx.quadraticCurveTo(fcx-r*0.26,_bY-r*0.05+_bt*0.5,fcx-r*0.12,_bY-r*0.01);ctx.stroke();ctx.beginPath();ctx.moveTo(fcx+r*0.12,_bY-r*0.01);ctx.quadraticCurveTo(fcx+r*0.26,_bY-r*0.05+_bt*0.5,fcx+r*0.4,_bY+_bt);ctx.stroke();
+const closed=opts.closed||E==='out';
+if(closed){ctx.strokeStyle='rgba(22,13,9,0.7)';ctx.lineWidth=Math.max(1.3,r*0.07);ctx.beginPath();ctx.arc(fcx-r*0.26,eyeY,r*0.13,0.3,Math.PI-0.3);ctx.stroke();ctx.beginPath();ctx.arc(fcx+r*0.26,eyeY,r*0.13,0.3,Math.PI-0.3);ctx.stroke();}
+else{for(const ex of [fcx-r*0.26,fcx+r*0.26]){const ew=r*0.155,eh=r*(wide?0.15:0.108);ctx.fillStyle='rgba(236,230,218,0.62)';ctx.beginPath();ctx.ellipse(ex,eyeY,ew,eh,0,0,7);ctx.fill();ctx.fillStyle='rgba(64,44,30,0.96)';ctx.beginPath();ctx.arc(ex+cs*r*0.02,eyeY,r*0.072,0,7);ctx.fill();ctx.fillStyle='rgba(12,8,5,0.96)';ctx.beginPath();ctx.arc(ex+cs*r*0.02,eyeY,r*0.036,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.9)';ctx.beginPath();ctx.arc(ex+cs*r*0.02-r*0.025,eyeY-r*0.03,r*0.02,0,7);ctx.fill();ctx.strokeStyle='rgba(22,13,9,0.5)';ctx.lineWidth=Math.max(1,r*0.05);ctx.beginPath();ctx.moveTo(ex-ew,eyeY-eh*0.7);ctx.quadraticCurveTo(ex,eyeY-eh*1.6,ex+ew,eyeY-eh*0.7);ctx.stroke();}}
+ctx.strokeStyle='rgba(24,14,10,0.28)';ctx.lineWidth=Math.max(1,r*0.06);ctx.beginPath();ctx.moveTo(fcx-cs*r*0.02,fcy-r*0.02);ctx.lineTo(fcx-cs*r*0.06,fcy+r*0.22);ctx.stroke();
+if(E==='smile'||E==='relief'){ctx.strokeStyle='rgba(120,58,50,0.8)';ctx.lineWidth=Math.max(1.4,r*0.09);ctx.beginPath();ctx.moveTo(fcx-r*0.17,fcy+r*0.47);ctx.quadraticCurveTo(fcx,fcy+r*0.57,fcx+r*0.17,fcy+r*0.45);ctx.stroke();}
+else if(wide){ctx.fillStyle='rgba(50,24,24,0.8)';ctx.beginPath();ctx.ellipse(fcx,fcy+r*0.52,r*(E==='anguish'?0.15:0.11),r*(E==='anguish'?0.19:0.15),0,0,7);ctx.fill();}
+else if(E==='out'){ctx.fillStyle='rgba(46,22,22,0.72)';ctx.beginPath();ctx.ellipse(fcx-r*0.02,fcy+r*0.54,r*0.1,r*0.07,0.12,0,7);ctx.fill();ctx.strokeStyle='rgba(120,58,50,0.4)';ctx.lineWidth=Math.max(1,r*0.05);ctx.beginPath();ctx.moveTo(fcx-r*0.14,fcy+r*0.5);ctx.quadraticCurveTo(fcx,fcy+r*0.52,fcx+r*0.12,fcy+r*0.5);ctx.stroke();}
+else{ctx.strokeStyle='rgba(120,58,50,0.7)';ctx.lineWidth=Math.max(1.3,r*0.08);ctx.lineCap='round';const mb=(E==='worry'||E==='plead'||E==='tears'||E==='pained')?r*0.09:((E==='grim'||E==='cold'||E==='stern')?-r*0.02:r*0.01);ctx.beginPath();ctx.moveTo(fcx-r*0.16,fcy+r*0.49);ctx.quadraticCurveTo(fcx,fcy+r*0.49+mb,fcx+r*0.16,fcy+r*0.49);ctx.stroke();}
+ctx.restore();
+// tears
+if((opts.tears||E==='tears'||E==='anguish'||opts.expr==='plead'&&opts.cry)&&!reduceMotion){const tp=((opts.el||0)*0.4)%1;ctx.fillStyle=rgba([200,220,235],0.5*(1-tp));ctx.beginPath();ctx.ellipse(fcx-r*0.26,eyeY+r*0.2+tp*r*0.5,r*0.033,r*0.055,0,0,7);ctx.fill();}
+// sweat
+if(opts.sweat&&!reduceMotion){const sp=((opts.el||0)*0.5)%1;ctx.fillStyle=rgba([235,238,240],0.4*(1-sp));ctx.beginPath();ctx.ellipse(fcx+cs*r*0.55,fcy-r*0.4+sp*r,r*0.03,r*0.06,0,0,7);ctx.fill();}
+// stubble / beard
+if(opts.beard==='stubble'){ctx.save();ctx.beginPath();ctx.ellipse(fcx,fcy+r*0.34,r*0.62,r*0.6,0,0,7);ctx.clip();ctx.fillStyle=rgba(mix(opts.beardCol||[80,60,40],L.c,0.1),0.35);for(let i=0;i<70;i++){const a=Math.random()*6.28,rr=Math.random()*r*0.6;ctx.fillRect(fcx+Math.cos(a)*rr,fcy+r*0.24+Math.sin(a)*rr*0.7,1,1);}ctx.restore();}
+else if(opts.beard==='full'){const bc=opts.beardCol||[120,116,110];ctx.fillStyle=rgba(mix(bc,L.c,0.12),0.9);ctx.beginPath();ctx.moveTo(fcx-r*0.72,fcy+r*0.06);ctx.quadraticCurveTo(fcx-r*0.6,fcy+r*0.92,fcx,fcy+r*0.98);ctx.quadraticCurveTo(fcx+r*0.6,fcy+r*0.92,fcx+r*0.72,fcy+r*0.06);ctx.quadraticCurveTo(fcx+r*0.46,fcy+r*0.5,fcx,fcy+r*0.52);ctx.quadraticCurveTo(fcx-r*0.46,fcy+r*0.5,fcx-r*0.72,fcy+r*0.06);ctx.fill();
+  // salt-and-pepper flecks
+  ctx.fillStyle=rgba([210,206,198],0.5);for(let i=0;i<40;i++){const a=Math.random()*3.14;const rr=r*0.4+Math.random()*r*0.3;ctx.fillRect(fcx+Math.cos(a)*rr,fcy+r*0.5+Math.abs(Math.sin(a))*rr*0.6,1.2,1.2);}}
+}
+function hand(hx,hy,r,skin,L){const lc=mix(skin.lit,L.c,0.28);ctx.fillStyle=rgb(skin.shadow);ctx.beginPath();ctx.arc(hx,hy,r,0,7);ctx.fill();ctx.fillStyle=rgba(lc,0.6*L.i);ctx.beginPath();ctx.arc(hx,hy-r*0.25,r*0.7,0,7);ctx.fill();}
+function roundr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+/* generic body — standing or seated/slumped; returns anchor points */
+function person(x,baseY,h,M,L,opts){opts=opts||{};const dir=opts.dir||-1;const el=opts.el||0;const seated=opts.seated;const slump=opts.slump;const breath=reduceMotion?0:Math.sin(el*1.5+(opts.ph||0))*h*0.012;const headR=h*0.11,shW=h*0.22,hipW=h*0.16;
+  let shY,hdY;
+  if(slump){shY=baseY-h*0.16;hdY=baseY-h*0.28;}
+  else if(seated){shY=baseY-h*0.42+breath;hdY=baseY-h*0.58+breath;}
+  else{shY=baseY-h*0.70+breath;hdY=baseY-h*0.86+breath;}
+  const hemY=baseY-h*0.30;ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+  if(!seated&&!slump){const sg=ctx.createRadialGradient(x,baseY+2,0,x,baseY+2,h*0.34);sg.addColorStop(0,'rgba(0,0,0,0.34)');sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.beginPath();ctx.ellipse(x,baseY+2,h*0.30,h*0.05,0,0,7);ctx.fill();}
+  const body=()=>{ctx.beginPath();
+    if(slump){ctx.moveTo(x-shW*1.2,baseY-h*0.06);ctx.quadraticCurveTo(x-shW,shY,x-shW*0.3,shY-h*0.02);ctx.lineTo(x+shW*1.3,baseY-h*0.02);ctx.quadraticCurveTo(x+shW*1.5,baseY,x+shW*1.5,baseY+h*0.02);ctx.lineTo(x-shW*1.2,baseY+h*0.02);ctx.closePath();}
+    else if(seated){ctx.moveTo(x-shW,shY);ctx.quadraticCurveTo(x-shW*1.04,baseY-h*0.04,x-shW*0.92,baseY+h*0.03);ctx.lineTo(x+shW*0.92,baseY+h*0.03);ctx.quadraticCurveTo(x+shW*1.04,baseY-h*0.04,x+shW,shY);ctx.quadraticCurveTo(x,shY-h*0.05,x-shW,shY);ctx.closePath();}
+    else{ctx.moveTo(x-shW,shY);ctx.quadraticCurveTo(x-hipW*1.1,baseY-h*0.40,x-hipW,hemY);ctx.lineTo(x-h*0.07,baseY);ctx.lineTo(x-h*0.01,baseY);ctx.lineTo(x,hemY-h*0.10);ctx.lineTo(x+h*0.01,baseY);ctx.lineTo(x+h*0.07,baseY);ctx.lineTo(x+hipW,hemY);ctx.quadraticCurveTo(x+hipW*1.1,baseY-h*0.40,x+shW,shY);ctx.quadraticCurveTo(x,shY-h*0.055,x-shW,shY);ctx.closePath();}};
+  shade(body,x,shY+h*0.14,M.cloth.lit,M.cloth.shadow,L,h*0.5);
+  ctx.fillStyle=rgb(M.skin.shadow);ctx.fillRect(x-headR*0.42,hdY+headR*0.4,headR*0.84,Math.max(6,shY-hdY));
+  hairMass(x,hdY,headR,dir,L,M.hair);
+  paintFace(x,hdY,headR,dir,M.skin,L,Object.assign({el},opts));
+  ctx.restore();
+  return {hx:x,hy:hdY,hr:headR,shY,shW,sy:shY+h*0.07,dir};
+}
+/* ---- character wrappers matched to the reference sheet ---- */
+function zeeFig(x,baseY,h,L,opts){opts=opts||{};const r=person(x,baseY,h,MAT.zee,L,Object.assign({dir:opts.dir||-1},opts));
+  // hair up in a puff-bun
+  ctx.fillStyle=rgb(mix(MAT.zee.hair.shadow,L.c,0.08));ctx.beginPath();ctx.arc(r.hx,r.hy-r.hr*0.95,r.hr*0.62,0,7);ctx.fill();
+  ctx.fillStyle=rgba(mix(MAT.zee.hair.lit,L.c,0.2),0.5);ctx.beginPath();ctx.arc(r.hx-r.hr*0.2,r.hy-r.hr*1.05,r.hr*0.34,0,7);ctx.fill();
+  // gold hoop
+  ctx.strokeStyle='#d8b25c';ctx.lineWidth=Math.max(1.4,r.hr*0.09);ctx.beginPath();ctx.arc(r.hx+(opts.dir||-1)*r.hr*0.62,r.hy+r.hr*0.5,r.hr*0.2,0,7);ctx.stroke();
+  // padded hood collar
+  if(!opts.slump){ctx.fillStyle=rgba(MAT.zee.cloth.shadow,0.9);ctx.beginPath();ctx.moveTo(r.hx-r.shW*0.7,r.shY+h*0.02);ctx.quadraticCurveTo(r.hx,r.shY-h*0.03,r.hx+r.shW*0.7,r.shY+h*0.02);ctx.quadraticCurveTo(r.hx,r.shY+h*0.12,r.hx-r.shW*0.7,r.shY+h*0.02);ctx.fill();
+  // puffer seams
+  ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=2;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(r.hx-r.shW*0.8,r.shY+h*0.06*i+h*0.06);ctx.lineTo(r.hx+r.shW*0.8,r.shY+h*0.06*i+h*0.06);ctx.stroke();}}
+  return r;}
+function samFig(x,baseY,h,L,opts){opts=opts||{};const r=person(x,baseY,h,MAT.sam,L,Object.assign({dir:opts.dir||-1,beard:'stubble',beardCol:[120,92,60]},opts));
+  // tousled fringe
+  ctx.fillStyle=rgb(mix(MAT.sam.hair.shadow,L.c,0.1));for(let i=0;i<5;i++){ctx.beginPath();ctx.ellipse(r.hx-r.hr*0.7+i*r.hr*0.35,r.hy-r.hr*0.7,r.hr*0.28,r.hr*0.2,(i-2)*0.3,0,7);ctx.fill();}
+  // hoodie collar under jacket
+  if(!opts.slump){ctx.strokeStyle='rgba(150,152,158,0.6)';ctx.lineWidth=Math.max(2,h*0.02);ctx.beginPath();ctx.moveTo(r.hx-r.shW*0.4,r.shY+h*0.05);ctx.lineTo(r.hx,r.shY+h*0.12);ctx.lineTo(r.hx+r.shW*0.4,r.shY+h*0.05);ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=Math.max(1.5,h*0.014);ctx.beginPath();ctx.moveTo(r.hx,r.shY+h*0.12);ctx.lineTo(r.hx,baseY-h*0.32);ctx.stroke();}
+  return r;}
+function bowdenFig(x,baseY,h,L,opts){opts=opts||{};const r=person(x,baseY,h,MAT.bowden,L,Object.assign({dir:opts.dir||-1,beard:'full',beardCol:[128,124,118]},opts));
+  // short grizzled hair already via hairMass; add worn jacket collar
+  if(!opts.slump){ctx.fillStyle=rgba(MAT.bowden.cloth.shadow,0.9);ctx.beginPath();ctx.moveTo(r.hx-r.shW*0.7,r.shY);ctx.lineTo(r.hx-r.shW*0.3,r.shY+h*0.1);ctx.lineTo(r.hx-r.shW*0.55,r.shY+h*0.12);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(r.hx+r.shW*0.7,r.shY);ctx.lineTo(r.hx+r.shW*0.3,r.shY+h*0.1);ctx.lineTo(r.hx+r.shW*0.55,r.shY+h*0.12);ctx.closePath();ctx.fill();}
+  return r;}
+/* ---- props ---- */
+function candlestick(x,y,s,L){ctx.save();ctx.fillStyle=rgb(mix([140,120,70],L.c,0.2));ctx.fillRect(x-s*0.08,y-s,s*0.16,s);ctx.beginPath();ctx.ellipse(x,y,s*0.34,s*0.12,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(x,y-s,s*0.2,s*0.08,0,0,7);ctx.fill();ctx.fillStyle=rgba([230,210,150],0.5*L.i);ctx.fillRect(x-s*0.03,y-s,s*0.04,s);ctx.restore();}
+function radiator(x,y,w,h,L){ctx.save();ctx.strokeStyle=rgb(mix([150,150,156],L.c,0.2));ctx.lineWidth=Math.max(3,w*0.06);for(let i=0;i<7;i++){const rx=x+i*(w/7)+w*0.06;ctx.beginPath();ctx.moveTo(rx,y);ctx.lineTo(rx,y+h);ctx.stroke();}ctx.lineWidth=Math.max(2,w*0.04);ctx.beginPath();ctx.moveTo(x,y+h*0.1);ctx.lineTo(x+w,y+h*0.1);ctx.moveTo(x,y+h*0.9);ctx.lineTo(x+w,y+h*0.9);ctx.stroke();ctx.restore();}
+function boxStack(x,y,s,L,knocked){ctx.save();ctx.fillStyle=rgb(mix([120,96,64],L.c,0.14));ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=2;
+  const boxes=knocked?[[0,0,1,1,0.3],[1.1,0.2,0.9,0.9,-0.2],[0.3,-1,1,1,0.05]]:[[0,0,1,1,0],[0.1,-1,0.9,0.9,0],[0.15,-1.85,0.8,0.8,0]];
+  boxes.forEach(b=>{ctx.save();ctx.translate(x+b[0]*s,y+b[1]*s);ctx.rotate(b[4]);ctx.fillRect(0,0,b[2]*s,b[3]*s);ctx.strokeRect(0,0,b[2]*s,b[3]*s);ctx.beginPath();ctx.moveTo(b[2]*s*0.5,0);ctx.lineTo(b[2]*s*0.5,b[3]*s*0.3);ctx.stroke();ctx.restore();});ctx.restore();}
+function phoneUI(x,y,s,kind,L){ctx.save();ctx.fillStyle='#0b0d10';roundr(x-s*0.5,y-s*0.9,s,s*1.8,s*0.12);ctx.fill();const scr=(kind==='threat')?['#3a1210','#180806']:(kind==='dead')?['#141414','#080808']:['#132030','#0a1420'];const g=ctx.createLinearGradient(0,y-s*0.8,0,y+s*0.8);g.addColorStop(0,scr[0]);g.addColorStop(1,scr[1]);ctx.fillStyle=g;roundr(x-s*0.42,y-s*0.78,s*0.84,s*1.56,s*0.06);ctx.fill();
+  const gl=(kind==='threat')?'rgba(210,90,80,0.5)':(kind==='dead')?'rgba(120,120,120,0.2)':'rgba(120,180,230,0.35)';const rg=ctx.createRadialGradient(x,y,0,x,y,s*1.4);rg.addColorStop(0,gl);rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,s*1.4,0,7);ctx.fill();
+  if(kind==='threat'){ctx.fillStyle='rgba(240,150,140,0.9)';for(let i=0;i<3;i++){ctx.fillRect(x-s*0.3,y-s*0.3+i*s*0.22,s*0.6,s*0.08);}}
+  else if(kind!=='dead'){ctx.fillStyle='rgba(160,190,220,0.7)';for(let i=0;i<3;i++){ctx.fillRect(x-s*0.3,y-s*0.4+i*s*0.3,s*0.6*(1-i*0.2),s*0.07);}}
+  ctx.restore();}
+
+/* ===== THREE KNOCKS — staged backgrounds, part 1 (beats: street→radiator) ===== */
+let knockPulse=0; // set by runner on knock beats
+function vign(a){ctx.fillStyle='rgba(4,4,5,'+(a||0.14)+')';ctx.fillRect(0,0,W,H);}
+/* --- the street (sodium-lit, deserted) --- */
+function streetBase(el){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#161a24');g.addColorStop(0.6,'#0e1017');g.addColorStop(1,'#080a0e');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // terraced silhouettes
+  ctx.fillStyle='#0b0d13';for(let i=0;i<6;i++){const bx=i*W*0.19-W*0.05,bh=H*0.3+((i*53)%9)*H*0.02;ctx.fillRect(bx,H*0.44-bh*0.0,W*0.2,H);ctx.fillRect(bx,H*0.5-((i*37)%7)*H*0.02,W*0.2,H);}
+  // pavement
+  ctx.fillStyle='#0a0b0f';ctx.fillRect(0,H*0.82,W,H*0.18);
+  // sodium street lamps
+  for(const lx of [W*0.16,W*0.72]){ctx.strokeStyle='#20242c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(lx,H*0.1);ctx.lineTo(lx,H*0.82);ctx.stroke();ctx.fillStyle='rgba(230,168,90,0.95)';ctx.beginPath();ctx.arc(lx,H*0.1,7,0,7);ctx.fill();const gg=ctx.createRadialGradient(lx,H*0.1,0,lx,H*0.1,H*0.34);gg.addColorStop(0,'rgba(230,168,90,0.22)');gg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(lx,H*0.1,H*0.34,0,7);ctx.fill();
+    // pool of light on pavement
+    const pg=ctx.createRadialGradient(lx,H*0.84,0,lx,H*0.84,W*0.2);pg.addColorStop(0,'rgba(230,168,90,0.14)');pg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=pg;ctx.beginPath();ctx.ellipse(lx,H*0.84,W*0.2,H*0.05,0,0,7);ctx.fill();}
+}
+function bgStreet(p,el,L){streetBase(el);
+  if(p.zeeWalk||p.zeeStop){
+    const bounce=(p.zeeWalk&&!reduceMotion)?Math.abs(Math.sin(el*4))*H*0.01:0;
+    const r=zeeFig(W*0.44,H*0.9-bounce,H*0.5,L,{dir:1,el,expr:p.ze||'worry',handTo:p.phone?[W*0.5,H*0.6]:null});
+    if(p.phone){hand(W*0.5,H*0.6,H*0.02,MAT.zee.skin,L);phoneUI(W*0.53,H*0.58,H*0.05,p.hold?'threat':'call',L);}
+    if(p.buzz){ctx.fillStyle='rgba(217,154,68,0.8)';ctx.font='bold 20px Space Mono';ctx.fillText('\u25CF',W*0.58,H*0.5);}
+  }
+  if(p.man){
+    // the tall man, behind her, bigger
+    bowdenFig(W*0.76,H*0.94,H*0.60,L,{dir:-1,el,expr:'stern'});
+  }
+  vign(0.16);
+}
+/* --- the chase (motion, blurred lamplight) --- */
+function bgChase(p,el,L){streetBase(el);
+  ctx.save();
+  // speed streaks
+  ctx.strokeStyle='rgba(230,168,90,0.16)';ctx.lineWidth=3;for(let i=0;i<8;i++){const y=H*0.2+i*H*0.08;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y+H*0.02);ctx.stroke();}
+  // Zee running foreground, Man pursuing back
+  const j=reduceMotion?0:Math.sin(el*10)*H*0.015;
+  zeeFig(W*0.36,H*0.92+j,H*0.52,L,{dir:1,el,expr:'fear',run:1});
+  bowdenFig(W*0.72,H*0.9-j,H*0.5,L,{dir:1,el,expr:'stern'});
+  ctx.restore();
+  vign(0.2);
+}
+/* --- the flat corridor: shared base --- */
+function corridorBase(el,L){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  if(!lightsOn){g.addColorStop(0,'#0c0e14');g.addColorStop(1,'#060709');}
+  else{g.addColorStop(0,'#241d12');g.addColorStop(0.6,'#181206');g.addColorStop(1,'#0d0a06');}
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // corridor perspective: walls converging to the front door at back
+  ctx.fillStyle=lightsOn?'#1a140b':'#0a0c11';
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*0.26,H*0.2);ctx.lineTo(W*0.26,H*0.86);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(W,0);ctx.lineTo(W*0.74,H*0.2);ctx.lineTo(W*0.74,H*0.86);ctx.lineTo(W,H);ctx.closePath();ctx.fill();
+  // floor
+  ctx.fillStyle=lightsOn?'#0e0b07':'#070809';ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W*0.26,H*0.86);ctx.lineTo(W*0.74,H*0.86);ctx.lineTo(W,H);ctx.closePath();ctx.fill();
+  // the front door at the back
+  ctx.fillStyle=lightsOn?'#221a10':'#0d0f14';ctx.fillRect(W*0.38,H*0.24,W*0.24,H*0.6);
+  ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=3;ctx.strokeRect(W*0.38,H*0.24,W*0.24,H*0.6);
+  // letterbox
+  ctx.fillStyle='#05060a';ctx.fillRect(W*0.45,H*0.56,W*0.1,H*0.02);
+  // cold spill from a window (implied, right)
+  if(!lightsOn){const wg=ctx.createLinearGradient(W,0,W*0.6,0);wg.addColorStop(0,'rgba(90,110,140,0.28)');wg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=wg;ctx.fillRect(W*0.6,0,W*0.4,H);}
+  // bare bulb glow when on
+  if(lightsOn){const bg=ctx.createRadialGradient(W*0.42,H*0.14,0,W*0.42,H*0.14,H*0.5);bg.addColorStop(0,'rgba(224,186,120,0.22)');bg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H*0.7);}
+  return L;
+}
+function bgBarricade(p,el,L){corridorBase(el,L);
+  boxStack(W*0.28,H*0.62,H*0.09,L,true); // knocked over
+  // Zee against the door, breathing
+  const r=zeeFig(W*0.5,H*0.88,H*0.56,L,{dir:1,el,expr:p.ze||'panic',ph:0.5,sweat:p.sweat,handTo:p.phone?[W*0.58,H*0.62]:null});
+  if(p.phone){hand(W*0.58,H*0.62,H*0.02,MAT.zee.skin,L);phoneUI(W*0.61,H*0.6,H*0.05,'dead',L);}
+  if(p.orchestra){
+    // faint overlay motifs: clock hand, drip, heartbeat ring
+    ctx.strokeStyle='rgba(217,154,68,0.25)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(W*0.5,H*0.44,H*0.05,-1.57,-1.57+(el%2)*3.14);ctx.stroke();
+  }
+  vign(0.2);
+}
+function bgDoor(p,el,L){corridorBase(el,L);
+  // camera closer on the door; Zee small, frozen, foreground-left
+  if(p.letterbox){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(W*0.45,H*0.55,W*0.1,H*0.04);hand(W*0.5,H*0.58,H*0.02,MAT.zee.skin,L);}
+  zeeFig(W*0.3,H*0.92,H*0.52,L,{dir:1,el,expr:p.ze||'fear',tears:p.ze==='tears',ph:0.5});
+  // knock impact marks / shudder handled by runner shake; draw a fist-glow on knock
+  if(p.knock&&knockPulse>0){ctx.fillStyle='rgba(217,154,68,'+(0.3*knockPulse)+')';ctx.beginPath();ctx.arc(W*0.5,H*0.42,H*0.06*knockPulse,0,7);ctx.fill();}
+  vign(0.22);
+}
+function bgCommunal(p,el,L){
+  // OUTSIDE the flat — the man facing the door, cold light
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#12161d');g.addColorStop(1,'#080a0e');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#0c0f15';ctx.fillRect(0,0,W,H*0.16);
+  // the door he faces (we're behind him)
+  ctx.fillStyle='#161a22';ctx.fillRect(W*0.3,H*0.2,W*0.4,H*0.66);ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=3;ctx.strokeRect(W*0.3,H*0.2,W*0.4,H*0.66);
+  ctx.fillStyle='#05060a';ctx.fillRect(W*0.44,H*0.5,W*0.12,H*0.02); // letterbox
+  // a cold ceiling strip light
+  const cg=ctx.createRadialGradient(W*0.5,0,0,W*0.5,0,H*0.7);cg.addColorStop(0,'rgba(150,168,190,0.2)');cg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=cg;ctx.fillRect(0,0,W,H);
+  // Bowden from behind/side, facing door
+  bowdenFig(W*0.5,H*0.94,H*0.6,L,{dir:-1,el,expr:p.me||'stern'});
+  vign(0.2);
+}
+function bgCandlestick(p,el,L){corridorBase(el,L);
+  boxStack(W*0.28,H*0.64,H*0.08,L,true);
+  // Zee turned to the corner, lifting the candlestick from shadow
+  const r=zeeFig(W*0.44,H*0.9,H*0.56,L,{dir:1,el,expr:'resolve',handTo:[W*0.6,H*0.66],ph:0.4});
+  hand(W*0.6,H*0.66,H*0.022,MAT.zee.skin,L);
+  candlestick(W*0.62,H*0.66,H*0.14,L);
+  vign(0.22);
+}
+function bgStrike(p,el,L){corridorBase(el,L);
+  // darkness — the slam. near-black with a sliver, a falling silhouette
+  ctx.fillStyle='rgba(4,4,6,0.72)';ctx.fillRect(0,0,W,H);
+  // impact burst
+  if(knockPulse>0){const g=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,H*0.4*knockPulse);g.addColorStop(0,'rgba(217,154,68,'+(0.3*knockPulse)+')');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  vign(0.3);
+}
+function bgRadiator(p,el,L){corridorBase(el,L);
+  radiator(W*0.16,H*0.6,W*0.14,H*0.2,L);
+  // the felled man slumped, foot toward radiator
+  bowdenFig(W*0.34,H*0.9,H*0.5,L,{dir:1,el,slump:1,expr:'out'});
+  // laces tying foot to radiator
+  ctx.strokeStyle='rgba(30,26,20,0.9)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*0.2,H*0.72);ctx.lineTo(W*0.28,H*0.86);ctx.stroke();
+  // a loose trainer
+  ctx.fillStyle=rgb(mix([60,60,66],L.c,0.14));roundr(W*0.4,H*0.9,H*0.06,H*0.03,4);ctx.fill();
+  // Zee crouched over him, grim
+  zeeFig(W*0.62,H*0.92,H*0.5,L,{dir:-1,el,expr:p.ze||'grim',seated:0,handTo:[W*0.5,H*0.78]});
+  hand(W*0.5,H*0.78,H*0.02,MAT.zee.skin,L);
+  candlestick(W*0.86,H*0.84,H*0.12,L); // stood against wall
+  vign(0.2);
+}
+
+/* ===== THREE KNOCKS — staged backgrounds, part 2 (Sam → finale) ===== */
+function bgSamDoor(p,el,L){corridorBase(el,L);
+  // door open; Sam in the frame being pulled in
+  ctx.fillStyle=lightsOn?'#2a2113':'#10131a';ctx.fillRect(W*0.6,H*0.22,W*0.22,H*0.62); // opened door dark gap
+  const cg=ctx.createLinearGradient(W*0.82,0,W*0.6,0);cg.addColorStop(0,'rgba(120,140,168,0.3)');cg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=cg;ctx.fillRect(W*0.6,H*0.22,W*0.22,H*0.62);
+  samFig(W*0.68,H*0.92,H*0.56,L,{dir:-1,el,expr:p.se||'hesitant'});
+  // Zee pulling him
+  zeeFig(W*0.4,H*0.92,H*0.54,L,{dir:1,el,expr:p.ze||'relief',handTo:[W*0.55,H*0.62]});
+  hand(W*0.55,H*0.62,H*0.02,MAT.zee.skin,L);
+  vign(0.2);
+}
+function bgRevealBody(p,el,L){corridorBase(el,L);
+  radiator(W*0.14,H*0.6,W*0.13,H*0.2,L);
+  bowdenFig(W*0.3,H*0.9,H*0.48,L,{dir:1,el,slump:1,expr:'out'});
+  // Sam recoiling, stunned
+  samFig(W*0.7,H*0.92,H*0.56,L,{dir:-1,el,expr:p.se||'shock'});
+  // Zee between, grim
+  zeeFig(W*0.5,H*0.94,H*0.5,L,{dir:-1,el,expr:p.ze||'grim'});
+  vign(0.2);
+}
+function bgTwoShot(p,el,L){corridorBase(el,L);
+  // the two-hander: Zee and Sam facing each other, mid-corridor
+  const knifeSide=p.knife?1:0;
+  zeeFig(W*0.32,H*0.93,H*0.56,L,{dir:1,el,expr:p.ze||'plead',tears:p.ze==='plead',handTo:p.phone?[W*0.46,H*0.64]:(p.sleeve?[W*0.5,H*0.6]:null)});
+  if(p.phone){hand(W*0.46,H*0.64,H*0.02,MAT.zee.skin,L);phoneUI(W*0.49,H*0.62,H*0.05,'threat',L);}
+  samFig(W*0.7,H*0.93,H*0.58,L,{dir:-1,el,expr:p.se||'pained'});
+  if(p.knife){
+    // Sam's knife, flicked out, in his near hand
+    hand(W*0.56,H*0.66,H*0.02,MAT.sam.skin,L);
+    ctx.save();ctx.translate(W*0.56,H*0.66);ctx.rotate(-0.5);ctx.fillStyle='rgba(200,205,215,0.9)';ctx.fillRect(0,-2,H*0.09,4);ctx.fillStyle='#1a1a1e';ctx.fillRect(-H*0.03,-3,H*0.03,6);ctx.restore();
+    // glint
+    ctx.fillStyle='rgba(255,255,255,0.7)';ctx.beginPath();ctx.arc(W*0.56+H*0.08,H*0.658,1.6,0,7);ctx.fill();
+  }
+  if(p.sleeve){hand(W*0.5,H*0.6,H*0.02,MAT.zee.skin,L);}
+  vign(0.2);
+}
+function bgPhoneReveal(p,el,L){
+  // full-frame on the phone: threat gone, the two remaining messages + Bowden photo
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0a0d12');g.addColorStop(1,'#050608');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // phone body large, tilted
+  ctx.save();ctx.translate(W*0.5,H*0.5);ctx.rotate(-0.04);
+  ctx.fillStyle='#0b0d10';roundr(-W*0.28,-H*0.34,W*0.56,H*0.68,W*0.05);ctx.fill();
+  const sg=ctx.createLinearGradient(0,-H*0.3,0,H*0.3);sg.addColorStop(0,'#101a26');sg.addColorStop(1,'#0a1018');ctx.fillStyle=sg;roundr(-W*0.24,-H*0.3,W*0.48,H*0.6,W*0.02);ctx.fill();
+  // message 1 (protection unit)
+  ctx.fillStyle='rgba(40,52,70,0.9)';roundr(-W*0.2,-H*0.22,W*0.4,H*0.11,8);ctx.fill();
+  ctx.fillStyle='rgba(180,200,225,0.85)';ctx.font='10px Space Mono';ctx.textAlign='left';
+  ctx.fillText('New threat ID\u2019d. You\u2019re being',-W*0.17,-H*0.18);ctx.fillText('moved tonight. Detective on way.',-W*0.17,-H*0.15);
+  // missed message: photo of Bowden + name
+  ctx.fillStyle='rgba(50,40,30,0.9)';roundr(-W*0.2,-H*0.06,W*0.4,H*0.2,8);ctx.fill();
+  // little Bowden photo
+  ctx.save();ctx.translate(-W*0.12,H*0.02);const pr=H*0.05;
+  const fL={x:0,y:-pr,c:[200,180,150],i:0.7};
+  ctx.fillStyle=rgb(MAT.bowden.skin.shadow);ctx.beginPath();ctx.arc(0,0,pr,0,7);ctx.fill();
+  hairMass(0,0,pr,-1,fL,MAT.bowden.hair);paintFace(0,0,pr,-1,MAT.bowden.skin,fL,{expr:'stern',beard:'full',beardCol:[128,124,118]});
+  ctx.restore();
+  ctx.fillStyle='rgba(220,210,195,0.9)';ctx.font='bold 11px Space Mono';ctx.fillText('Detective Sgt',-W*0.03,-H*0.0);ctx.fillText('Bowden',-W*0.03,H*0.03);
+  ctx.textAlign='center';ctx.restore();
+  // red glow of realisation fading
+  const rg=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,W*0.6);rg.addColorStop(0,'rgba(168,48,42,0.12)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+  vign(0.22);
+}
+function bgFinale(p,el,L){corridorBase(el,L);
+  radiator(W*0.12,H*0.6,W*0.12,H*0.2,L);
+  candlestick(W*0.9,H*0.84,H*0.12,L);
+  // window (closed, not locked) — cold rectangle right
+  ctx.fillStyle='#0c1017';ctx.fillRect(W*0.78,H*0.3,W*0.16,H*0.28);ctx.strokeStyle='rgba(90,110,140,0.4)';ctx.lineWidth=2;ctx.strokeRect(W*0.78,H*0.3,W*0.16,H*0.28);ctx.beginPath();ctx.moveTo(W*0.86,H*0.3);ctx.lineTo(W*0.86,H*0.58);ctx.moveTo(W*0.78,H*0.44);ctx.lineTo(W*0.94,H*0.44);ctx.stroke();
+  // Bowden risen, alert, back-left — the one who sees it all
+  bowdenFig(W*0.22,H*0.94,H*0.56,L,{dir:1,el,expr:p.bowdenTerror?'shock':'worry'});
+  // Sam, knife out, shaking, tears
+  samFig(W*0.5,H*0.94,H*0.58,L,{dir:-1,el,expr:p.se||'anguish',tears:1});
+  hand(W*0.42,H*0.68,H*0.02,MAT.sam.skin,L);
+  ctx.save();ctx.translate(W*0.42,H*0.68);ctx.rotate(-0.6+(reduceMotion?0:Math.sin(el*20)*0.06));ctx.fillStyle='rgba(200,205,215,0.9)';ctx.fillRect(0,-2,H*0.1,4);ctx.fillStyle='#1a1a1e';ctx.fillRect(-H*0.03,-3,H*0.03,6);ctx.restore();
+  // Zee lunging for the candlestick (right)
+  zeeFig(W*0.74,H*0.95,H*0.54,L,{dir:1,el,expr:'fear',handTo:[W*0.86,H*0.8]});
+  hand(W*0.86,H*0.8,H*0.02,MAT.zee.skin,L);
+  vign(0.24);
+}
+/* ---- background dispatch ---- */
+const BG={
+  street:bgStreet, chase:bgChase, barricade:bgBarricade, door:bgDoor, communal:bgCommunal,
+  candlestick:bgCandlestick, strike:bgStrike, radiator:bgRadiator, samDoor:bgSamDoor,
+  'reveal-body':bgRevealBody, twoShot:bgTwoShot, phoneReveal:bgPhoneReveal, finale:bgFinale
+};
+/* --- warrant beat: the wallet opens to a warrant card; Sam flicks the knife --- */
+function bgWarrant(p,el,L){corridorBase(el,L);
+  radiator(W*0.12,H*0.6,W*0.12,H*0.2,L);
+  bowdenFig(W*0.26,H*0.9,H*0.46,L,{dir:1,el,slump:1,expr:'out'});
+  // Zee holding the open wallet / warrant card, stunned
+  zeeFig(W*0.44,H*0.93,H*0.54,L,{dir:1,el,expr:p.ze||'shock',handTo:[W*0.54,H*0.66]});
+  hand(W*0.54,H*0.66,H*0.02,MAT.zee.skin,L);
+  // warrant card: dark wallet + pale card + crest
+  ctx.save();ctx.translate(W*0.56,H*0.64);ctx.rotate(-0.1);ctx.fillStyle='#15130f';ctx.fillRect(-H*0.05,-H*0.03,H*0.1,H*0.08);ctx.fillStyle='#d8d2c2';ctx.fillRect(-H*0.045,-H*0.025,H*0.05,H*0.07);ctx.fillStyle='rgba(120,140,170,0.8)';ctx.beginPath();ctx.arc(-H*0.02,-H*0.005,H*0.012,0,7);ctx.fill();ctx.restore();
+  // Sam, cold now, knife flicked out
+  samFig(W*0.72,H*0.93,H*0.58,L,{dir:-1,el,expr:p.se||'cold'});
+  if(p.knife){hand(W*0.6,H*0.66,H*0.02,MAT.sam.skin,L);ctx.save();ctx.translate(W*0.6,H*0.66);ctx.rotate(-0.5);ctx.fillStyle='rgba(200,205,215,0.9)';ctx.fillRect(0,-2,H*0.09,4);ctx.fillStyle='#1a1a1e';ctx.fillRect(-H*0.03,-3,H*0.03,6);ctx.restore();ctx.fillStyle='rgba(255,255,255,0.7)';ctx.beginPath();ctx.arc(W*0.6+H*0.085,H*0.658,1.6,0,7);ctx.fill();}
+  vign(0.2);
+}
+BG.warrant=bgWarrant;
+/* --- the pocket search: both crouched over Bowden, going through his jacket --- */
+function bgSearch(p,el,L){corridorBase(el,L);
+  radiator(W*0.1,H*0.6,W*0.12,H*0.2,L);
+  bowdenFig(W*0.3,H*0.92,H*0.46,L,{dir:1,el,slump:1,expr:'out'});
+  // laces to radiator
+  ctx.strokeStyle='rgba(30,26,20,0.9)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*0.17,H*0.72);ctx.lineTo(W*0.24,H*0.88);ctx.stroke();
+  // Zee crouched, hand at his chest pocket
+  zeeFig(W*0.5,H*0.94,H*0.5,L,{dir:1,el,expr:p.ze||'grim',handTo:[W*0.4,H*0.82]});
+  hand(W*0.4,H*0.82,H*0.02,MAT.zee.skin,L);
+  // Sam backing off, pained, right
+  samFig(W*0.76,H*0.93,H*0.56,L,{dir:-1,el,expr:p.se||'pained'});
+  vign(0.2);
+}
+BG.search=bgSearch;
+/* --- the window beat: Zee at the window; Bowden stirring on the floor behind --- */
+function bgWindow(p,el,L){corridorBase(el,L);
+  radiator(W*0.1,H*0.6,W*0.12,H*0.2,L);
+  candlestick(W*0.88,H*0.84,H*0.12,L);
+  // window right — closed, not locked
+  ctx.fillStyle='#0c1017';ctx.fillRect(W*0.72,H*0.28,W*0.2,H*0.3);ctx.strokeStyle='rgba(90,110,140,0.4)';ctx.lineWidth=2;ctx.strokeRect(W*0.72,H*0.28,W*0.2,H*0.3);ctx.beginPath();ctx.moveTo(W*0.82,H*0.28);ctx.lineTo(W*0.82,H*0.58);ctx.moveTo(W*0.72,H*0.43);ctx.lineTo(W*0.92,H*0.43);ctx.stroke();
+  const wg=ctx.createLinearGradient(W,0,W*0.6,0);wg.addColorStop(0,'rgba(90,110,140,0.22)');wg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=wg;ctx.fillRect(W*0.6,0,W*0.4,H);
+  // Bowden stirring — waking: eyes cracking, worry, half-up
+  bowdenFig(W*0.32,H*0.9,H*0.5,L,{dir:1,el,expr:p.bowdenWake?'worry':'out',seated:1});
+  // Zee at the window, turned away
+  zeeFig(W*0.66,H*0.93,H*0.54,L,{dir:1,el,expr:'fear',handTo:[W*0.76,H*0.6]});
+  hand(W*0.76,H*0.6,H*0.02,MAT.zee.skin,L);
+  // Sam, mid, knife coming back out low
+  samFig(W*0.48,H*0.95,H*0.5,L,{dir:-1,el,expr:'anguish'});
+  vign(0.22);
+}
+BG.window=bgWindow;
+
+/* ===== THREE KNOCKS — audio + runner (pass 4) ===== */
+let AC=null,master=null,muted=false,beds={};
+function audioInit(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.9;master.connect(AC.destination);}catch(e){AC=null;}}
+function now(){return AC?AC.currentTime:0;}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,Math.floor(sr*d),sr),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function tone(f,t,dur,amp,type){const o=AC.createOscillator();o.type=type||'sine';o.frequency.value=f;const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(amp,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.02);}
+function buzzS(){if(!AC||muted)return;const t=now();for(let i=0;i<2;i++)tone(140,t+i*0.18,0.12,0.09,'square');}
+function stingS(){if(!AC||muted)return;const t=now();const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(70,t+0.5);const g=AC.createGain();g.gain.setValueAtTime(0.16,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.7);const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=800;o.connect(lp);lp.connect(g);g.connect(master);o.start(t);o.stop(t+0.72);}
+function whooshS(){if(!AC||muted)return;const t=now();const s=AC.createBufferSource();s.buffer=nbuf(0.5);const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(300,t);bp.frequency.linearRampToValueAtTime(1800,t+0.4);const g=AC.createGain();g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.45);s.connect(bp);bp.connect(g);g.connect(master);s.start(t);s.stop(t+0.46);}
+function doorS(){if(!AC||muted)return;const t=now();const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+0.18);const g=AC.createGain();g.gain.setValueAtTime(0.3,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.24);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.26);const s=AC.createBufferSource();s.buffer=nbuf(0.06);const g2=AC.createGain();g2.gain.setValueAtTime(0.2,t);g2.gain.exponentialRampToValueAtTime(0.0001,t+0.07);s.connect(g2);g2.connect(master);s.start(t);s.stop(t+0.07);}
+function knockS(){if(!AC||muted)return;const t=now();for(let i=0;i<3;i++){const tt=t+i*0.42;const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(90,tt);o.frequency.exponentialRampToValueAtTime(50,tt+0.1);const g=AC.createGain();g.gain.setValueAtTime(0.34,tt);g.gain.exponentialRampToValueAtTime(0.0001,tt+0.16);o.connect(g);g.connect(master);o.start(tt);o.stop(tt+0.18);const s=AC.createBufferSource();s.buffer=nbuf(0.04);const g2=AC.createGain();g2.gain.setValueAtTime(0.16,tt);g2.gain.exponentialRampToValueAtTime(0.0001,tt+0.05);s.connect(g2);g2.connect(master);s.start(tt);s.stop(tt+0.05);}}
+function thudS(){if(!AC||muted)return;const t=now();const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(38,t+0.22);const g=AC.createGain();g.gain.setValueAtTime(0.4,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.32);}
+function flickS(){if(!AC||muted)return;const t=now();tone(2400,t,0.03,0.08,'square');tone(600,t+0.02,0.04,0.05,'square');}
+const SFX={buzz:buzzS,sting:stingS,whoosh:whooshS,door:doorS,knock:knockS,thud:thudS,flick:flickS};
+function startBeds(list){Object.keys(beds).forEach(k=>{if(list.indexOf(k)<0)stopBed(k);});list.forEach(k=>{if(!beds[k])beds[k]=makeBed(k);});}
+function stopBed(k){if(beds[k]){beds[k].stop();delete beds[k];}}
+function stopAllBeds(){Object.keys(beds).forEach(stopBed);}
+function makeBed(kind){let timer=null,alive=true,nodes=[];
+  function drone(freqs,amp,type,lp){const g=AC.createGain();g.gain.value=0.0001;g.gain.linearRampToValueAtTime(muted?0.0001:amp,now()+1.2);const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=lp||260;freqs.forEach(fr=>{const o=AC.createOscillator();o.type=type||'sawtooth';o.frequency.value=fr;o.connect(f);o.start();nodes.push(o);});f.connect(g);g.connect(master);nodes.push(g);}
+  function pulse(interval,make){const step=()=>{if(!alive)return;if(AC&&!muted)make();timer=setTimeout(step,interval);};timer=setTimeout(step,interval);}
+  if(kind==='night'){drone([48,64],0.04,'sawtooth',180);}
+  else if(kind==='chase'){drone([70,96],0.05,'sawtooth',400);pulse(340,()=>{const t=now();tone(150,t,0.1,0.06,'square');});}
+  else if(kind==='clock'){pulse(1000,()=>{const t=now();tone(1500,t,0.03,0.05,'square');tone(1400,t+0.5,0.03,0.04,'square');});}
+  else if(kind==='heart'){pulse(1100,()=>{const t=now();tone(60,t,0.14,0.14,'sine');tone(58,t+0.24,0.12,0.1,'sine');});}
+  else if(kind==='drip'){pulse(1600,()=>{const t=now();const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(900,t);o.frequency.exponentialRampToValueAtTime(400,t+0.08);const g=AC.createGain();g.gain.setValueAtTime(0.06,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.12);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.13);});}
+  else if(kind==='drone'){drone([44,58,66],0.06,'sawtooth',200);}
+  return {stop(){alive=false;if(timer)clearTimeout(timer);const t=now();nodes.forEach(n=>{try{if(n.gain)n.gain.linearRampToValueAtTime(0.0001,t+0.3);}catch(e){}});setTimeout(()=>{nodes.forEach(n=>{try{n.stop&&n.stop();}catch(e){}});},340);}};
+}
+
+/* ================= RUNNER (locked camera) ================= */
+let idx=-1,sceneT0=0,running=false,shakeEnd=0,knockT0=0,finishing=false,toBlack=false,transStart=0;
+const STAGE_SET={street:'street',chase:'street',communal:'communal'}; // else -> flat
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function renderText(s){cap.innerHTML='';s.text.forEach((b,i)=>{const el=document.createElement('div');el.className='blk';el.style.animationDelay=(0.12+i*0.5)+'s';
+  if(b.k==='narr'){const p=document.createElement('p');p.className='narr';p.textContent=b.s;el.appendChild(p);}
+  else if(b.k==='msg'){const p=document.createElement('div');p.className='msg'+(b.threat?' threat':'');p.innerHTML='<span class="from">'+esc(b.from)+'</span>'+esc(b.s);el.appendChild(p);}
+  else{const p=document.createElement('p');p.className='line'+(b.cls?' '+b.cls:'');p.innerHTML='<span class="who">'+esc(b.who)+'</span>'+esc(b.s);el.appendChild(p);}
+  cap.appendChild(el);});}
+function enter(i){idx=i;const s=SCENES[i];transStart=performance.now();
+  curSet=STAGE_SET[s.stage]||'flat';
+  lightsOn=!s.p.dark; // dark beats kill the flat lights
+  slug.classList.remove('dim');
+  const slugTxt=(s.stage==='street'||s.stage==='chase')?'EXT. QUIET STREET':(s.stage==='communal'?'INT. COMMUNAL HALLWAY':'INT. ENTRANCE CORRIDOR / FLAT');
+  slug.innerHTML='<span class="no">'+slugTxt+'</span> &middot; EVENING';
+  renderText(s);sceneT0=performance.now();
+  if(s.shake)shakeEnd=performance.now()+700;
+  if(s.p.knock){knockT0=performance.now();}
+  if(s.sfx&&SFX[s.sfx])SFX[s.sfx]();
+  startBeds(s.bed||[]);
+  hint.classList.remove('hide');hint.classList.toggle('knock',!!s.p.knock);
+  hint.textContent=s.last?'tap to end':'tap to continue';}
+function advance(){if(finishing)return;if(idx>=SCENES.length-1){finalSequence();return;}enter(idx+1);}
+function finalSequence(){finishing=true;hint.classList.add('hide');cap.innerHTML='';slug.classList.add('dim');
+  // hold on Bowden's terror, then hard cut to black on the shout — ambiguous
+  if(AC&&!muted){stingS();}
+  setTimeout(()=>{toBlack=true;stopAllBeds();},1400);
+  setTimeout(()=>{$('endScr').classList.remove('hide');},2600);}
+function start(){$('titleScr').classList.add('hide');$('endScr').classList.add('hide');audioInit();if(AC&&AC.state==='suspended')AC.resume();toBlack=false;finishing=false;enter(0);if(!running){running=true;requestAnimationFrame(frame);}}
+function frame(ts){if(!running)return;const el=(ts-sceneT0)/1000;
+  knockPulse=knockT0?Math.max(0,1-(ts-knockT0)/1200):0;
+  try{
+    ctx.save();
+    if(ts<shakeEnd&&!reduceMotion){const k=(shakeEnd-ts)/700;const m=8*k;ctx.translate((Math.random()-0.5)*m,(Math.random()-0.5)*m);}
+    if(toBlack){ctx.fillStyle='#050506';ctx.fillRect(-40,-40,W+80,H+80);}
+    else if(idx<0){curSet='street';streetBase(el);}
+    else{const s=SCENES[idx];if(s){const L=lightAt();(BG[s.stage]||bgBarricade)(s.p,el,L);}}
+    ctx.restore();
+  }catch(e){}
+  if(grainCv&&!toBlack){ctx.save();ctx.globalAlpha=0.055;ctx.globalCompositeOperation='overlay';const ox=reduceMotion?0:(Math.random()*150)|0,oy=reduceMotion?0:(Math.random()*150)|0;for(let yy=-oy;yy<H;yy+=150)for(let xx=-ox;xx<W;xx+=150)ctx.drawImage(grainCv,xx,yy);ctx.restore();}
+  if(!toBlack){const tr=Math.max(0,1-(ts-transStart)/420);if(tr>0){ctx.save();ctx.globalAlpha=tr*tr;ctx.fillStyle='#050506';ctx.fillRect(0,0,W,H);ctx.restore();}}
+  requestAnimationFrame(frame);}
+
+app.addEventListener('click',(e)=>{if(e.target.id==='mute'||e.target.id==='replayBtn')return;if(!$('titleScr').classList.contains('hide')){start();return;}if(!$('endScr').classList.contains('hide'))return;advance();});
+document.addEventListener('keydown',(e)=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!$('titleScr').classList.contains('hide'))start();else if($('endScr').classList.contains('hide'))advance();}});
+$('replayBtn').addEventListener('click',(e)=>{e.stopPropagation();start();});
+$('mute').addEventListener('click',(e)=>{e.stopPropagation();muted=!muted;$('mute').innerHTML=muted?'&#128263;':'&#128266;';if(master)master.gain.value=muted?0:0.9;if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+resize();transStart=performance.now();running=true;requestAnimationFrame(frame);
+</script>
+</body>
+</html>
