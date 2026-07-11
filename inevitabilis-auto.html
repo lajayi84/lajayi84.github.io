@@ -57,6 +57,10 @@
   #prog{position:absolute;top:0;left:0;right:0;height:3px;z-index:8;background:rgba(255,255,255,.07);pointer-events:none;}
   #progfill{height:100%;width:0;background:linear-gradient(90deg,var(--cold),var(--warm));box-shadow:0 0 8px var(--warm);transition:width .12s linear;}
   body.paused #progfill{box-shadow:none;opacity:.5;}
+
+  .tipline{margin-top:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.4px;color:#b6ab98;}
+  .tipline a{color:#e8a24c;text-decoration:none;border-bottom:1px solid rgba(232,162,76,.4);padding-bottom:1px;pointer-events:auto;}
+  .tipline a:active{opacity:.7;}
 </style>
 </head>
 <body>
@@ -84,6 +88,7 @@
     <div class="ttl" style="font-size:clamp(40px,13vw,76px);">Inevitabilis</div>
     <div class="epi">Some doors only open one way. Everyone was always going to run.</div>
     <div class="by" style="animation-delay:.9s">Written by <b>Lanre Ajayi</b></div>
+    <div class="tipline">Made by Lanre Ajayi &middot; <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a></div>
     <div class="replay" id="replayBtn">&#8634; Watch again</div>
   </div>
 </div>
