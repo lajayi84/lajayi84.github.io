@@ -45,6 +45,10 @@
  #endScr .epi{font-family:'Inter',sans-serif;font-style:italic;font-size:15.5px;color:#a09c94;max-width:24em;margin-top:12px;line-height:1.5;}
  .nxt{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2.4px;text-transform:uppercase;color:#5aa39c;margin-top:18px;}
  @media (prefers-reduced-motion: reduce){.blk{animation-duration:.01s;}#hint{animation:none;}}
+
+  .tipline{margin-top:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.4px;color:#b6ab98;}
+  .tipline a{color:#e8a24c;text-decoration:none;border-bottom:1px solid rgba(232,162,76,.4);padding-bottom:1px;pointer-events:auto;}
+  .tipline a:active{opacity:.7;}
 </style></head><body>
 <div id="app">
  <canvas id="stage"></canvas>
@@ -65,6 +69,7 @@
   <div class="epi"></div>
   <div class="nxt">The End</div>
   <div class="btns"><button class="btn" id="replayBtn">&#8634; Again</button><a class="btn" href="td-chapters.html">All chapters</a></div>
+    <div class="tipline">Made by Lanre Ajayi &middot; <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a></div>
  </div>
 </div>
 <script>
@@ -282,7 +287,9 @@ function enter(i){idx=i;const s=SCENES[i];blip();trans=performance.now();mFrom=M
  hint.textContent=auto?'\u23f8 tap to pause':(s.last?'tap to end':THEME.hint);}
 function advance(){if(fin)return;if(idx>=SCENES.length-1){finish();return;}enter(idx+1);}
 function finish(){fin=true;hint.classList.add('hide');cap.innerHTML='';stopAudio();
- setTimeout(()=>{toEnd=true;},1300);setTimeout(()=>{$('endScr').classList.remove('hide');},2300);}
+ setTimeout(()=>{toEnd=true;},1300);setTimeout(()=>{$('endScr').classList.remove('hide');},2300);
+ /* let this chapter's end card breathe before the player moves on */
+ setTimeout(()=>{try{if(window.parent!==window)parent.postMessage({td:'ended'},'*');}catch(e){}},3300);}
 function start(a){$('titleScr').classList.add('hide');$('endScr').classList.add('hide');auto=!!a;audioInit();if(AC&&AC.state==='suspended')AC.resume();if(!pad)startAudio();toEnd=false;fin=false;MOOD=0;enter(0);if(!running){running=true;requestAnimationFrame(frame);}}
 function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;document.body.classList.toggle('paused',paused);hint.textContent=paused?'\u25b6 tap to resume':'\u23f8 tap to pause';}
 function frame(ts){if(!running)return;const dt=ts-(prevTs||ts);prevTs=ts;
@@ -305,5 +312,8 @@ $('replayBtn').addEventListener('click',e=>{e.stopPropagation();start(auto);});
 $('mute').addEventListener('click',e=>{e.stopPropagation();muted=!muted;$('mute').innerHTML=muted?'&#128263;':'&#128266;';if(master)master.gain.value=muted?0:0.8;if(!muted&&AC&&AC.state==='suspended')AC.resume();});
 document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!$('titleScr').classList.contains('hide'))start(false);else if($('endScr').classList.contains('hide')){if(auto)togglePause();else advance();}}});
 resize();trans=performance.now();running=true;requestAnimationFrame(frame);
+
+/* continuous-play hook: the player embeds us with ?auto=1 */
+try{if(new URLSearchParams(location.search).get('auto')==='1'){setTimeout(()=>start(true),260);}}catch(e){}
 
 </script></body></html>

@@ -41,6 +41,10 @@
   .replay:active{transform:scale(.97);}
   #mute{position:absolute;top:12px;right:14px;z-index:9;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:50%;background:rgba(12,14,17,.7);border:1px solid var(--line);backdrop-filter:blur(5px);pointer-events:auto;}
   @media (prefers-reduced-motion: reduce){.blk,.kick,.by,.epi,.sub,.start,.replay,.ttl{animation-duration:.01s;}#hint,.start .p{animation:none;}}
+
+  .tipline{margin-top:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.4px;color:#b6ab98;}
+  .tipline a{color:#e8a24c;text-decoration:none;border-bottom:1px solid rgba(232,162,76,.4);padding-bottom:1px;pointer-events:auto;}
+  .tipline a:active{opacity:.7;}
 </style>
 </head>
 <body>
@@ -62,6 +66,7 @@
     <div class="ttl" style="font-size:clamp(30px,9vw,54px);">Get In,<br>Get Done,<br>Get <span class="c">Out</span></div>
     <div class="epi">Wrong day. Wrong flat. Wrong everything.</div>
     <div class="by" style="animation-delay:.9s">Written by <b>Lanre Ajayi</b></div>
+    <div class="tipline">Made by Lanre Ajayi &middot; <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a></div>
     <div class="replay" id="replayBtn">&#8634; Watch again</div>
   </div>
 </div>

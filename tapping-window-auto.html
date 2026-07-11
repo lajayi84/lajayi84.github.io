@@ -51,6 +51,10 @@
   #progfill{height:100%;width:0;background:linear-gradient(90deg,#ecca8c,#e08b2c);transition:width .2s linear;border-radius:0 2px 2px 0;}
   body.paused #progfill{opacity:.45;}
   @media (prefers-reduced-motion: reduce){.blk,.ttl,.subt,.by,.smp,.start,.replay{animation-duration:.01s;}#hint,.start .p{animation:none;}}
+
+  .tipline{margin-top:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.4px;color:#b6ab98;}
+  .tipline a{color:#e8a24c;text-decoration:none;border-bottom:1px solid rgba(232,162,76,.4);padding-bottom:1px;pointer-events:auto;}
+  .tipline a:active{opacity:.7;}
 </style>
 </head>
 <body>
@@ -71,6 +75,7 @@
     <div class="endttl">&mdash; The End &mdash;</div>
     <div class="endsub">The Tapping at the Window</div>
     <div class="by" style="animation-delay:.5s">Written by <b>Lanre Ajayi</b></div>
+    <div class="tipline">Made by Lanre Ajayi &middot; <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a></div>
     <div class="replay" id="replayBtn">&#8634; Read again</div>
   </div>
 </div>
