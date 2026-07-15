@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pip Flew Too Far</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky:#a9d4e8;--sky2:#cfe7d6;--leaf:#5d8a3a;--leaf2:#3f6b2c;--bark:#6a4f38;
+    --gold:#f0c04a;--pip:#f6d032;--pipsh:#d9a41e;--warm:#e8b04a;--cream:#faf3e2;
+    --earth:#5a4432;--hawk:#4a4038;--hawkeye:#f2c033;--ink:#3a2f22;--mut:#8a7d68;--red:#c8503c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:'Nunito',system-ui,sans-serif;color:var(--ink);background:#dced e8;
+    background:#d3e8ea;display:flex;align-items:center;justify-content:center;min-height:100%;
+    overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:540px;height:100dvh;max-height:940px;overflow:hidden;
+    background:#bfe0e6;cursor:pointer;}
+  #stage{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;}
+  #app::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
+    background:radial-gradient(140% 115% at 50% 38%,transparent 62%,rgba(40,50,30,.28));}
+  #prog{position:absolute;top:0;left:0;right:0;height:3px;z-index:9;background:rgba(240,192,74,.16);}
+  #progfill{height:100%;width:0;background:var(--gold);box-shadow:0 0 8px rgba(240,192,74,.6);transition:width .2s linear;}
+  body.paused #progfill{opacity:.4;box-shadow:none;}
+  #cap{position:absolute;left:0;right:0;bottom:0;z-index:6;
+    padding:0 30px calc(48px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;justify-content:flex-end;gap:8px;min-height:31%;
+    background:linear-gradient(180deg,transparent,rgba(24,32,18,.32) 44%,rgba(20,28,14,.9));pointer-events:none;}
+  .ln{opacity:0;transform:translateY(8px);animation:rise .5s cubic-bezier(.2,.8,.3,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .big{font-family:'Baloo 2',cursive;font-weight:600;font-size:clamp(21px,5.6vw,28px);line-height:1.25;
+    color:#fff7e6;text-shadow:0 2px 16px rgba(0,0,0,.7);}
+  .body{font-family:'Nunito',sans-serif;font-size:16.5px;line-height:1.5;color:#f2ecdd;font-weight:600;
+    text-shadow:0 1px 12px rgba(0,0,0,.8);max-width:30em;}
+  .em{color:var(--pip);font-style:normal;font-family:'Baloo 2',cursive;}
+  #hint{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;
+    text-align:center;font-family:'Baloo 2',cursive;font-weight:600;font-size:10px;letter-spacing:3px;
+    text-transform:uppercase;color:var(--cream);opacity:.6;pointer-events:none;animation:hb 2.4s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.3;}50%{opacity:.72;}}
+  #hint.hide{display:none;} #hint.last{color:var(--pip);}
+  .screen{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:38px 30px;}
+  .screen.hide{display:none;}
+  #titleScr{background:linear-gradient(170deg,#a9d4e8,#cfe7d6 55%,#8fb85f);}
+  .kick{font-family:'Baloo 2',cursive;font-weight:600;font-size:11px;letter-spacing:3px;
+    text-transform:uppercase;color:#5d8a3a;margin-bottom:14px;}
+  .ttl{font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(38px,10vw,60px);line-height:1;
+    color:#4a7a2a;text-shadow:0 3px 0 rgba(255,255,255,.4);}
+  .ttl .g{color:var(--pipsh);}
+  .sub{font-family:'Nunito',sans-serif;font-style:italic;font-size:16px;color:#4a5a3a;margin-top:16px;
+    max-width:21em;line-height:1.5;font-weight:600;}
+  .by{font-family:'Baloo 2',cursive;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+    color:#5a6a48;margin-top:22px;} .by b{color:#3a5a24;font-weight:700;}
+  .btns{display:flex;gap:11px;margin-top:28px;}
+  .btn{font-family:'Baloo 2',cursive;font-weight:600;font-size:12px;letter-spacing:1px;
+    padding:14px 24px;border-radius:20px;border:2px solid #5d8a3a;background:rgba(255,255,255,.5);
+    color:#3a5a24;cursor:pointer;pointer-events:auto;}
+  .btn.pri{background:var(--pip);color:#5a4210;border-color:var(--pipsh);}
+  .btn:active{transform:scale(.96);}
+  #endScr{background:linear-gradient(170deg,#f3d98a,#e8b04a 50%,#8fb85f);}
+  #endScr .kick{color:#7a5a1a;} #endScr .ttl{color:#6a4a12;text-shadow:0 3px 0 rgba(255,255,255,.35);}
+  #endScr .ttl .g{color:#a8701a;}
+  #endScr .epi{font-family:'Nunito',sans-serif;font-style:italic;font-size:16px;color:#5a4520;
+    max-width:23em;margin-top:16px;line-height:1.55;font-weight:600;}
+  #endScr .by{color:#6a5028;} #endScr .by b{color:#4a3410;}
+  .replay{margin-top:24px;font-family:'Baloo 2',cursive;font-weight:600;font-size:12px;letter-spacing:1px;
+    color:#5a4210;border:2px solid #a8701a;border-radius:20px;padding:13px 24px;background:rgba(255,255,255,.4);
+    pointer-events:auto;cursor:pointer;}
+  .replay:active{transform:scale(.96);}
+  #mute{position:absolute;top:13px;right:15px;z-index:10;cursor:pointer;width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:50%;
+    background:rgba(30,40,20,.4);border:1px solid rgba(255,255,255,.25);pointer-events:auto;}
+  @media (prefers-reduced-motion:reduce){.ln{animation-duration:.01s;}#hint{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="stage"></canvas>
+  <div id="mute">&#128266;</div>
+  <div id="prog"><div id="progfill"></div></div>
+  <div id="cap"></div>
+  <div id="hint" class="hide">tap</div>
+  <div class="screen" id="titleScr">
+    <div class="kick">A picture book</div>
+    <div class="ttl">Pip Flew<br>Too <span class="g">Far</span></div>
+    <div class="sub">A little chick who was quite, quite sure he was the greatest flyer in the world.</div>
+    <div class="by">Written by <b>Lanre Ajayi</b></div>
+    <div class="btns"><button class="btn pri" id="btnAuto">&#9656; Read to me</button><button class="btn" id="btnRead">Read it myself</button></div>
+  </div>
+  <div class="screen hide" id="endScr">
+    <div class="kick">The End</div>
+    <div class="ttl">Pip Flew<br>Too <span class="g">Far</span></div>
+    <div class="epi">&ldquo;You flew far, and you flew home. But oh, my Pip &mdash; stay little a while longer. The sky will wait.&rdquo;</div>
+    <div class="by">Written by <b>Lanre Ajayi</b></div>
+    <div class="tipline" style="margin-top:14px;font-family:'Baloo 2',cursive;font-size:11px;letter-spacing:.3px;color:#6a5028;">Made by Lanre Ajayi &middot; <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener" style="color:#a8701a;text-decoration:none;border-bottom:1px solid rgba(168,112,26,.4);pointer-events:auto;">leave a tip</a></div>
+    <div class="replay" id="replayBtn">&#8634; Read again</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* PIP FLEW TOO FAR — 16 spreads.
+   Each: {view, text:[...], plus per-scene actors/params}
+   views: nest, pipwake, leave, joy, toofar, plane, heron, lost, bees, ground, mole, shadow, sharp, mother, home, reunion */
+const B=s=>({t:'big',s});
+const P=s=>({t:'body',s});
+const SCENES=[
+ // 1 — nest, mother asleep, warmth
+ {view:'nest',time:'morn',mother:'sleep',sibs:1,
+  text:[P("High in the tall oak, in a nest lined with moss, a mother bird slept with her wing folded over a huddle of chicks."),
+        B("It was morning. It was warm. It was safe.")]},
+ // 2 — Pip awake, cocky
+ {view:'pipwake',pip:{pose:'proud'},
+  text:[P("But one small chick was already wide awake. His name was Pip, and his feathers were only just dry."),
+        P("Yesterday \u2014 for the very first time \u2014 he had flown. All the way to the next branch, and all the way back. And now Pip was quite, quite certain he was the greatest flyer in the whole wide world.")]},
+ // 3 — sneaks out
+ {view:'leave',pip:{pose:'tiptoe'},mother:'sleep',sibs:1,
+  text:[B("\u201cWhy wait?\u201d whispered Pip."),
+        P("While his mother slept, and his brothers and sisters dreamed, Pip tiptoed to the edge of the nest. He looked down. He looked out. And before anyone could wake \u2014 he went.")]},
+ // 4 — the joy of flight
+ {view:'joy',pip:{pose:'soar'},
+  text:[B("Oh, it was wonderful!"),
+        P("Up over the hedge, up over the field, higher and higher and higher. Pip had never seen so much world. It rolled out beneath him, green and gold and going on forever. \u201cI knew I could!\u201d he sang.")]},
+ // 5 — too far, nest gone
+ {view:'toofar',pip:{pose:'soar',small:1},
+  text:[P("On and on he flew, sure he knew the way."),
+        P("But when Pip looked back, the tall oak was only a dot. Then a speck. Then \u2014 it was gone. Pip flew on. He did not notice yet.")]},
+ // 6 — the plane (mistaken for a bird)
+ {view:'plane',pip:{pose:'soar'},
+  text:[B("Then, far ahead \u2014 a bird!"),
+        P("An enormous bird, silver and roaring, bigger than any bird Pip had ever seen. His heart leapt. Another flyer! A big one! He would say hello! Pip beat his little wings and flew straight for it.")]},
+ // 7 — the heron saves him
+ {view:'heron',pip:{pose:'held'},heron:1,
+  text:[P("A long grey wing swept him back."),
+        P("\u201cThat is no bird, little one,\u201d said a tall, calm Heron. \u201cThat is a thing made of metal. It does not know you are there \u2014 and it would not care.\u201d Pip watched the great silver thing roar away. He felt, all at once, very small.")]},
+ // 8 — lost (merged: heron asks + realises lost)
+ {view:'lost',pip:{pose:'small'},heron:1,
+  text:[P("\u201cAnd where do you live?\u201d asked the Heron."),
+        P("Pip opened his beak to say. But he stopped. He looked north. He looked south. He looked at all that endless world. He did not know. He could not see one single thing he knew. Pip was lost.")]},
+ // 9 — the bees tease + bonk
+ {view:'bees',pip:{pose:'tumble'},bees:1,
+  text:[P("That was when the bees found him. A little swarm, buzzing and bold."),
+        P("\u201cLost, are we? Titchy thing! Thought you could fly out here?\u201d They laughed and buzzed too close \u2014 and bonk, one bumped him right on the beak. Pip tumbled down, and down, and landed in the grass.")]},
+ // 10 — ground, rock bottom
+ {view:'ground',pip:{pose:'sit'},
+  text:[P("There he sat, on the cold ground, rubbing his beak."),
+        B("He was tired. He was lost. He was so very small. And he did not feel like the greatest flyer in the world at all.")]},
+ // 11 — the mole gives the way
+ {view:'mole',pip:{pose:'sit'},mole:1,
+  text:[P("Up popped a Mole \u2014 who had never flown once in all his life."),
+        P("\u201cHome?\u201d said the Mole. \u201cOh, I know every inch of this land, me. You want the tall oak. Past the two ponds. Where the sun comes up.\u201d He pointed with one small paw. \u201cThat way.\u201d The one who could not fly knew exactly the way.")]},
+ // 12 — the shadow (hawk arrives)
+ {view:'shadow',pip:{pose:'lift'},hawk:'shadow',
+  text:[P("So Pip lifted up, hopeful now, and turned toward the two ponds \u2014"),
+        B("and a cold shadow slid across the field. Pip looked up. A hawk.")]},
+ // 13 — fear sharpens him (agency)
+ {view:'sharp',pip:{pose:'dive'},hawk:'chase',
+  text:[B("Pip's heart went fast."),
+        P("And something happened. He flew as he had never flown \u2014 tilting, dropping, catching the wind. Past the two ponds, the Mole had said. Pip could see them, shining, ahead. He was frightened. And the fright made him quick.")]},
+ // 14 — mother intervenes
+ {view:'mother',pip:{pose:'flee'},mother:'fury',hawk:'chase',
+  text:[B("Then \u2014 a fury of feathers!"),
+        P("His mother, out of the sky, fierce and wide, sweeping between Pip and the hawk. \u201cGO, Pip!\u201d she cried. \u201cHome! GO!\u201d And Pip went.")]},
+ // 15 — flies home by his wits (PEAK)
+ {view:'home',pip:{pose:'home'},
+  text:[B("And he could."),
+        P("Past the two ponds. Toward the tall oak. Everything the Mole had told him, everything the fright had taught him \u2014 Pip read the wind, and found the way, and flew. Down, down, into the moss of the nest. Home.")]},
+ // 16 — the wait, the return, the line
+ {view:'reunion',pip:{pose:'nestled'},sibs:1,mother:'return',last:1,
+  text:[P("His brothers and sisters pressed close. But where was Mother? They looked up. For one long moment the sky was empty \u2014 then, far off, a shape. Growing. Closer. Her. Tired, and ragged, and whole."),
+        P("She folded down over all of them, her wide wing closing them in. \u201cI flew so far,\u201d said Pip, very small \u2014 and then, just a little: \u201c...I did fly far.\u201d"),
+        B("\u201cYou flew far, and you flew home. But oh, my Pip \u2014 you're still so small. Stay little a while longer. The sky will wait.\u201d")]}
+];
+
+/* ===== PIP FLEW TOO FAR — engine + cast ===== */
+const $=id=>document.getElementById(id);
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const app=$('app'),cv=$('stage'),ctx=cv.getContext('2d'),cap=$('cap'),hint=$('hint');
+let W=0,H=0,DPR=1,grainCv=null;
+function rgb(c){return 'rgb('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+')';}
+function rgba(c,a){return 'rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a+')';}
+function mix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+function resize(){const r=app.getBoundingClientRect();W=r.width||540;H=r.height||900;DPR=Math.min(2,window.devicePixelRatio||1);cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',resize);
+function buildGrain(){grainCv=document.createElement('canvas');grainCv.width=120;grainCv.height=120;const g=grainCv.getContext('2d');const im=g.createImageData(120,120);for(let i=0;i<im.data.length;i+=4){const v=128+(Math.random()*2-1)*26;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255;}g.putImageData(im,0,0);}
+function roundr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+const C={
+  pip:[246,208,50], pipSh:[210,158,30], pipLit:[255,232,120],
+  beak:[240,150,40], feet:[235,140,45],
+  mother:[150,110,70], motherSh:[96,68,42], motherBreast:[214,196,160],
+  heron:[150,164,180], heronSh:[92,104,124], heronBeak:[240,150,40], heronCrest:[40,44,54],
+  bee:[240,196,60], beeStripe:[40,34,28], beeWing:[220,235,245],
+  mole:[74,64,60], moleSh:[46,40,38], moleNose:[214,150,150], moleCap:[90,78,54], moleSpec:[220,190,90],
+  hawk:[110,86,62], hawkSh:[64,50,38], hawkBeak:[60,54,48], hawkEye:[242,192,50],
+  sib:[206,182,140], sibSh:[150,128,96],
+  leaf:[93,138,58], leaf2:[63,107,44], bark:[106,79,56], sky:[169,212,232], earth:[90,68,50]
+};
+
+/* ---- Pip: round, yellow, cocky tuft. poses drive posture ---- */
+function drawPip(x,y,s,pose,t){
+  ctx.save();
+  const flap=reduceMotion?0:Math.sin(t*0.008)*0.3;
+  let wingUp = (pose==='proud'||pose==='soar'||pose==='joy');
+  let bodyTilt = pose==='dive'?0.5: pose==='flee'?0.3: pose==='home'?0.2: pose==='tumble'?-0.6:0;
+  ctx.translate(x,y);ctx.rotate(bodyTilt);
+  // body (egg-round)
+  const bg=ctx.createRadialGradient(-s*0.3,-s*0.3,s*0.1,0,0,s*1.3);
+  bg.addColorStop(0,rgb(C.pipLit));bg.addColorStop(0.7,rgb(C.pip));bg.addColorStop(1,rgb(C.pipSh));
+  ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(0,s*0.1,s*0.95,s*1.05,0,0,7);ctx.fill();
+  // wing (thrown up if cocky/flying)
+  ctx.save();ctx.fillStyle=rgb(C.pip);
+  if(wingUp){ctx.rotate(-0.7+flap);ctx.beginPath();ctx.ellipse(s*0.5,-s*0.4,s*0.7,s*0.32,0,0,7);ctx.fill();}
+  else{ctx.beginPath();ctx.ellipse(s*0.55,s*0.2,s*0.5,s*0.3,0.4,0,7);ctx.fill();}
+  ctx.restore();
+  // far wing when flying
+  if(wingUp){ctx.save();ctx.fillStyle=rgb(C.pipSh);ctx.rotate(0.6-flap);ctx.beginPath();ctx.ellipse(-s*0.5,-s*0.3,s*0.6,s*0.28,0,0,7);ctx.fill();ctx.restore();}
+  // head
+  const hy=-s*0.75;
+  const hg=ctx.createRadialGradient(-s*0.25,hy-s*0.25,s*0.05,0,hy,s*0.85);
+  hg.addColorStop(0,rgb(C.pipLit));hg.addColorStop(0.7,rgb(C.pip));hg.addColorStop(1,rgb(C.pipSh));
+  ctx.fillStyle=hg;ctx.beginPath();ctx.arc(0,hy,s*0.72,0,7);ctx.fill();
+  // THE COCKY TUFT (3 little feathers)
+  ctx.strokeStyle=rgb(C.pipSh);ctx.lineWidth=s*0.14;ctx.lineCap='round';
+  for(let i=-1;i<=1;i++){ctx.save();ctx.translate(i*s*0.14,hy-s*0.6);ctx.rotate(i*0.4-flap*0.5);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-s*0.4);ctx.stroke();ctx.restore();}
+  // eyes (big, dark, bright) — closer/wider by pose
+  const eScared=(pose==='dive'||pose==='flee'||pose==='tumble'||pose==='small'||pose==='sit');
+  for(const sx of[-1,1]){const ex=sx*s*0.28,ey=hy-s*0.02,er=s*(eScared?0.24:0.2);
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ex,ey,er,0,7);ctx.fill();
+    ctx.fillStyle='#2a2018';ctx.beginPath();ctx.arc(ex+sx*s*0.03,ey+s*0.02,er*0.62,0,7);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ex-s*0.04,ey-s*0.05,er*0.24,0,7);ctx.fill();}
+  // brow when scared or proud
+  ctx.strokeStyle=rgb(C.pipSh);ctx.lineWidth=s*0.06;
+  if(pose==='proud'||pose==='soar'){ctx.beginPath();ctx.moveTo(-s*0.42,hy-s*0.28);ctx.lineTo(-s*0.12,hy-s*0.34);ctx.moveTo(s*0.12,hy-s*0.34);ctx.lineTo(s*0.42,hy-s*0.28);ctx.stroke();}
+  // beak (tiny orange)
+  ctx.fillStyle=rgb(C.beak);ctx.beginPath();ctx.moveTo(-s*0.12,hy+s*0.22);ctx.lineTo(s*0.12,hy+s*0.22);ctx.lineTo(0,hy+s*0.42);ctx.closePath();ctx.fill();
+  // feet (only if standing)
+  if(pose==='proud'||pose==='tiptoe'||pose==='sit'||pose==='small'||pose==='nestled'){
+    ctx.strokeStyle=rgb(C.feet);ctx.lineWidth=s*0.09;
+    for(const sx of[-1,1]){ctx.beginPath();ctx.moveTo(sx*s*0.25,s*1.05);ctx.lineTo(sx*s*0.25,s*1.3);
+      ctx.moveTo(sx*s*0.25,s*1.3);ctx.lineTo(sx*s*0.4,s*1.4);ctx.moveTo(sx*s*0.25,s*1.3);ctx.lineTo(sx*s*0.1,s*1.4);ctx.stroke();}}
+  ctx.restore();
+}
+/* ---- generic adult bird body (mother, siblings share a base) ---- */
+function birdBody(x,y,s,col,colSh,breast){
+  const bg=ctx.createRadialGradient(x-s*0.3,y-s*0.3,s*0.1,x,y,s*1.4);
+  bg.addColorStop(0,rgb(mix(col,[255,255,255],0.2)));bg.addColorStop(0.7,rgb(col));bg.addColorStop(1,rgb(colSh));
+  ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(x,y,s*0.9,s*1.1,0,0,7);ctx.fill();
+  if(breast){ctx.fillStyle=rgb(breast);ctx.beginPath();ctx.ellipse(x,y+s*0.3,s*0.5,s*0.7,0,0,7);ctx.fill();
+    // soft spotting
+    ctx.fillStyle=rgba(colSh,0.4);for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(x-s*0.3+i*s*0.15,y+s*0.1+(i%2)*s*0.2,s*0.05,0,7);ctx.fill();}}
+}
+/* ---- Mother: brown raptor-songbird, broad wing ---- */
+function drawMother(x,y,s,mode,t){
+  ctx.save();
+  if(mode==='fury'){ // wings wide, fierce, mid-air
+    ctx.fillStyle=rgb(C.motherSh);
+    for(const sx of[-1,1]){ctx.save();ctx.translate(x,y);ctx.rotate(sx*0.5);ctx.beginPath();ctx.ellipse(sx*s*1.1,-s*0.2,s*1.1,s*0.4,0,0,7);ctx.fill();ctx.restore();}
+  }
+  birdBody(x,y,s,C.mother,C.motherSh,C.motherBreast);
+  // broad protective wing (folded) unless fury
+  if(mode!=='fury'){ctx.fillStyle=rgb(C.motherSh);ctx.beginPath();ctx.ellipse(x+s*0.4,y+s*0.1,s*0.55,s*0.85,0.2,0,7);ctx.fill();
+    // wing feather lines
+    ctx.strokeStyle=rgba([40,30,20],0.4);ctx.lineWidth=1.5;for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(x+s*0.4,y+s*0.1,s*0.55-i*s*0.12,s*0.85-i*s*0.18,0.2,0.5,2.6);ctx.stroke();}}
+  // head
+  const hy=y-s*0.95;
+  ctx.fillStyle=rgb(C.mother);ctx.beginPath();ctx.arc(x,hy,s*0.6,0,7);ctx.fill();
+  // eyes (kind but can be fierce)
+  const fierce=(mode==='fury');
+  for(const sx of[-1,1]){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+sx*s*0.22,hy-s*0.02,s*0.14,0,7);ctx.fill();
+    ctx.fillStyle='#2a1c10';ctx.beginPath();ctx.arc(x+sx*s*0.22,hy-s*0.02,s*0.09,0,7);ctx.fill();}
+  if(fierce){ctx.strokeStyle=rgb(C.motherSh);ctx.lineWidth=s*0.06;ctx.beginPath();ctx.moveTo(x-s*0.4,hy-s*0.24);ctx.lineTo(x-s*0.1,hy-s*0.14);ctx.moveTo(x+s*0.1,hy-s*0.14);ctx.lineTo(x+s*0.4,hy-s*0.24);ctx.stroke();}
+  // hooked beak
+  ctx.fillStyle=rgb(C.beak);ctx.beginPath();ctx.moveTo(x-s*0.1,hy+s*0.2);ctx.lineTo(x+s*0.1,hy+s*0.2);ctx.lineTo(x+s*0.02,hy+s*0.42);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+/* ---- Heron: tall, blue-grey, S-neck, orange dagger, crest ---- */
+function drawHeron(x,groundY,s){
+  ctx.save();
+  // legs in water
+  ctx.strokeStyle=rgb(C.heronSh);ctx.lineWidth=s*0.09;
+  ctx.beginPath();ctx.moveTo(x-s*0.1,groundY);ctx.lineTo(x-s*0.12,groundY-s*1.6);ctx.moveTo(x+s*0.15,groundY);ctx.lineTo(x+s*0.1,groundY-s*1.6);ctx.stroke();
+  // body
+  const by=groundY-s*1.9;
+  birdBody(x,by,s*0.9,C.heron,C.heronSh,null);
+  // shaggy breast plumes
+  ctx.fillStyle=rgba(C.heronSh,0.5);for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(x-s*0.3+i*s*0.2,by+s*0.3);ctx.lineTo(x-s*0.34+i*s*0.2,by+s*0.9);ctx.lineTo(x-s*0.26+i*s*0.2,by+s*0.9);ctx.closePath();ctx.fill();}
+  // long folded wing
+  ctx.fillStyle=rgb(C.heronSh);ctx.beginPath();ctx.ellipse(x+s*0.2,by+s*0.1,s*0.5,s*0.95,0.1,0,7);ctx.fill();
+  // S-curved neck
+  ctx.strokeStyle=rgb(C.heron);ctx.lineWidth=s*0.38;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x,by-s*0.6);ctx.bezierCurveTo(x-s*0.5,by-s*1.2,x+s*0.5,by-s*1.6,x+s*0.1,by-s*2.2);ctx.stroke();
+  // head
+  const hx=x+s*0.1,hy=by-s*2.35;
+  ctx.fillStyle=rgb(C.heron);ctx.beginPath();ctx.arc(hx,hy,s*0.34,0,7);ctx.fill();
+  // black crest stripe
+  ctx.strokeStyle=rgb(C.heronCrest);ctx.lineWidth=s*0.08;ctx.beginPath();ctx.moveTo(hx-s*0.1,hy-s*0.2);ctx.lineTo(hx+s*0.5,hy-s*0.45);ctx.stroke();
+  // eye
+  ctx.fillStyle='#f2c84a';ctx.beginPath();ctx.arc(hx+s*0.1,hy-s*0.02,s*0.09,0,7);ctx.fill();
+  ctx.fillStyle='#1a1408';ctx.beginPath();ctx.arc(hx+s*0.1,hy-s*0.02,s*0.045,0,7);ctx.fill();
+  // long orange dagger beak
+  ctx.fillStyle=rgb(C.heronBeak);ctx.beginPath();ctx.moveTo(hx+s*0.28,hy-s*0.06);ctx.lineTo(hx+s*1.1,hy+s*0.04);ctx.lineTo(hx+s*0.28,hy+s*0.1);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+/* ---- Bees: round, striped, grinning ---- */
+function drawBee(x,y,s,t,i){
+  ctx.save();ctx.translate(x,y+Math.sin(t*0.01+i)*s*0.3);
+  // wings
+  ctx.fillStyle=rgba(C.beeWing,0.7);
+  ctx.beginPath();ctx.ellipse(-s*0.1,-s*0.5,s*0.4,s*0.25,-0.5,0,7);ctx.fill();
+  ctx.beginPath();ctx.ellipse(s*0.1,-s*0.5,s*0.4,s*0.25,0.5,0,7);ctx.fill();
+  // body
+  ctx.fillStyle=rgb(C.bee);ctx.beginPath();ctx.ellipse(0,0,s*0.55,s*0.45,0,0,7);ctx.fill();
+  // stripes
+  ctx.fillStyle=rgb(C.beeStripe);for(let k=-1;k<=1;k++){ctx.beginPath();ctx.ellipse(k*s*0.28,0,s*0.08,s*0.44,0,0,7);ctx.fill();}
+  // face
+  ctx.fillStyle='#fff';for(const sx of[-1,1]){ctx.beginPath();ctx.arc(sx*s*0.18,-s*0.1,s*0.13,0,7);ctx.fill();}
+  ctx.fillStyle='#2a2018';for(const sx of[-1,1]){ctx.beginPath();ctx.arc(sx*s*0.18,-s*0.08,s*0.07,0,7);ctx.fill();}
+  // cheeky grin
+  ctx.strokeStyle='#3a2a1a';ctx.lineWidth=s*0.05;ctx.beginPath();ctx.arc(0,s*0.05,s*0.14,0.1,Math.PI-0.1);ctx.stroke();
+  ctx.restore();
+}
+/* ---- Mole: cap + gold specs, the countryman ---- */
+function drawMole(x,y,s){
+  ctx.save();
+  // mound of earth
+  ctx.fillStyle=rgb(C.earth);ctx.beginPath();ctx.ellipse(x,y+s*0.7,s*1.6,s*0.6,0,0,Math.PI,true);ctx.fill();
+  ctx.fillStyle=rgb(mix(C.earth,[0,0,0],0.2));ctx.beginPath();ctx.ellipse(x,y+s*0.75,s*1.6,s*0.5,0,0,Math.PI,true);ctx.fill();
+  // body (emerging)
+  const bg=ctx.createRadialGradient(x-s*0.2,y-s*0.2,s*0.1,x,y,s);
+  bg.addColorStop(0,rgb(mix(C.mole,[255,255,255],0.15)));bg.addColorStop(1,rgb(C.moleSh));
+  ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(x,y+s*0.1,s*0.7,s*0.65,0,0,7);ctx.fill();
+  // digging claws
+  ctx.fillStyle=rgb(mix(C.mole,[220,210,200],0.5));
+  for(const sx of[-1,1]){ctx.save();ctx.translate(x+sx*s*0.55,y+s*0.35);for(let k=0;k<3;k++){ctx.beginPath();ctx.ellipse((k-1)*s*0.1,0,s*0.06,s*0.16,0,0,7);ctx.fill();}ctx.restore();}
+  // pink pointed snout
+  ctx.fillStyle=rgb(C.moleNose);ctx.beginPath();ctx.moveTo(x+s*0.5,y-s*0.05);ctx.lineTo(x+s*0.85,y+s*0.05);ctx.lineTo(x+s*0.5,y+s*0.15);ctx.closePath();ctx.fill();
+  // smile
+  ctx.strokeStyle=rgb(C.moleSh);ctx.lineWidth=s*0.04;ctx.beginPath();ctx.arc(x+s*0.2,y+s*0.08,s*0.18,0,Math.PI*0.7);ctx.stroke();
+  // gold specs
+  ctx.strokeStyle=rgb(C.moleSpec);ctx.lineWidth=s*0.05;
+  ctx.beginPath();ctx.arc(x+s*0.1,y-s*0.15,s*0.16,0,7);ctx.arc(x-s*0.28,y-s*0.15,s*0.16,0,7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-s*0.12,y-s*0.15);ctx.lineTo(x-s*0.06,y-s*0.15);ctx.stroke();
+  // tiny eyes behind
+  ctx.fillStyle='#1a1410';ctx.beginPath();ctx.arc(x+s*0.1,y-s*0.15,s*0.05,0,7);ctx.arc(x-s*0.28,y-s*0.15,s*0.05,0,7);ctx.fill();
+  // flat cap
+  ctx.fillStyle=rgb(C.moleCap);ctx.beginPath();ctx.ellipse(x-s*0.05,y-s*0.4,s*0.6,s*0.3,0,Math.PI,2*Math.PI);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x+s*0.35,y-s*0.32,s*0.35,s*0.12,0,0,7);ctx.fill(); // peak
+  ctx.restore();
+}
+/* ---- Hawk: fierce yellow eye, hooked beak. mode shadow|chase ---- */
+function drawHawk(x,y,s,mode,t){
+  ctx.save();
+  const col=mode==='shadow'?mix(C.hawk,[20,20,30],0.5):C.hawk;
+  // wings spread
+  ctx.fillStyle=rgb(mode==='shadow'?[30,30,40]:C.hawkSh);
+  for(const sx of[-1,1]){ctx.save();ctx.translate(x,y);ctx.rotate(sx*(0.3+Math.sin(t*0.006)*0.1));ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(sx*s*2.2,-s*0.3);ctx.lineTo(sx*s*1.8,s*0.4);ctx.closePath();ctx.fill();
+    // feather tips
+    for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(sx*(s*1.2+k*s*0.25),-s*0.1);ctx.lineTo(sx*(s*1.5+k*s*0.25),s*0.3);ctx.lineTo(sx*(s*1.3+k*s*0.25),s*0.35);ctx.closePath();ctx.fill();}ctx.restore();}
+  // body
+  birdBody(x,y,s,col,C.hawkSh,mode==='shadow'?null:[190,170,150]);
+  // head
+  const hy=y-s*0.9;
+  ctx.fillStyle=rgb(col);ctx.beginPath();ctx.arc(x,hy,s*0.55,0,7);ctx.fill();
+  // fierce YELLOW eye + heavy brow
+  if(mode!=='shadow'){
+    for(const sx of[-1,1]){ctx.fillStyle=rgb(C.hawkEye);ctx.beginPath();ctx.arc(x+sx*s*0.22,hy,s*0.15,0,7);ctx.fill();
+      ctx.fillStyle='#1a1206';ctx.beginPath();ctx.arc(x+sx*s*0.22,hy,s*0.07,0,7);ctx.fill();}
+    ctx.strokeStyle=rgb(C.hawkSh);ctx.lineWidth=s*0.09;ctx.beginPath();ctx.moveTo(x-s*0.45,hy-s*0.28);ctx.lineTo(x-s*0.08,hy-s*0.12);ctx.moveTo(x+s*0.08,hy-s*0.12);ctx.lineTo(x+s*0.45,hy-s*0.28);ctx.stroke();
+  } else { // shadow: just glinting eyes
+    for(const sx of[-1,1]){ctx.fillStyle=rgb(C.hawkEye);ctx.beginPath();ctx.arc(x+sx*s*0.22,hy,s*0.08,0,7);ctx.fill();}
+  }
+  // hooked beak
+  ctx.fillStyle=rgb(C.hawkBeak);ctx.beginPath();ctx.moveTo(x-s*0.12,hy+s*0.25);ctx.lineTo(x+s*0.12,hy+s*0.25);ctx.lineTo(x+s*0.05,hy+s*0.5);ctx.quadraticCurveTo(x,hy+s*0.55,x-s*0.05,hy+s*0.48);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+/* ---- a sibling chick (buff) ---- */
+function drawSib(x,y,s,t,i){
+  ctx.save();const bob=reduceMotion?0:Math.sin(t*0.005+i)*s*0.06;ctx.translate(0,bob);
+  const bg=ctx.createRadialGradient(x-s*0.2,y-s*0.2,s*0.1,x,y,s);
+  bg.addColorStop(0,rgb(mix(C.sib,[255,255,255],0.2)));bg.addColorStop(1,rgb(C.sibSh));
+  ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(x,y,s*0.7,s*0.8,0,0,7);ctx.fill();
+  const hy=y-s*0.6;ctx.fillStyle=rgb(C.sib);ctx.beginPath();ctx.arc(x,hy,s*0.5,0,7);ctx.fill();
+  for(const sx of[-1,1]){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+sx*s*0.2,hy,s*0.15,0,7);ctx.fill();ctx.fillStyle='#2a2018';ctx.beginPath();ctx.arc(x+sx*s*0.2,hy,s*0.09,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+sx*s*0.2-s*0.03,hy-s*0.03,s*0.03,0,7);ctx.fill();}
+  ctx.fillStyle=rgb(C.beak);ctx.beginPath();ctx.moveTo(x-s*0.08,hy+s*0.15);ctx.lineTo(x+s*0.08,hy+s*0.15);ctx.lineTo(x,hy+s*0.3);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+
+/* ===== backgrounds + per-spread composition ===== */
+function skyGrad(top,bot){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(bot));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function sun(x,y,r,warm){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,rgba(warm?[255,244,200]:[255,250,230],0.8));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function clouds(t){ctx.fillStyle='rgba(255,255,255,0.5)';for(let i=0;i<3;i++){const cx=(i*W*0.5+t*0.006*(i+1))%(W*1.4)-W*0.2,cy=H*(0.12+i*0.08);ctx.beginPath();for(let k=0;k<4;k++)ctx.arc(cx+k*W*0.06,cy+(k%2)*8,W*0.05,0,7);ctx.fill();}}
+function oakBranch(y){ctx.strokeStyle=rgb(C.bark);ctx.lineWidth=H*0.03;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-10,y+30);ctx.quadraticCurveTo(W*0.4,y,W+10,y+20);ctx.stroke();
+  // leaves
+  ctx.fillStyle=rgb(C.leaf);for(let i=0;i<14;i++){const lx=i*W*0.08,ly=y-20+Math.sin(i)*20;ctx.beginPath();ctx.ellipse(lx,ly,W*0.05,W*0.03,i,0,7);ctx.fill();}
+  ctx.fillStyle=rgb(C.leaf2);for(let i=0;i<10;i++){const lx=i*W*0.11+20,ly=y-40+Math.cos(i)*24;ctx.beginPath();ctx.ellipse(lx,ly,W*0.045,W*0.025,i*1.3,0,7);ctx.fill();}}
+function nest(cx,cy,s){ctx.fillStyle=rgb(mix(C.bark,[40,30,20],0.3));ctx.beginPath();ctx.ellipse(cx,cy,s*1.3,s*0.7,0,0,Math.PI);ctx.fill();
+  ctx.strokeStyle=rgb(C.bark);ctx.lineWidth=4;for(let i=0;i<10;i++){ctx.beginPath();ctx.ellipse(cx,cy,s*1.3-i*3,s*0.7-i*2,Math.sin(i)*0.2,0,Math.PI);ctx.stroke();}
+  ctx.fillStyle=rgb([120,150,70]);ctx.beginPath();ctx.ellipse(cx,cy-s*0.1,s*1.0,s*0.4,0,Math.PI,2*Math.PI);ctx.fill();}
+function field(y){ctx.fillStyle=rgb([150,180,90]);ctx.fillRect(0,y,W,H-y);
+  ctx.fillStyle=rgb(C.leaf);ctx.beginPath();ctx.moveTo(0,y+20);ctx.quadraticCurveTo(W*0.5,y-10,W,y+16);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.fill();}
+
+let _t=0;
+function paintScene(sc,t){
+  _t=t;const v=sc.view;
+  const pipPose=sc.pip?sc.pip.pose:null;
+  if(v==='nest'||v==='leave'){
+    skyGrad([169,212,232],[207,231,214]);sun(W*0.7,H*0.2,W*0.5,false);
+    oakBranch(H*0.5);nest(W*0.5,H*0.62,H*0.09);
+    if(sc.mother==='sleep')drawMother(W*0.62,H*0.5,H*0.075,'sleep',t);
+    if(sc.sibs)for(let i=0;i<3;i++)drawSib(W*0.38+i*W*0.08,H*0.58,H*0.03,t,i);
+    if(v==='leave'&&sc.pip)drawPip(W*0.32,H*0.55,H*0.045,'tiptoe',t);
+  }
+  else if(v==='pipwake'){
+    skyGrad([179,216,232],[214,233,214]);sun(W*0.3,H*0.18,W*0.5,false);
+    oakBranch(H*0.62);nest(W*0.5,H*0.72,H*0.1);
+    drawPip(W*0.5,H*0.52,H*0.11,'proud',t); // big, hero
+  }
+  else if(v==='joy'||v==='toofar'){
+    skyGrad([150,200,232],[200,228,222]);sun(W*0.75,H*0.16,W*0.6,false);clouds(t);
+    // land far below
+    ctx.fillStyle=rgba([120,160,80],0.5);ctx.beginPath();ctx.moveTo(0,H*0.8);ctx.quadraticCurveTo(W*0.5,H*0.74,W,H*0.82);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.fill();
+    const sz=v==='toofar'?H*0.05:H*0.08;
+    drawPip(W*0.5,H*0.4,sz,'soar',t);
+    if(v==='toofar'){// tiny nest dot behind
+      ctx.fillStyle=rgb(C.bark);ctx.beginPath();ctx.arc(W*0.82,H*0.28,3,0,7);ctx.fill();}
+  }
+  else if(v==='plane'){
+    skyGrad([150,198,230],[198,226,220]);clouds(t);
+    // the plane — silver, far ahead, upper right
+    ctx.save();ctx.translate(W*0.72,H*0.26);
+    ctx.fillStyle=rgb([200,206,214]);ctx.beginPath();ctx.ellipse(0,0,W*0.13,W*0.035,0.1,0,7);ctx.fill();
+    ctx.fillStyle=rgb([170,178,190]);ctx.beginPath();ctx.moveTo(-W*0.02,0);ctx.lineTo(-W*0.09,-W*0.05);ctx.lineTo(W*0.02,-W*0.005);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(-W*0.02,W*0.005);ctx.lineTo(-W*0.09,W*0.05);ctx.lineTo(W*0.02,W*0.01);ctx.closePath();ctx.fill();
+    ctx.fillStyle=rgb([150,158,172]);ctx.beginPath();ctx.moveTo(-W*0.11,0);ctx.lineTo(-W*0.15,-W*0.04);ctx.lineTo(-W*0.1,0);ctx.closePath();ctx.fill();
+    ctx.restore();
+    drawPip(W*0.4,H*0.5,H*0.06,'soar',t);
+  }
+  else if(v==='heron'||v==='lost'){
+    skyGrad([170,206,220],[206,226,196]);sun(W*0.2,H*0.2,W*0.5,false);
+    // pond + reeds
+    ctx.fillStyle=rgb([120,160,175]);ctx.fillRect(0,H*0.72,W,H*0.28);
+    ctx.fillStyle=rgb([255,255,255,0.2]);for(let i=0;i<20;i++)ctx.fillRect(Math.random()*W,H*0.74+Math.random()*H*0.2,W*0.05,1);
+    ctx.strokeStyle=rgb(C.leaf2);ctx.lineWidth=3;for(let i=0;i<8;i++){const rx=W*0.05+i*W*0.11;ctx.beginPath();ctx.moveTo(rx,H*0.72);ctx.lineTo(rx+Math.sin(i)*10,H*0.5);ctx.stroke();}
+    drawHeron(W*0.68,H*0.72,H*0.075);
+    drawPip(W*0.32,H*0.4,H*0.05,v==='lost'?'small':'held',t);
+  }
+  else if(v==='bees'){
+    skyGrad([180,214,224],[214,226,180]);
+    // flowers below
+    field(H*0.72);
+    for(let i=0;i<7;i++){const fx=W*0.08+i*W*0.13,fy=H*0.76+Math.sin(i)*10;ctx.fillStyle=[ '#e6789a','#f0c040','#c890e0'][i%3];for(let k=0;k<5;k++){ctx.beginPath();ctx.ellipse(fx+Math.cos(k*1.3)*8,fy+Math.sin(k*1.3)*8,5,3,k,0,7);ctx.fill();}ctx.fillStyle='#f0c040';ctx.beginPath();ctx.arc(fx,fy,4,0,7);ctx.fill();}
+    drawPip(W*0.5,H*0.44,H*0.05,'tumble',t);
+    const bp=[[0.28,0.28],[0.72,0.3],[0.34,0.5],[0.66,0.52],[0.5,0.24]];
+    bp.forEach((p,i)=>drawBee(W*p[0],H*p[1],H*0.03,t,i));
+  }
+  else if(v==='ground'){
+    skyGrad([190,214,214],[220,222,180]);field(H*0.5);
+    // big empty world, tiny Pip
+    drawPip(W*0.48,H*0.6,H*0.055,'sit',t);
+  }
+  else if(v==='mole'){
+    skyGrad([196,216,206],[222,220,176]);field(H*0.46);
+    drawMole(W*0.62,H*0.6,H*0.07);
+    drawPip(W*0.32,H*0.62,H*0.05,'sit',t);
+  }
+  else if(v==='shadow'){
+    skyGrad([150,170,180],[190,200,170]); // light dims
+    field(H*0.62);
+    // the cold shadow sliding across
+    ctx.fillStyle='rgba(20,24,34,0.28)';ctx.beginPath();ctx.ellipse(W*0.5,H*0.55,W*0.4,H*0.12,0,0,7);ctx.fill();
+    drawHawk(W*0.5,H*0.16,H*0.06,'shadow',t);
+    drawPip(W*0.45,H*0.5,H*0.05,'lift',t);
+  }
+  else if(v==='sharp'){
+    skyGrad([140,166,188],[196,206,196]);
+    // two ponds shining ahead
+    ctx.fillStyle=rgb([150,185,200]);ctx.beginPath();ctx.ellipse(W*0.3,H*0.78,W*0.14,H*0.05,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(W*0.62,H*0.8,W*0.13,H*0.045,0,0,7);ctx.fill();
+    drawHawk(W*0.7,H*0.2,H*0.07,'chase',t);
+    drawPip(W*0.38,H*0.44,H*0.055,'dive',t);
+  }
+  else if(v==='mother'){
+    skyGrad([150,172,190],[198,208,192]);
+    drawHawk(W*0.72,H*0.28,H*0.07,'chase',t);
+    drawMother(W*0.54,H*0.34,H*0.08,'fury',t);
+    drawPip(W*0.26,H*0.56,H*0.05,'flee',t);
+  }
+  else if(v==='home'){
+    skyGrad([175,205,220],[210,226,200]);sun(W*0.5,H*0.2,W*0.6,true);clouds(t);
+    // two ponds passing below, the oak ahead
+    ctx.fillStyle=rgb([150,185,200]);ctx.beginPath();ctx.ellipse(W*0.25,H*0.82,W*0.1,H*0.03,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(W*0.5,H*0.85,W*0.1,H*0.03,0,0,7);ctx.fill();
+    // oak on the horizon
+    ctx.fillStyle=rgb(C.leaf2);ctx.beginPath();ctx.arc(W*0.8,H*0.66,W*0.12,0,7);ctx.fill();ctx.fillStyle=rgb(C.bark);ctx.fillRect(W*0.78,H*0.68,W*0.04,H*0.1);
+    drawPip(W*0.42,H*0.42,H*0.06,'home',t);
+  }
+  else if(v==='reunion'){
+    skyGrad([196,216,222],[224,220,180]);sun(W*0.7,H*0.22,W*0.5,true);
+    oakBranch(H*0.44);nest(W*0.5,H*0.6,H*0.12);
+    if(sc.mother==='return')drawMother(W*0.52,H*0.42,H*0.09,'return',t);
+    for(let i=0;i<3;i++)drawSib(W*0.36+i*W*0.09,H*0.56,H*0.032,t,i);
+    drawPip(W*0.5,H*0.54,H*0.04,'nestled',t);
+  }
+  // grain + vignette
+  if(grainCv){ctx.save();ctx.globalAlpha=0.035;ctx.globalCompositeOperation='overlay';const ox=reduceMotion?0:(Math.random()*120)|0,oy=reduceMotion?0:(Math.random()*120)|0;for(let y=-oy;y<H;y+=120)for(let x=-ox;x<W;x+=120)ctx.drawImage(grainCv,x,y);ctx.restore();}
+}
+
+/* ===== runner: text, audio, tap/auto ===== */
+let AC=null,master=null,muted=false,bed=[],hawkDrone=null;
+function audioInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.75;master.connect(AC.destination);}catch(e){AC=null;}}
+function T(){return AC?AC.currentTime:0;}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,Math.floor(sr*d),sr),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function startBed(){if(!AC)return;
+  // gentle woodland air
+  const s=AC.createBufferSource();s.buffer=nbuf(3);s.loop=true;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;const g=AC.createGain();g.gain.value=0.0001;g.gain.linearRampToValueAtTime(muted?0.0001:0.03,T()+2);s.connect(lp);lp.connect(g);g.connect(master);s.start();bed.push(s,g);
+  // warm pad
+  const o=AC.createOscillator();o.type='sine';o.frequency.value=196;const og=AC.createGain();og.gain.value=0.0001;og.gain.linearRampToValueAtTime(muted?0.0001:0.035,T()+2);o.connect(og);og.connect(master);o.start();bed.push(o,og);}
+// little birdsong flute blips for gentle scenes
+function chirp(){if(!AC||muted)return;const t=T();const notes=[784,880,988];const f=notes[(Math.random()*notes.length)|0];const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,t);o.frequency.linearRampToValueAtTime(f*1.05,t+0.1);const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.05,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.32);}
+// page turn
+function pageTurn(){if(!AC||muted)return;const t=T();const s=AC.createBufferSource();s.buffer=nbuf(0.25);const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(1200,t);bp.frequency.exponentialRampToValueAtTime(600,t+0.2);const g=AC.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);s.connect(bp);bp.connect(g);g.connect(master);s.start();}
+// hawk dread drone on/off
+function hawkOn(){if(!AC||muted||hawkDrone)return;const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=70;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=200;const g=AC.createGain();g.gain.setValueAtTime(0.0001,T());g.gain.linearRampToValueAtTime(0.09,T()+0.5);o.connect(lp);lp.connect(g);g.connect(master);o.start();hawkDrone={o,g};}
+function hawkOff(){if(!hawkDrone)return;const t=T();try{hawkDrone.g.gain.linearRampToValueAtTime(0.0001,t+0.6);}catch(e){}const h=hawkDrone;setTimeout(()=>{try{h.o.stop();}catch(e){}},700);hawkDrone=null;}
+function warmSwell(){if(!AC||muted)return;const t=T();[392,494,587].forEach((f,i)=>{const o=AC.createOscillator();o.type='sine';o.frequency.value=f;const g=AC.createGain();g.gain.setValueAtTime(0.0001,t+i*0.08);g.gain.linearRampToValueAtTime(0.05,t+i*0.08+0.3);g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.08+1.6);o.connect(g);g.connect(master);o.start(t+i*0.08);o.stop(t+i*0.08+1.7);});}
+function stopAudio(){if(AC){const t=T();bed.forEach(n=>{if(n.gain)try{n.gain.linearRampToValueAtTime(0.0001,t+0.4);}catch(e){}});}hawkOff();}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmt(s){return esc(s).replace(/\*(.+?)\*/g,'<span class="em">$1</span>');}
+function renderText(sc){cap.innerHTML='';let d=0.1;sc.text.forEach(b=>{const e=document.createElement('div');e.className='ln';e.style.animationDelay=d.toFixed(2)+'s';d+=0.55;const p=document.createElement('p');p.className=(b.t==='big'?'big':'body');p.innerHTML=fmt(b.s);e.appendChild(p);cap.appendChild(e);});}
+function calcDwell(sc){let w=0;sc.text.forEach(b=>w+=b.s.split(/\s+/).length);return Math.max(6.5,Math.min(15,2.4+w*0.34));}
+
+let idx=-1,t0=0,running=false,fin=false,auto=false,paused=false,dwell=9,prevTs=0,trans=0,toEnd=false;
+const HAWK_VIEWS={shadow:1,sharp:1,mother:1};
+function enter(i){idx=i;const sc=SCENES[i];trans=performance.now();renderText(sc);t0=performance.now();dwell=calcDwell(sc);
+  const pf=$('progfill');if(pf)pf.style.width='0%';paused=false;document.body.classList.remove('paused');
+  if(i>0)pageTurn();
+  // audio moods
+  if(HAWK_VIEWS[sc.view])hawkOn();else hawkOff();
+  if(['nest','pipwake','joy','mole','reunion'].includes(sc.view))chirp();
+  if(sc.view==='home'||sc.view==='reunion')warmSwell();
+  hint.classList.remove('hide');hint.classList.toggle('last',!!sc.last);
+  hint.textContent=auto?'\u23f8 tap to pause':(sc.last?'tap to finish':'tap');}
+function advance(){if(fin)return;if(idx>=SCENES.length-1){finish();return;}enter(idx+1);}
+function finish(){fin=true;hint.classList.add('hide');cap.innerHTML='';stopAudio();setTimeout(()=>{toEnd=true;},1000);setTimeout(()=>{$('endScr').classList.remove('hide');},1900);}
+function start(a){$('titleScr').classList.add('hide');$('endScr').classList.add('hide');auto=!!a;audioInit();if(AC&&AC.state==='suspended')AC.resume();startBed();toEnd=false;fin=false;enter(0);if(!running){running=true;requestAnimationFrame(frame);}}
+function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;document.body.classList.toggle('paused',paused);hint.textContent=paused?'\u25b6 tap to resume':'\u23f8 tap to pause';}
+function frame(ts){if(!running)return;const dt=ts-(prevTs||ts);prevTs=ts;
+  if(paused&&idx>=0){t0+=dt;trans+=dt;}
+  const el=(ts-t0)/1000;const sc=idx>=0?SCENES[idx]:null;
+  if(auto&&!paused&&!fin&&idx>=0&&!toEnd){const pf=$('progfill');if(pf)pf.style.width=(Math.min(1,el/dwell)*100)+'%';if(el>=dwell)advance();}
+  try{
+    if(toEnd){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,rgb([243,217,138]));g.addColorStop(1,rgb([143,184,95]));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+    else if(idx<0){ctx.fillStyle=rgb([169,212,232]);ctx.fillRect(0,0,W,H);}
+    else paintScene(sc,ts);
+  }catch(e){}
+  if(!toEnd){const tr=Math.max(0,1-(ts-trans)/420);if(tr>0){ctx.save();ctx.globalAlpha=tr*tr;ctx.fillStyle='#bfe0e6';ctx.fillRect(0,0,W,H);ctx.restore();}}
+  requestAnimationFrame(frame);}
+app.addEventListener('click',e=>{const id=e.target.id;if(id==='btnRead'||id==='btnAuto'||id==='replayBtn'||id==='mute')return;
+  if(!$('titleScr').classList.contains('hide'))return;if(!$('endScr').classList.contains('hide'))return;
+  if(auto)togglePause();else advance();});
+$('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
+$('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});
+$('replayBtn').addEventListener('click',e=>{e.stopPropagation();start(auto);});
+$('mute').addEventListener('click',e=>{e.stopPropagation();muted=!muted;$('mute').innerHTML=muted?'&#128263;':'&#128266;';if(master)master.gain.value=muted?0:0.75;if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!$('titleScr').classList.contains('hide'))start(false);else if($('endScr').classList.contains('hide')){if(auto)togglePause();else advance();}}});
+resize();trans=performance.now();running=true;requestAnimationFrame(frame);
+
+</script></body></html>
