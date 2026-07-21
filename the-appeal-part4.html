@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Appeal — Part Four</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{ --page:#e7e0d2; --ink:#2a251f; --ink-soft:#6b6357; --accent:#b07a4e; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{background:#050506;color:var(--ink);font-family:'Spectral',Georgia,serif;
+    display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:520px;height:100dvh;max-height:920px;overflow:hidden;
+    background:#050506;display:flex;flex-direction:column;cursor:pointer;}
+
+  #window{position:relative;flex:0 1 56%;min-height:44%;overflow:hidden;background:#000;}
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #window::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:
+      radial-gradient(120% 92% at 58% 45%, transparent 45%, rgba(5,5,8,.5) 80%, rgba(5,5,8,.8)),
+      linear-gradient(180deg, rgba(5,6,10,.4), transparent 20%, transparent 80%, rgba(5,6,10,.5));}
+  #grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.05;mix-blend-mode:overlay;}
+  #eyebrow{position:absolute;top:20px;left:24px;z-index:6;
+    font-family:'Fraunces',serif;font-weight:500;font-size:10.5px;letter-spacing:.3em;
+    text-transform:uppercase;color:rgba(231,224,210,.5);}
+  #eyebrow b{display:block;font-size:9px;letter-spacing:.26em;color:rgba(231,224,210,.28);font-weight:400;margin-top:4px;}
+  /* fade layer for scene transitions */
+  #fade{position:absolute;inset:0;z-index:7;background:#050506;opacity:0;pointer-events:none;}
+
+  #band{flex:1 1 auto;background:var(--page);position:relative;
+    padding:26px 30px 0;overflow:hidden;display:flex;flex-direction:column;min-height:0;
+    box-shadow:0 -40px 80px rgba(0,0,0,.55);}
+  #band::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(42,37,31,.16) 18%,rgba(42,37,31,.16) 82%,transparent);}
+  #prose{font-size:15.5px;line-height:1.56;color:var(--ink);max-width:33em;
+    flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding-bottom:46px;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  #prose::-webkit-scrollbar{display:none;}
+  #prose p{margin-bottom:.66em;opacity:0;transform:translateY(7px);animation:rise 1s cubic-bezier(.2,.7,.25,1) forwards;}
+  #prose p:nth-child(2){animation-delay:.55s;}
+  #prose p:nth-child(3){animation-delay:1.0s;}
+  #prose.first p:first-child::first-letter{font-family:'Fraunces',serif;font-weight:500;font-size:3.1em;line-height:.78;
+    float:left;margin:.05em .12em 0 0;color:#332c22;}
+  #prose em{font-style:italic;color:#463c30;}
+  #prose .dlg{color:#3a3025;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  #foot{position:absolute;left:0;right:0;bottom:0;z-index:3;
+    padding:10px 0 calc(12px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(231,224,210,0),var(--page) 42%);}
+  #bar{width:64%;max-width:280px;height:2px;background:rgba(42,37,31,.14);border-radius:2px;overflow:hidden;}
+  #barfill{height:100%;width:0;background:var(--accent);transition:width .25s linear;}
+  body.paused #barfill{opacity:.4;}
+  #hint{font-family:'Fraunces',serif;font-size:9px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--ink-soft);opacity:.5;animation:hb 2.8s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.28;}50%{opacity:.58;}}
+  #hint.hide{display:none;}
+
+  #mute{position:absolute;top:16px;right:18px;z-index:8;width:30px;height:30px;display:flex;align-items:center;
+    justify-content:center;font-size:13px;border-radius:50%;background:rgba(10,10,14,.4);
+    border:1px solid rgba(231,224,210,.18);color:rgba(231,224,210,.7);pointer-events:auto;cursor:pointer;}
+
+  .screen{position:absolute;inset:0;z-index:20;background:#070708;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:40px;transition:opacity 1.1s;}
+  .screen.gone{opacity:0;pointer-events:none;}
+  .k{font-family:'Fraunces',serif;font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;
+    color:rgba(231,224,210,.48);margin-bottom:22px;}
+  .ttl{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(44px,13vw,72px);color:#e7e0d2;
+    line-height:.96;letter-spacing:-.01em;}
+  .ttl em{font-style:italic;color:#c9a27a;}
+  .sub{font-family:'Spectral',serif;font-style:italic;font-size:14.5px;color:rgba(231,224,210,.5);
+    margin-top:20px;max-width:24em;line-height:1.55;}
+  .btns{display:flex;gap:12px;margin-top:34px;}
+  .go{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    padding:14px 26px;border-radius:2px;border:1px solid #c9a27a;background:#c9a27a;color:#0a0908;
+    cursor:pointer;pointer-events:auto;}
+  .go.ghost{background:transparent;color:#c9a27a;}
+  .go:active{transform:scale(.97);}
+  #endScr .ttl{font-size:clamp(30px,8vw,46px);}
+  #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:rgba(231,224,210,.62);
+    max-width:22em;margin-top:18px;line-height:1.6;}
+  #endScr .part{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:rgba(231,224,210,.4);margin-top:26px;}
+  #endScr .credits{font-family:'Spectral',serif;font-style:italic;font-size:12px;color:rgba(231,224,210,.4);margin-top:18px;}
+  #endScr .endbtns{display:flex;gap:12px;margin-top:26px;}
+  @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="window">
+    <canvas id="scene"></canvas>
+    <canvas id="grain"></canvas>
+    <div id="eyebrow">The Appeal<b>Part Four · The Arithmetic</b></div>
+    <div id="fade"></div>
+  </div>
+  <div id="mute">&#9835;</div>
+  <div id="band">
+    <div id="prose"></div>
+    <div id="foot"><div id="bar"><div id="barfill"></div></div><div id="hint">tap to continue</div></div>
+  </div>
+  <div class="screen" id="titleScr">
+    <div class="k">A film in four parts</div>
+    <div class="ttl">The <em>Appeal</em></div>
+    <div class="sub">Part Four — The Arithmetic</div>
+    <div class="btns"><button class="go" id="btnRead">Read</button><button class="go ghost" id="btnAuto">Play to me</button></div>
+  </div>
+  <div class="screen gone" id="endScr">
+    <div class="k">The Appeal</div>
+    <div class="ttl">The <em>Appeal</em></div>
+    <div class="epi">"Outside, the day went on. It always does."</div>
+    <div class="part">The End</div>
+    <div class="credits">Written by Lanre Ajayi · Animated with Claude</div>
+    <div class="endbtns">
+      <a class="go" id="btnTip" href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">Leave a tip</a>
+      <button class="go ghost" id="btnReplay">Read again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== THE APPEAL · Part One — engine ===== */
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('scene'),ctx=cv.getContext('2d');
+const gcv=$('grain'),gx=gcv.getContext('2d');
+let W=0,H=0,DPR=1,grainTiles=[];
+
+function size(){const r=$('window').getBoundingClientRect();
+  W=r.width;H=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*DPR;cv.height=H*DPR;gcv.width=W*DPR;gcv.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);gx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',size);
+
+function buildGrain(){grainTiles=[];
+  for(let k=0;k<3;k++){const c=document.createElement('canvas');c.width=160;c.height=160;
+    const g=c.getContext('2d'),id=g.createImageData(160,160),d=id.data;
+    for(let i=0;i<d.length;i+=4){const v=128+(Math.random()*2-1)*42;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+    g.putImageData(id,0,0);grainTiles.push(c);}}
+function drawGrain(){if(!grainTiles.length||reduce)return;
+  gx.clearRect(0,0,W,H);const tile=grainTiles[(Math.random()*grainTiles.length)|0];
+  const ox=-(Math.random()*160)|0,oy=-(Math.random()*160)|0;
+  for(let y=oy;y<H;y+=160)for(let x=ox;x<W;x+=160)gx.drawImage(tile,x,y);}
+
+/* ---- colour + light helpers ---- */
+function lerp(a,b,t){return a+(b-a)*t;}
+function rgba(r,g,b,a){return `rgba(${r|0},${g|0},${b|0},${a})`;}
+function vgrad(y0,y1,stops){const g=ctx.createLinearGradient(0,y0,0,y1);stops.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function radial(x,y,r0,r1,stops){const g=ctx.createRadialGradient(x,y,r0,x,y,r1);stops.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+/* soft glow blob */
+function glow(x,y,r,col,a){ctx.fillStyle=radial(x,y,2,r,[[0,rgba(col[0],col[1],col[2],a)],[1,rgba(col[0],col[1],col[2],0)]]);ctx.fillRect(0,0,W,H);}
+/* a backlit human silhouette — presence via posture, no features. lean: -1 forward-left..+1 back */
+function figure(x,groundY,scale,opt){opt=opt||{};
+  const a=opt.a==null?.66:opt.a;const col=opt.col||[26,16,12];const lean=opt.lean||0;
+  ctx.save();ctx.translate(x,groundY);ctx.rotate(lean*0.12);
+  ctx.fillStyle=rgba(col[0],col[1],col[2],a);
+  // torso
+  ctx.beginPath();ctx.ellipse(0,-scale*0.9,scale*0.42,scale*0.95,0,0,7);ctx.fill();
+  // head
+  ctx.beginPath();ctx.arc(0,-scale*1.95,scale*0.32,0,7);ctx.fill();
+  // shoulders hint
+  ctx.beginPath();ctx.ellipse(0,-scale*1.5,scale*0.55,scale*0.3,0,0,7);ctx.fill();
+  ctx.restore();}
+/* rim light on a silhouette edge */
+function rim(x,y,r,col,a){ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(x,y,1,r,[[0,rgba(col[0],col[1],col[2],a)],[1,rgba(col[0],col[1],col[2],0)]]);
+  ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.restore();}
+
+/* ---- parallax rain ---- */
+let rain=[];
+function initRain(intensity){rain=[];intensity=intensity||1;
+  const layers=[{n:Math.round(60*intensity),sp:2.5,ln:22,w:1.4,a:.16},
+                {n:Math.round(80*intensity),sp:1.5,ln:14,w:1.0,a:.10},
+                {n:Math.round(110*intensity),sp:.85,ln:9,w:.7,a:.055}];
+  layers.forEach(L=>{for(let i=0;i<L.n;i++)rain.push({x:Math.random(),y:Math.random(),L});});}
+function drawRain(wind,warmX,warmY){if(reduce){return;}
+  wind=wind||1.5;
+  for(const p of rain){p.y+=p.L.sp/H;if(p.y>1.05){p.y=-.05;p.x=Math.random();}
+    const x=p.x*W,y=p.y*H;
+    ctx.strokeStyle=rgba(200,212,232,p.L.a);ctx.lineWidth=p.L.w;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-wind,y+p.L.ln);ctx.stroke();}
+  // a few streaks catch warm light near a source
+  if(warmX!=null){ctx.strokeStyle='rgba(250,210,150,.10)';ctx.lineWidth=1;
+    for(let i=0;i<8;i++){const x=warmX+(Math.random()-.5)*W*0.3,y=warmY+((performance.now()*.2+i*80)%(H*0.4));
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-1,y+10);ctx.stroke();}}}
+
+/* wet road with a reflected light pool */
+function wetRoad(topY,lightX,lightCol){
+  ctx.fillStyle=vgrad(topY,H,[[0,'#15171b'],[1,'#0a0b0e']]);ctx.fillRect(0,topY,W,H-topY);
+  if(lightX!=null){const rg=ctx.createLinearGradient(lightX,topY,lightX,H);
+    rg.addColorStop(0,rgba(lightCol[0],lightCol[1],lightCol[2],.16));rg.addColorStop(1,rgba(lightCol[0],lightCol[1],lightCol[2],0));
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle=rg;
+    ctx.fillRect(lightX-W*0.12,topY,W*0.24,H-topY);ctx.restore();}}
+
+/* sodium streetlamp */
+function streetlamp(x,topY,poolY){
+  glow(x,topY+H*0.02,W*0.5,[235,170,90],.22);
+  ctx.strokeStyle='#2c2820';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,topY);ctx.lineTo(x,poolY);ctx.stroke();
+  ctx.fillStyle='rgba(255,214,150,.95)';ctx.beginPath();ctx.arc(x,topY,7,0,7);ctx.fill();
+  rim(x,topY,26,[255,220,150],.5);}
+
+/* a street figure with sodium rim-light so it reads as a form, not a blob */
+function streetFigure(x,groundY,scale,lampX,opt){opt=opt||{};
+  figure(x,groundY,scale,{col:opt.col||[16,18,24],a:opt.a==null?.95:opt.a,lean:opt.lean||0});
+  // warm rim on the lamp-facing side
+  const side=lampX<x?-1:1;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(x+side*scale*0.3,groundY-scale*1.2,2,scale*1.4,[[0,'rgba(240,180,100,.28)'],[1,'rgba(240,180,100,0)']]);
+  ctx.beginPath();ctx.ellipse(x+side*scale*0.28,groundY-scale*1.1,scale*0.5,scale*1.2,0,0,7);ctx.fill();ctx.restore();
+  // cool fill on the shadow side (sky bounce)
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(x-side*scale*0.3,groundY-scale*1.0,2,scale*1.0,[[0,'rgba(90,120,160,.10)'],[1,'rgba(90,120,160,0)']]);
+  ctx.beginPath();ctx.ellipse(x-side*scale*0.28,groundY-scale*1.0,scale*0.4,scale*1.0,0,0,7);ctx.fill();ctx.restore();}
+
+
+/* ===== THE APPEAL · Part Four — 12 scene painters (THE LANDING) ===== */
+/* drained grey morning. Colourless daylight. Reuses engine: figure, rim, glow, radial, vgrad, rr, grain, phoneLight-like */
+
+/* the grey morning flat — flat cold daylight, no warmth, the wreckage of the night */
+function greyMorning(t,opt){opt=opt||{};
+  // pale, drained, colourless — the opposite of every warm frame before
+  ctx.fillStyle=vgrad(0,H,[[0,'#3a3d42'],[.5,'#303338'],[1,'#212327']]);ctx.fillRect(0,0,W,H);
+  // window as the light source now — a pale grey rectangle, cold daylight pouring flatly in
+  const wx=opt.wx!=null?opt.wx:W*.58, wy=H*.16, ww=W*.36, wh=H*.44;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(wx+ww*.5,wy+wh*.5,10,ww*1.8,[[0,'rgba(200,205,212,.2)'],[1,'rgba(200,205,212,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+  ctx.fillStyle=vgrad(wy,wy+wh,[[0,'#8b9099'],[1,'#6f757e']]);rr(wx,wy,ww,wh,2);ctx.fill();
+  // muntins
+  ctx.strokeStyle='rgba(20,22,26,.6)';ctx.lineWidth=3;rr(wx,wy,ww,wh,2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(wx+ww*.5,wy);ctx.lineTo(wx+ww*.5,wy+wh);ctx.moveTo(wx,wy+wh*.44);ctx.lineTo(wx+ww,wy+wh*.44);ctx.stroke();
+  // laptop, still open, low battery — a small dying screen on the table
+  if(opt.laptop!==false){const lx=W*.28,ly=H*.6;ctx.fillStyle='#14171b';rr(lx-W*.1,ly,W*.2,H*.09,3);ctx.fill();
+    const dim=0.4+0.2*Math.sin(t*.004);ctx.fillStyle=rgba(120,150,165,.4*dim);rr(lx-W*.085,ly+H*.008,W*.17,H*.06,2);ctx.fill();}
+  return {wx,wy,ww,wh};
+}
+
+/* the brother, seen — warm colour, the ONE bright thing in a grey film (cruelly alive) */
+function brotherScreen(t,mode){
+  ctx.fillStyle='#101216';ctx.fillRect(0,0,W,H);
+  // a warm photo glowing in the cold room — the brother's world had colour
+  const cx=W*.5,cy=H*.42;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(cx,cy,10,W*.6,[[0,'rgba(230,180,120,.22)'],[1,'rgba(230,180,120,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+  // the photo frame
+  ctx.fillStyle=vgrad(cy-H*.22,cy+H*.22,[[0,'#c98f5a'],[.5,'#b47a48'],[1,'#7a5333']]);rr(cx-W*.28,cy-H*.24,W*.56,H*.44,4);ctx.fill();
+  // a warm-lit figure IN the photo — an athlete mid-stride / a good open posture (still a silhouette, but warm-rimmed)
+  if(mode==='athlete'){figure(cx,cy+H*.14,H*.13,{lean:-.5,col:[60,40,26],a:.7});
+    rim(cx-6,cy-H*.02,40,[255,210,150],.5);}
+  else{figure(cx,cy+H*.15,H*.14,{lean:0,col:[60,40,26],a:.7}); // standing, addressing camera
+    rim(cx,cy-H*.04,44,[255,215,160],.5);}
+  // his eyes "like JJ" — a faint highlight where a face would be
+  ctx.fillStyle='rgba(255,225,180,.25)';ctx.beginPath();ctx.arc(cx,cy-H*.05,3,0,7);ctx.fill();
+  // cold room vignette around the warm photo
+  ctx.fillStyle=vgrad(0,H,[[0,'rgba(16,18,22,.55)'],[.5,'rgba(16,18,22,.1)'],[1,'rgba(16,18,22,.6)']]);ctx.fillRect(0,0,W,H);
+}
+
+/* phone-fade cascade: a name/person dissolving as Mo reaches (like the memory hinge, but faster, colder) */
+function phoneFade(t,prog){
+  greyMorning(t,{laptop:false});
+  // Mo's phone, cold, in the grey — the thing dissolving
+  const cx=W*.4,cy=H*.6;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(cx,cy,2,W*.3,[[0,rgba(150,180,210,.25*(1-prog*.6))],[1,'rgba(150,180,210,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+  // scattering fragments (the person's name/face going)
+  for(let i=0;i<6;i++){const seed=i*83.1;const drift=prog*prog*36*((seed%7)-3),rise=prog*26*((seed%5)-2);
+    const a=Math.max(0,1-prog*1.4-(i/6)*.2);ctx.fillStyle=rgba(150,180,210,a*.8);
+    ctx.fillRect(cx-W*.1+i*W*.035+drift,cy-H*.06+rise,W*.026,H*.024*(1-prog*.5));}
+}
+
+/* the window ending — JJ at the glass, Mo behind, the pane between (Part 1 reversed) */
+function windowEnding(t,opt){opt=opt||{};const reach=opt.reach||0;
+  greyMorning(t,{wx:W*.5,laptop:false});
+  const wx=W*.5,wy=H*.16,ww=W*.4,wh=H*.5;
+  // the window, bigger now, dominant — cold morning beyond
+  ctx.fillStyle=vgrad(wy,wy+wh,[[0,'#9297a0'],[1,'#71767f']]);rr(wx-ww*.5,wy,ww,wh,2);ctx.fill();
+  // faint city/street beyond, going about its day
+  ctx.fillStyle='rgba(80,86,94,.6)';for(let i=0;i<5;i++)ctx.fillRect(wx-ww*.5+i*ww*.2,wy+wh*.5,ww*.12,wh*.5);
+  ctx.strokeStyle='rgba(20,22,26,.6)';ctx.lineWidth=3;rr(wx-ww*.5,wy,ww,wh,2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(wx,wy);ctx.lineTo(wx,wy+wh);ctx.moveTo(wx-ww*.5,wy+wh*.4);ctx.lineTo(wx+ww*.5,wy+wh*.4);ctx.stroke();
+  // JJ at the glass, from behind — small, still, facing away into the morning
+  figure(wx,H*.9,H*.17,{lean:0,col:[40,43,48],a:.9});
+  // JJ's faint reflection in the glass
+  ctx.save();ctx.globalAlpha=.2;figure(wx,wy+wh*.7,H*.1,{lean:0,col:[150,155,165],a:.5});ctx.restore();
+  // Mo behind, reaching — closer or further by reach
+  const mox=W*.26+reach*W*.05;
+  figure(mox,H*.92,H*.14,{lean:-.3-reach*.3,col:[44,40,38],a:.7+reach*.15});
+  // the unbridgeable gap — a soft dark column between them
+  ctx.fillStyle=rgba(20,22,26,.25);ctx.fillRect(W*.38,0,W*.06,H);
+}
+
+/* ============ THE 12 SCENES ============ */
+const SCENES=[
+ // 1 — grey morning, Mo hasn't slept
+ {first:true,
+  prose:[["p","Morning came, because it does, indifferent to what the night had done."],
+         ["p","Mo hadn't slept. He was still at the table, still following the thread, because stopping now would mean sitting alone with what he'd found, and that was worse. JJ was on the sofa, eyes closed, not sleeping. <em>There is a point past which there is nothing to say, and you just have to be two people in a room who know a terrible thing.</em>"]],
+  paint:t=>{greyMorning(t);
+    figure(W*.28,H*.86,H*.12,{lean:-.3,col:[40,42,46],a:.9}); // Mo at table
+    figure(W*.7,H*.9,H*.1,{lean:.3,col:[42,44,48],a:.7}); // JJ on sofa
+  }},
+ // 2 — the brother, seen (athlete -> influencer)
+ {prose:[["p","And there he was. The brother. Not the killer's guilt, not the record's ugliness — <em>him.</em> His own face, nothing like the men who made him."],
+         ["p","An athlete, first: the boy JJ's mother had raised — in the other world. He had run, and won, and given it up to talk to people about their reasons to keep going. Hundreds of thousands had listened. He had a good face."],
+         ["p","<em>He looked, a little, around the eyes, like JJ.</em>"]],
+  paint:t=>{brotherScreen(t,'athlete');}},
+ // 3 — JJ looks at the brother he never had
+ {prose:[["p","JJ came and stood behind him and looked at the brother he had never had. He didn't say anything. What is there."],
+         ["p","He looked at the face that had his mother's eyes in it, and his own, and reached out and did not quite touch the screen — the way you don't touch a thing that isn't really there. A whole brother. Thirty years of a brother. A person who had been <em>loved.</em>"],
+         ["p","\"He seems good,\" JJ said, finally. <em>It was the saddest thing Mo had ever heard him say.</em>"]],
+  paint:t=>{brotherScreen(t,'studio');
+    // JJ's hand/silhouette not quite touching, foreground edge
+    figure(W*.78,H*.95,H*.13,{lean:-.4,col:[30,32,36],a:.6});}},
+ // 4 — Mo keeps pulling; the rescue story
+ {prose:[["p","Mo should have closed the laptop. He'd learned nothing all night but how to hurt them both, and still he kept pulling, because he could not leave the truth alone."],
+         ["p","There was a story about the brother. A day, years ago — a station platform, a bad moment, a stranger who'd stepped too close to the edge of everything — and the brother had reached out and <em>held on.</em> Had saved a life. There was even a name."],
+         ["p","Mo read the name. <em>And the room went very cold, because Mo knew the name.</em>"]],
+  paint:t=>{greyMorning(t);
+    figure(W*.34,H*.88,H*.13,{lean:-.4,col:[40,42,46],a:.92});
+    // laptop glow catching Mo, but cold
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.28,H*.62,2,W*.25,[[0,'rgba(120,150,165,.18)'],[1,'rgba(120,150,165,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}},
+ // 5 — it's someone from Mo's OWN life
+ {prose:[["p","It was someone from his own life."],
+         ["p","Someone ordinary and real and <em>present</em> — someone in the edges of Mo's days; someone he'd have said hello to this week. Someone alive right now, this morning, in the world Mo had grown up in — because years ago, on a platform, a stranger had caught them."],
+         ["p","<em>A stranger who had never been born.</em>"]],
+  paint:t=>{greyMorning(t);
+    // Mo alone, the dread turned inward — still, lit flat and grey
+    figure(W*.42,H*.88,H*.14,{lean:0,col:[42,44,48],a:.92});
+    // the room's colour draining further as it becomes about HIM
+    ctx.fillStyle=rgba(30,32,36,.15+.05*Math.sin(t*.0015));ctx.fillRect(0,0,W,H);}},
+ // 6 — Mo scrambles to check — the cascade fade (HINGE-like)
+ {hinge:true,
+  prose:[["p","Mo was on his phone before he knew he'd moved. Not reading — <em>checking.</em> Searching for the person the brother had saved, who had to be fine, who he'd known — hadn't he? A face was there and then it wasn't; a name he'd read ten seconds ago was already dissolving in his hands."],
+         ["p","\"Write it —\" he started, but there was never any time; by the time the pen was moving the person was already just a shape, and then not even that. <em>Gone.</em> He hadn't even kept their name long enough to grieve it."],
+         ["p","\"Mo?\" JJ said. \"What is it. Mo. What.\""]],
+  paint:t=>{const prog=Math.min(1,t/5000);phoneFade(t,prog);
+    figure(W*.7,H*.92,H*.11,{lean:-.1,col:[42,44,48],a:.7});}},
+ // 7 — the confirmation: absence. the second death.
+ {prose:[["p","And it was there, and it was the wrong shape — a person who, in this world, had stepped too close to the edge of everything one day years ago, and there had been no one there to catch them."],
+         ["p","Because the one who would have caught them was never born. Because his father never killed JJ's father. <em>Because two friends had done a kind thing in the rain.</em>"],
+         ["p","The brother saved a life once. Mo and JJ had just reached back through thirty years and un-saved it."]],
+  paint:t=>{greyMorning(t,{laptop:false});
+    figure(W*.44,H*.9,H*.13,{lean:.1,col:[42,44,48],a:.9}); // Mo, phone lowered
+    // a cold empty space where a person should be — a faint absence-shape
+    ctx.save();ctx.globalAlpha=.12;figure(W*.62,H*.88,H*.13,{lean:0,col:[80,84,90],a:.4});ctx.restore();}},
+ // 8 — the full arithmetic; only the note remains
+ {prose:[["p","So this was the sum of it. They had saved a man who did a terrible thing. By saving him they unmade the boy his death made possible — a better man than either who made him — and by unmaking him, let a second person fall, years later, with no one there."],
+         ["p","There was no going back. No screen to fall into now. Only this room, the morning, and a few words in biro on an envelope — <em>a name that had killed a girl, and two names that meant nothing anymore.</em> That was all they got to keep. Not the faces. <em>Just that they had done it.</em>"]],
+  paint:t=>{greyMorning(t,{laptop:false});
+    figure(W*.36,H*.9,H*.12,{lean:.1,col:[42,44,48],a:.88});
+    figure(W*.6,H*.9,H*.12,{lean:-.1,col:[42,44,48],a:.88});
+    // the envelope on the table, the one thing that persists — a small pale rectangle
+    ctx.fillStyle='rgba(210,205,190,.5)';rr(W*.44,H*.7,W*.14,H*.06,2);ctx.fill();
+    ctx.fillStyle='rgba(40,38,30,.6)';ctx.fillRect(W*.47,H*.73,W*.08,2);}},
+ // 9 — Mo turns all the way to JJ (the mirror begins)
+ {prose:[["p","Mo turned to him. All the way, this time — the way he should have turned that first night, when JJ said <em>that's my dad</em> and Mo kept looking at the screen. He turned all the way to his friend now, finally, completely."],
+         ["p","And it was too late, in a different way. Because JJ wasn't in the room anymore, not really. He was out past the window, holding a father who didn't deserve saving and a brother who was never born and a mother widowed to make a son she'd now never have — <em>holding all of it, alone, in a place Mo could not reach.</em>"]],
+  paint:t=>{windowEnding(t,{reach:.3});}},
+ // 10 — "JJ." JJ didn't turn round. (Part 1 reversed)
+ {prose:[["p","\"JJ,\" Mo said."],
+         ["p","JJ didn't turn round."],
+         ["p","It was the same shape as the very first night, exactly the same, but the wrong way round now — one reaching, one lost in the glass, a pane between them. <em>Only this time it was Mo on the outside, wanting in.</em> Mo who finally, desperately wanted to turn toward his friend, and found that his friend had gone somewhere the turning couldn't follow."]],
+  paint:t=>{windowEnding(t,{reach:.6});}},
+ // 11 — JJ at the glass, the world not knowing
+ {prose:[["p","JJ looked out at a morning that didn't know anything had happened. People down there, buying milk, living the ordinary lives that a good man on a platform had died so one of them could keep. <em>None of them would ever know his name.</em>"],
+         ["p","Only JJ, and Mo, would ever carry it — and even they would not get to carry the <em>people.</em> The brother was already gone from behind JJ's eyes. What stayed was heavier and emptier than a memory. Not <em>whom</em> they had unmade. <em>Only that they had.</em>"]],
+  paint:t=>{windowEnding(t,{reach:.5});
+    // push in slightly on JJ at the glass
+    ctx.fillStyle=rgba(20,22,26,.15);ctx.fillRect(0,0,W,H);}},
+ // 12 — the final frame: the distance, the day going on
+ {last:true,
+  prose:[["p","Behind him, he could feel Mo wanting to speak. Wanting to make it smaller, or shared, or bearable. There was nothing Mo could say. They both knew it."],
+         ["p","So they stayed like that a while, in the grey morning light — one at the glass, one just behind, the small unbridgeable distance between them that had been there since the very first night, <em>when a man looked at a screen instead of at his friend.</em>"],
+         ["p","Outside, the day went on. <em>It always does. That's the terrible thing. It always does.</em>"]],
+  paint:t=>{windowEnding(t,{reach:.5});
+    // slow fade toward grey — the light very slowly flattening everything
+    const fade=Math.min(.5,t/12000);ctx.fillStyle=rgba(60,63,68,fade);ctx.fillRect(0,0,W,H);}}
+];
+
+let _rainWarp=-1;function initRainIf(w){}
+
+/* ===== THE APPEAL · Part One — runner ===== */
+let idx=-1,auto=false,paused=false,fin=false,running=false;
+let sceneT0=0,transT0=0,prevTs=0,dwell=9;
+let muted=false;
+
+/* ---- audio: ambient bed + rain + tv hum + crossing drone ---- */
+let AC=null,master=null,bedNodes=[],drone=null;
+function aInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();master.gain.value=muted?0:0.8;master.connect(AC.destination);}catch(e){AC=null;}}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,sr*d,sr),x=b.getChannelData(0);
+  for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function startBed(){if(!AC)return;
+  // low room tone
+  const o=AC.createOscillator();o.type='sine';o.frequency.value=46;const g=AC.createGain();g.gain.value=.0001;
+  g.gain.linearRampToValueAtTime(.05,AC.currentTime+3);o.connect(g);g.connect(master);o.start();bedNodes.push(o,g);}
+function rainSound(on){if(!AC)return;
+  if(on&&!rainSound._n){const s=AC.createBufferSource();s.buffer=nbuf(3);s.loop=true;
+    const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2200;bp.Q.value=.5;
+    const hp=AC.createBiquadFilter();hp.type='highpass';hp.frequency.value=800;
+    const g=AC.createGain();g.gain.value=.0001;g.gain.linearRampToValueAtTime(.06,AC.currentTime+1.5);
+    s.connect(hp);hp.connect(bp);bp.connect(g);g.connect(master);s.start();rainSound._n={s,g};}
+  else if(!on&&rainSound._n){const n=rainSound._n;n.g.gain.linearRampToValueAtTime(.0001,AC.currentTime+1);
+    setTimeout(()=>{try{n.s.stop();}catch(e){}},1200);rainSound._n=null;}}
+function tvHum(on){if(!AC)return;
+  if(on&&!tvHum._n){const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=95;
+    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=320;
+    const g=AC.createGain();g.gain.value=.0001;g.gain.linearRampToValueAtTime(.012,AC.currentTime+.5);
+    o.connect(lp);lp.connect(g);g.connect(master);o.start();tvHum._n={o,g};}
+  else if(!on&&tvHum._n){const n=tvHum._n;n.g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.6);
+    setTimeout(()=>{try{n.o.stop();}catch(e){}},700);tvHum._n=null;}}
+function crossingDrone(){if(!AC||muted)return;const t=AC.currentTime;
+  const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(70,t);
+  o.frequency.exponentialRampToValueAtTime(30,t+4);
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=180;
+  const g=AC.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.12,t+2.5);
+  g.gain.linearRampToValueAtTime(.0001,t+6);o.connect(lp);lp.connect(g);g.connect(master);o.start(t);o.stop(t+6.2);}
+function stopAll(){if(!AC)return;bedNodes.forEach(n=>{if(n.gain)try{n.gain.linearRampToValueAtTime(.0001,AC.currentTime+.5);}catch(e){}});
+  rainSound(false);tvHum(false);}
+
+/* ---- text band ---- */
+function renderProse(sc){const el=$('prose');el.className=sc.first?'first':'';
+  el.innerHTML=sc.prose.map(p=>`<${p[0]}>${p[1]}</${p[0]}>`).join('');}
+function wordCount(sc){return sc.prose.reduce((n,p)=>n+p[1].replace(/<[^>]+>/g,'').split(/\s+/).length,0);}
+function calcDwell(sc){return Math.max(7,Math.min(16,3+wordCount(sc)*0.32));}
+
+/* ---- scene control ---- */
+function enter(i){idx=i;const sc=SCENES[i];sceneT0=performance.now();transT0=performance.now();
+  renderProse(sc);dwell=calcDwell(sc);_rainWarp=-1;
+  if(sc.rain)initRain(sc.rain);
+  // audio moods
+  rainSound(false); // Part 3 is indoors, no rain
+  tvHum(false); // Part 4: the machines are dying, near silence
+  if(sc.hinge)crossingDrone();
+  const bf=$('barfill');if(bf)bf.style.width='0%';
+  paused=false;document.body.classList.remove('paused');
+  const hint=$('hint');hint.classList.remove('hide');
+  hint.textContent=auto?(sc.last?'':'tap to pause'):(sc.last?'tap to finish':'tap to continue');}
+function advance(){if(fin)return;if(idx>=SCENES.length-1){finish();return;}enter(idx+1);}
+function finish(){fin=true;$('hint').classList.add('hide');stopAll();
+  const f=$('fade');f.style.transition='opacity 1.4s';f.style.opacity='1';
+  setTimeout(()=>{$('endScr').classList.remove('gone');},1500);}
+function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
+  aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
+  fin=false;$('fade').style.opacity='0';enter(0);
+  if(!running){running=true;requestAnimationFrame(loop);}}
+function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
+  document.body.classList.toggle('paused',paused);
+  $('hint').textContent=paused?'tap to resume':'tap to pause';}
+
+/* ---- main loop ---- */
+function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
+  if(paused&&idx>=0)sceneT0+=dt;
+  const t=now-sceneT0;const sc=idx>=0?SCENES[idx]:null;
+  // paint
+  try{ctx.clearRect(0,0,W,H);if(sc)sc.paint(t);}catch(e){}
+  drawGrain();
+  // scene crossfade (fade layer quick dip on enter)
+  const tr=Math.max(0,1-(now-transT0)/650);
+  if(tr>0&&!fin){$('fade').style.opacity=(tr*tr*0.9).toFixed(3);}else if(!fin){$('fade').style.opacity='0';}
+  // auto advance
+  if(auto&&!paused&&!fin&&idx>=0){const bf=$('barfill');if(bf)bf.style.width=(Math.min(1,t/(dwell*1000))*100)+'%';
+    if(t>=dwell*1000)advance();}
+  requestAnimationFrame(loop);}
+
+/* ---- input ---- */
+$('app').addEventListener('click',e=>{const id=e.target.id;
+  if(['btnRead','btnAuto','btnReplay','btnTip','mute'].includes(id))return;
+  if(!$('titleScr').classList.contains('gone'))return;
+  if(!$('endScr').classList.contains('gone'))return;
+  if(auto)togglePause();else advance();});
+$('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
+$('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});
+$('btnReplay').addEventListener('click',e=>{e.stopPropagation();start(auto);});
+$('mute').addEventListener('click',e=>{e.stopPropagation();muted=!muted;
+  $('mute').innerHTML=muted?'&#128263;':'&#9835;';if(master)master.gain.value=muted?0:0.8;
+  if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();
+  if(!$('titleScr').classList.contains('gone'))start(false);
+  else if($('endScr').classList.contains('gone')){if(auto)togglePause();else advance();}}});
+
+size();running=true;requestAnimationFrame(loop);
+
+</script></body></html>

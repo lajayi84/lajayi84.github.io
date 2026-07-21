@@ -33,6 +33,21 @@
     text-decoration:none;color:#e6ddce;background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.14);border-radius:7px;padding:9px 15px;}
   .btn:first-child{background:var(--c);color:#161009;border-color:var(--c);font-weight:700;}
+  .feature{display:block;text-decoration:none;color:inherit;border:1px solid rgba(159,179,194,.28);
+    border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#1a1822,#141118);
+    margin:4px 0 6px;position:relative;transition:transform .15s,border-color .15s;}
+  .feature:active{transform:scale(.995);}
+  .feature:hover{border-color:rgba(159,179,194,.5);}
+  .feature .fpad{padding:20px 20px 18px;}
+  .feature .fk{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;color:#9fb3c2;}
+  .feature h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px,8vw,44px);
+    line-height:.96;letter-spacing:-.02em;margin:8px 0 0;}
+  .feature h2 .em{color:#9fb3c2;}
+  .feature .fblurb{color:#b0a596;font-size:14.5px;line-height:1.5;margin-top:10px;max-width:34em;}
+  .feature .frow{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .feature .fgo{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
+    color:#161009;background:#9fb3c2;border-radius:7px;padding:9px 15px;font-weight:700;}
+  .feature .fmeta{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:#7a7268;}
   footer{text-align:center;margin-top:30px;color:#6a6258;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;}
 </style></head>
 <body>
@@ -43,6 +58,14 @@
     <p class="tag">A collection of animated shorts &amp; a bedtime story.</p>
     <p class="instruct">Tap any title to play. Best with sound, in a dark room.</p>
   </header>
+  <a class="feature" href="the-appeal.html">
+    <div class="fpad">
+      <div class="fk">New &middot; a film in four parts</div>
+      <h2>The <span class="em">Appeal</span></h2>
+      <p class="fblurb">Two friends are pulled into an old crime reconstruction &mdash; and into the real night behind it. They save a life. They should not have. A complete tragedy in four parts, where the last part answers the first.</p>
+      <div class="frow"><span class="fgo">Start the series &#9656;</span><span class="fmeta">4 parts &middot; watch in order</span></div>
+    </div>
+  </a>
   <div class="seclabel">The Films &mdash; 12</div>
     <a class="card" href="alley.html" style="--c:#e8923c">
       <div class="stripe"></div>
