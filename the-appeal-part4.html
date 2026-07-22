@@ -82,6 +82,8 @@
   #endScr .ttl{font-size:clamp(30px,8vw,46px);}
   #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:rgba(231,224,210,.62);
     max-width:22em;margin-top:18px;line-height:1.6;}
+  #endScr .serieslink{display:inline-block;margin-top:18px;font-family:'Fraunces',serif;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:rgba(231,224,210,.4);text-decoration:none;}
   #endScr .part{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
     color:rgba(231,224,210,.4);margin-top:26px;}
   #endScr .credits{font-family:'Spectral',serif;font-style:italic;font-size:12px;color:rgba(231,224,210,.4);margin-top:18px;}
@@ -118,6 +120,7 @@
       <a class="go" id="btnTip" href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">Leave a tip</a>
       <button class="go ghost" id="btnReplay">Read again</button>
     </div>
+    <a class="serieslink" href="the-appeal.html">&#8592; The series</a>
   </div>
 </div>
 
@@ -316,7 +319,7 @@ const SCENES=[
     figure(W*.78,H*.95,H*.13,{lean:-.4,col:[30,32,36],a:.6});}},
  // 4 — Mo keeps pulling; the rescue story
  {prose:[["p","Mo should have closed the laptop. He'd learned nothing all night but how to hurt them both, and still he kept pulling, because he could not leave the truth alone."],
-         ["p","There was a story about the brother. A day, years ago — a station platform, a bad moment, a stranger who'd stepped too close to the edge of everything — and the brother had reached out and <em>held on.</em> Had saved a life. There was even a name."],
+         ["p","There was a story about the brother. A festival, years ago — he'd been up on the stage as the band's invited guest, the athlete-turned-good-man they'd wanted beside them — when the crowd down front began to fold in on itself, the way crowds do, a crush building at the barrier. And he'd seen one girl going under, and got down there, and <em>pulled her out.</em> Had saved a life. There was even a name."],
          ["p","Mo read the name. <em>And the room went very cold, because Mo knew the name.</em>"]],
   paint:t=>{greyMorning(t);
     figure(W*.34,H*.88,H*.13,{lean:-.4,col:[40,42,46],a:.92});
@@ -325,8 +328,8 @@ const SCENES=[
     ctx.fillStyle=radial(W*.28,H*.62,2,W*.25,[[0,'rgba(120,150,165,.18)'],[1,'rgba(120,150,165,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}},
  // 5 — it's someone from Mo's OWN life
  {prose:[["p","It was someone from his own life."],
-         ["p","Someone ordinary and real and <em>present</em> — someone in the edges of Mo's days; someone he'd have said hello to this week. Someone alive right now, this morning, in the world Mo had grown up in — because years ago, on a platform, a stranger had caught them."],
-         ["p","<em>A stranger who had never been born.</em>"]],
+         ["p","It was Arianne. His cousin — upstairs in this very flat the night it all began, laughing through the ceiling with her friends. At nineteen she had gone to a festival and been pulled out of a crush at the barrier by a man up on the stage. She had come home. She had grown up. She was <em>alive</em>, all these years — because the man on the stage had existed to reach down for her."],
+         ["p","And the man who had reached down for her — the brother, the good man, JJ's brother — <em>had never been born.</em>"]],
   paint:t=>{greyMorning(t);
     // Mo alone, the dread turned inward — still, lit flat and grey
     figure(W*.42,H*.88,H*.14,{lean:0,col:[42,44,48],a:.92});
@@ -334,13 +337,13 @@ const SCENES=[
     ctx.fillStyle=rgba(30,32,36,.15+.05*Math.sin(t*.0015));ctx.fillRect(0,0,W,H);}},
  // 6 — Mo scrambles to check — the cascade fade (HINGE-like)
  {hinge:true,
-  prose:[["p","Mo was on his phone before he knew he'd moved. Not reading — <em>checking.</em> Searching for the person the brother had saved, who had to be fine, who he'd known — hadn't he? A face was there and then it wasn't; a name he'd read ten seconds ago was already dissolving in his hands."],
-         ["p","\"Write it —\" he started, but there was never any time; by the time the pen was moving the person was already just a shape, and then not even that. <em>Gone.</em> He hadn't even kept their name long enough to grieve it."],
+  prose:[["p","Mo was on his phone before he knew he'd moved. Not reading — <em>checking.</em> Calling up Arianne, who had to be fine, who had been upstairs only hours ago. But the screen wouldn't hold her — the face there and then not there, the name loosening even as he stared."],
+         ["p","\"Write it —\" he started, scrabbling, because he could feel her going the way the others had gone. Arianne, who he had known his whole life. By the time the pen was moving she was already half a stranger. <em>Soon he would be left knowing only that there had been someone — and that they had done it.</em>"],
          ["p","\"Mo?\" JJ said. \"What is it. Mo. What.\""]],
   paint:t=>{const prog=Math.min(1,t/5000);phoneFade(t,prog);
     figure(W*.7,H*.92,H*.11,{lean:-.1,col:[42,44,48],a:.7});}},
  // 7 — the confirmation: absence. the second death.
- {prose:[["p","And it was there, and it was the wrong shape — a person who, in this world, had stepped too close to the edge of everything one day years ago, and there had been no one there to catch them."],
+ {prose:[["p","And it was there, and it was the wrong shape — a girl of nineteen who had gone to a festival years ago and been carried under at the barrier, in a crush, with no one on the stage who knew to come down for her."],
          ["p","Because the one who would have caught them was never born. Because his father never killed JJ's father. <em>Because two friends had done a kind thing in the rain.</em>"],
          ["p","The brother saved a life once. Mo and JJ had just reached back through thirty years and un-saved it."]],
   paint:t=>{greyMorning(t,{laptop:false});
@@ -366,7 +369,7 @@ const SCENES=[
          ["p","It was the same shape as the very first night, exactly the same, but the wrong way round now — one reaching, one lost in the glass, a pane between them. <em>Only this time it was Mo on the outside, wanting in.</em> Mo who finally, desperately wanted to turn toward his friend, and found that his friend had gone somewhere the turning couldn't follow."]],
   paint:t=>{windowEnding(t,{reach:.6});}},
  // 11 — JJ at the glass, the world not knowing
- {prose:[["p","JJ looked out at a morning that didn't know anything had happened. People down there, buying milk, living the ordinary lives that a good man on a platform had died so one of them could keep. <em>None of them would ever know his name.</em>"],
+ {prose:[["p","JJ looked out at a morning that didn't know anything had happened. People down there, buying milk, living the ordinary lives that a good man had once climbed down off a stage to protect. <em>None of them would ever know his name.</em>"],
          ["p","Only JJ, and Mo, would ever carry it — and even they would not get to carry the <em>people.</em> The brother was already gone from behind JJ's eyes. What stayed was heavier and emptier than a memory. Not <em>whom</em> they had unmade. <em>Only that they had.</em>"]],
   paint:t=>{windowEnding(t,{reach:.5});
     // push in slightly on JJ at the glass
@@ -385,6 +388,7 @@ let _rainWarp=-1;function initRainIf(w){}
 
 /* ===== THE APPEAL · Part One — runner ===== */
 let idx=-1,auto=false,paused=false,fin=false,running=false;
+let lastInput=0;
 let sceneT0=0,transT0=0,prevTs=0,dwell=9;
 let muted=false;
 
@@ -446,7 +450,7 @@ function finish(){fin=true;$('hint').classList.add('hide');stopAll();
   setTimeout(()=>{$('endScr').classList.remove('gone');},1500);}
 function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
   aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
-  fin=false;$('fade').style.opacity='0';enter(0);
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
   if(!running){running=true;requestAnimationFrame(loop);}}
 function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
   document.body.classList.toggle('paused',paused);
@@ -470,6 +474,7 @@ function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
 /* ---- input ---- */
 $('app').addEventListener('click',e=>{const id=e.target.id;
   if(['btnRead','btnAuto','btnReplay','btnTip','mute'].includes(id))return;
+  if(e.target.closest('.screen'))return;
   if(!$('titleScr').classList.contains('gone'))return;
   if(!$('endScr').classList.contains('gone'))return;
   if(auto)togglePause();else advance();});

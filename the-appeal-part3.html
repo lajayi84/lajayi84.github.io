@@ -82,6 +82,9 @@
   #endScr .ttl{font-size:clamp(30px,8vw,46px);}
   #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:rgba(231,224,210,.62);
     max-width:22em;margin-top:18px;line-height:1.6;}
+  #endScr .endbtns{display:flex;gap:12px;justify-content:center;}
+  #endScr .serieslink{display:inline-block;margin-top:18px;font-family:'Fraunces',serif;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:rgba(231,224,210,.4);text-decoration:none;}
   #endScr .part{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
     color:rgba(231,224,210,.4);margin-top:26px;}
   @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
@@ -111,7 +114,11 @@
     <div class="ttl">The <em>Appeal</em></div>
     <div class="epi">"He was real. He was your brother. And we &mdash;"</div>
     <div class="part">Part Four — The Arithmetic</div>
-    <div class="endbtns" style="margin-top:28px;display:flex;gap:12px;"><a class="go" id="btnNext" href="the-appeal-part4.html">Continue &#8594;</a><button class="go ghost" id="btnReplay">Read again</button></div>
+    <div class="endbtns" style="margin-top:28px;">
+      <a class="go" id="btnNext" href="the-appeal-part4.html">Continue &#8594;</a>
+      <button class="go ghost" id="btnReplay">Read again</button>
+    </div>
+    <a class="serieslink" href="the-appeal.html">&#8592; The series</a>
   </div>
 </div>
 
@@ -308,8 +315,8 @@ const SCENES=[
  // 5 — the recolour (flashback flicker to the alley)
  {pulse:.5,
   prose:[["p","And then Mo remembered the words. He went cold all the way through."],
-         ["p"," <em>She was seventeen. She was seventeen.</em> The man in the alley, flinging it back over his shoulder — Mo had let it slide off him as raving, as grief, as the drink. It had been the truest thing anyone said that night."],
-         ["p","He'd been someone who loved that girl, come to make the drunk answer, and it had gone wrong. The truth had been said out loud in the first thirty seconds — and Mo, <em>watching the wrong thing the way he always did,</em> had let it go."]],
+         ["p","<em>She was seventeen. She was seventeen.</em> The man in the alley, flinging it back over his shoulder — Mo had let it slide off him as raving, as grief, as the drink. It had been the truest thing anyone said that night."],
+         ["p","He'd been someone who loved that girl, come to make the drunk answer for her. It was never meant to end in a body — a shove, a fall, the wrong angle of a kerb; the kind of thing a court might have called manslaughter, if it had ever reached a court. But the man panicked and ran. And a man who runs turns a death into a murder. That was why they never caught him. That was why, thirty years on, it was still a case worth reconstructing. <em>The running was the whole of it.</em> And in the first thirty seconds Mo had heard the truth and, <em>watching the wrong thing the way he always did,</em> let it go."]],
   paint:t=>{
     // a cold flashback: the alley/rain briefly bleeds over the laptop room
     const flick=Math.abs(Math.sin(t*.004));
@@ -335,7 +342,7 @@ const SCENES=[
  // 7 — Mo keeps pulling the thread; the second name surfaces
  {pulse:1,
   prose:[["p","He should have stopped there. He couldn't. Mo never could."],
-         ["p","He followed the thread past Jose, into the after — JJ's mother, widowed with a baby. The man who'd come to the alley, who had run, and had not run far. <em>Guilt keeps people close, sometimes, in the worst way.</em>"],
+         ["p","He followed the thread past Jose, into the after — JJ's mother, widowed with a baby. And the man from the alley, who had run, and had not run far. The record had a name for him now, because the new world had let him become someone instead of a photofit: <em>Harvey Arthur Dollis.</em> The man who had killed JJ's father, and had spent the rest of his life close to the family he'd broken. <em>Guilt keeps people close, sometimes, in the worst way.</em>"],
          ["p","And out of that — the widow and the man who'd made her one — a second name was surfacing on Mo's screen. A name attached, somehow, to both of them."]],
   paint:t=>{screenFill(t,'plain');
     // one line beginning to glow/pulse — the surfacing name
@@ -399,6 +406,7 @@ function initRainIf(w){}
 
 /* ===== THE APPEAL · Part One — runner ===== */
 let idx=-1,auto=false,paused=false,fin=false,running=false;
+let lastInput=0;
 let sceneT0=0,transT0=0,prevTs=0,dwell=9;
 let muted=false;
 
@@ -460,7 +468,7 @@ function finish(){fin=true;$('hint').classList.add('hide');stopAll();
   setTimeout(()=>{$('endScr').classList.remove('gone');},1500);}
 function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
   aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
-  fin=false;$('fade').style.opacity='0';enter(0);
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
   if(!running){running=true;requestAnimationFrame(loop);}}
 function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
   document.body.classList.toggle('paused',paused);
@@ -482,10 +490,13 @@ function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
   requestAnimationFrame(loop);}
 
 /* ---- input ---- */
-$('app').addEventListener('click',e=>{const id=e.target.id;
-  if(['btnRead','btnAuto','btnReplay','btnNext','mute'].includes(id))return;
+$('app').addEventListener('click',e=>{
+  // ignore taps on any overlay screen or control (buttons handle themselves)
+  if(e.target.closest('.screen'))return;
+  if(['btnRead','btnAuto','btnReplay','btnNext','mute'].includes(e.target.id))return;
   if(!$('titleScr').classList.contains('gone'))return;
   if(!$('endScr').classList.contains('gone'))return;
+  const now=Date.now();if(now-lastInput<350)return;lastInput=now;   // debounce double-fire
   if(auto)togglePause();else advance();});
 $('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
 $('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});

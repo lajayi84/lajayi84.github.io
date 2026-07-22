@@ -82,6 +82,9 @@
   #endScr .ttl{font-size:clamp(30px,8vw,46px);}
   #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:rgba(231,224,210,.62);
     max-width:22em;margin-top:18px;line-height:1.6;}
+  #endScr .endbtns{display:flex;gap:12px;justify-content:center;}
+  #endScr .serieslink{display:inline-block;margin-top:18px;font-family:'Fraunces',serif;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:rgba(231,224,210,.4);text-decoration:none;}
   #endScr .part{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
     color:rgba(231,224,210,.4);margin-top:26px;}
   @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
@@ -111,7 +114,11 @@
     <div class="ttl">The <em>Appeal</em></div>
     <div class="epi">"Something&rsquo;s wrong. Something&rsquo;s &mdash; we changed something."</div>
     <div class="part">Part Three — The Truth</div>
-    <div class="endbtns" style="margin-top:28px;display:flex;gap:12px;"><a class="go" id="btnNext" href="the-appeal-part3.html">Continue &#8594;</a><button class="go ghost" id="btnReplay">Read again</button></div>
+    <div class="endbtns" style="margin-top:28px;">
+      <a class="go" id="btnNext" href="the-appeal-part3.html">Continue &#8594;</a>
+      <button class="go ghost" id="btnReplay">Read again</button>
+    </div>
+    <a class="serieslink" href="the-appeal.html">&#8592; The series</a>
   </div>
 </div>
 
@@ -336,7 +343,7 @@ const SCENES=[
     drawRain(1.5,W*.6,H*.4);}},
  // 7 — the father walks off; JJ luminous with it
  {rain:1.3,
-  prose:[["p","They watched him walk away up the street — the same walk, the same coat, going home now to the night he was supposed to never finish. He didn't look back."],
+  prose:[["p","They watched him walk away up the street — the same walk, the same coat, going home now to the night he was never supposed to finish. He didn't look back."],
          ["p",'JJ was shaking. Not from cold. "He\'s alive," he said. "Mo. I touched him. He\'s <em>alive.</em>" And he laughed, a broken, astonished laugh, and Mo, God help him, laughed too, <em>because it felt like the most enormous good thing either of them had ever done.</em>']],
   paint:t=>{alleyStreet(t,{lx:W*.66});
     // father small, walking away up the street toward the light
@@ -411,6 +418,7 @@ function initRainIf(warp){const step=Math.round(warp*4);if(step!==_rainWarp){_ra
 
 /* ===== THE APPEAL · Part One — runner ===== */
 let idx=-1,auto=false,paused=false,fin=false,running=false;
+let lastInput=0;
 let sceneT0=0,transT0=0,prevTs=0,dwell=9;
 let muted=false;
 
@@ -472,7 +480,7 @@ function finish(){fin=true;$('hint').classList.add('hide');stopAll();
   setTimeout(()=>{$('endScr').classList.remove('gone');},1500);}
 function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
   aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
-  fin=false;$('fade').style.opacity='0';enter(0);
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
   if(!running){running=true;requestAnimationFrame(loop);}}
 function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
   document.body.classList.toggle('paused',paused);
@@ -494,10 +502,13 @@ function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
   requestAnimationFrame(loop);}
 
 /* ---- input ---- */
-$('app').addEventListener('click',e=>{const id=e.target.id;
-  if(['btnRead','btnAuto','btnReplay','btnNext','mute'].includes(id))return;
+$('app').addEventListener('click',e=>{
+  // ignore taps on any overlay screen or control (buttons handle themselves)
+  if(e.target.closest('.screen'))return;
+  if(['btnRead','btnAuto','btnReplay','btnNext','mute'].includes(e.target.id))return;
   if(!$('titleScr').classList.contains('gone'))return;
   if(!$('endScr').classList.contains('gone'))return;
+  const now=Date.now();if(now-lastInput<350)return;lastInput=now;   // debounce double-fire
   if(auto)togglePause();else advance();});
 $('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
 $('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});

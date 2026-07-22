@@ -82,6 +82,9 @@
   #endScr .ttl{font-size:clamp(30px,8vw,46px);}
   #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:rgba(231,224,210,.62);
     max-width:22em;margin-top:18px;line-height:1.6;}
+  #endScr .endbtns{display:flex;gap:12px;justify-content:center;}
+  #endScr .serieslink{display:inline-block;margin-top:18px;font-family:'Fraunces',serif;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:rgba(231,224,210,.4);text-decoration:none;}
   #endScr .part{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
     color:rgba(231,224,210,.4);margin-top:26px;}
   @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
@@ -111,7 +114,11 @@
     <div class="ttl">The <em>Appeal</em></div>
     <div class="epi">"That's him," JJ said. "That's — Mo, that's my dad."</div>
     <div class="part">Part Two — The Save</div>
-    <div class="endbtns" style="margin-top:28px;display:flex;gap:12px;"><a class="go" id="btnNext" href="the-appeal-part2.html">Continue &#8594;</a><button class="go ghost" id="btnReplay">Read again</button></div>
+    <div class="endbtns" style="margin-top:28px;">
+      <a class="go" id="btnNext" href="the-appeal-part2.html">Continue &#8594;</a>
+      <button class="go ghost" id="btnReplay">Read again</button>
+    </div>
+    <a class="serieslink" href="the-appeal.html">&#8592; The series</a>
   </div>
 </div>
 
@@ -330,7 +337,7 @@ const SCENES=[
  // 1 — warm room from outside
  {first:true,rain:1,
   prose:[["p","There is a particular quiet that only exists between two people who have known each other a long time. Not silence exactly — the television was on, and the kettle had just clicked off — but the quiet of not having to be anyone."],
-         ["p","Mo had known JJ since they were eleven. <em>That was most of a life ago now.</em>"]],
+         ["p","Mo had known JJ since they were eleven. <em>That was most of a life ago now.</em> Upstairs, Mo's cousin Arianne and two of her friends were laughing at something through the ceiling — she was staying the weekend, camped out in the spare room like she owned it. The house was full and warm and ordinary."]],
   paint:t=>{const r=roomWindow(t);drawRain(1.4,r.wx+r.ww*.5,r.wy+r.wh*.5);}},
  // 2 — interior, Mo mid-theory
  {rain:0,
@@ -453,6 +460,7 @@ function initRainIf(warp){const step=Math.round(warp*4);if(step!==_rainWarp){_ra
 
 /* ===== THE APPEAL · Part One — runner ===== */
 let idx=-1,auto=false,paused=false,fin=false,running=false;
+let lastInput=0;
 let sceneT0=0,transT0=0,prevTs=0,dwell=9;
 let muted=false;
 
@@ -514,7 +522,7 @@ function finish(){fin=true;$('hint').classList.add('hide');stopAll();
   setTimeout(()=>{$('endScr').classList.remove('gone');},1500);}
 function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
   aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
-  fin=false;$('fade').style.opacity='0';enter(0);
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
   if(!running){running=true;requestAnimationFrame(loop);}}
 function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
   document.body.classList.toggle('paused',paused);
@@ -536,10 +544,13 @@ function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
   requestAnimationFrame(loop);}
 
 /* ---- input ---- */
-$('app').addEventListener('click',e=>{const id=e.target.id;
-  if(['btnRead','btnAuto','btnReplay','btnNext','mute'].includes(id))return;
+$('app').addEventListener('click',e=>{
+  // ignore taps on any overlay screen or control (buttons handle themselves)
+  if(e.target.closest('.screen'))return;
+  if(['btnRead','btnAuto','btnReplay','btnNext','mute'].includes(e.target.id))return;
   if(!$('titleScr').classList.contains('gone'))return;
   if(!$('endScr').classList.contains('gone'))return;
+  const now=Date.now();if(now-lastInput<350)return;lastInput=now;   // debounce double-fire
   if(auto)togglePause();else advance();});
 $('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
 $('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});
