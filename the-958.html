@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 9.58 to Wend's End — a journey in eight parts</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Spectral:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#efe7d6; --dim:#a99; --board:#12161b; --rail:#5aa0ac; --amber:#e0a038; --line:rgba(239,231,214,.12); }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:#0a0d10;color:var(--ink);font-family:'Spectral',Georgia,serif;
+    min-height:100vh;display:flex;justify-content:center;padding:26px 16px 60px;
+    background-image:radial-gradient(120% 80% at 50% -10%, #14202a 0%, #0a0d10 55%);}
+  .wrap{width:100%;max-width:560px;}
+
+  /* back link */
+  .back{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--dim);
+    text-decoration:none;display:inline-block;margin-bottom:26px;opacity:.7;}
+  .back:hover{opacity:1;color:var(--ink);}
+  .back::before{content:"← ";}
+
+  /* the departure board header */
+  .board{background:linear-gradient(180deg,#12161b,#0d1116);border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+  .board-top{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;background:linear-gradient(180deg,#1a2028,#141a20);border-bottom:1px solid var(--line);}
+  .board-top .live{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;
+    color:var(--amber);text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+  .board-top .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 8px var(--amber);animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .board-top .clock{font-family:'Space Mono',monospace;font-size:13px;color:var(--ink);letter-spacing:.05em;}
+
+  .board-title{padding:26px 20px 8px;text-align:center;}
+  .eyebrow{font-family:'Fraunces',serif;font-weight:600;font-size:10px;letter-spacing:.34em;
+    text-transform:uppercase;color:var(--dim);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,8vw,46px);line-height:1;
+    margin-top:12px;letter-spacing:-.01em;}
+  h1 .time{color:var(--amber);}
+  h1 .dest{display:block;font-size:.56em;color:var(--rail);font-weight:500;margin-top:.35em;letter-spacing:.02em;}
+  .tagline{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:var(--dim);
+    max-width:30em;margin:18px auto 4px;line-height:1.5;padding:0 10px;}
+  .aiwrap{padding:6px 20px 22px;text-align:center;}
+  .ainote{font-family:'Spectral',serif;font-size:12.5px;color:#8a8479;line-height:1.5;
+    max-width:32em;margin:0 auto;border-left:2px solid rgba(90,160,172,.4);padding-left:12px;text-align:left;display:inline-block;}
+  .ainote b{color:var(--ink);font-weight:400;}
+
+  /* the calling-points board */
+  .calls{padding:6px 0 8px;}
+  .calls-head{display:grid;grid-template-columns:56px 1fr 74px;gap:8px;padding:10px 20px;
+    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dim);border-bottom:1px solid var(--line);}
+  a.service{display:grid;grid-template-columns:56px 1fr 74px;gap:8px;align-items:center;
+    padding:15px 20px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);
+    transition:background .15s;position:relative;}
+  a.service:last-child{border-bottom:none;}
+  a.service:hover{background:rgba(90,160,172,.07);}
+  a.service .num{font-family:'Space Mono',monospace;font-size:15px;color:var(--amber);font-weight:700;}
+  a.service .stop{min-width:0;}
+  a.service .stop .name{display:block;font-family:'Fraunces',serif;font-weight:500;font-size:17px;line-height:1.15;margin-bottom:4px;}
+  a.service .stop .sub{font-family:'Spectral',serif;font-style:italic;font-size:13px;color:var(--dim);
+    margin-top:2px;line-height:1.35;}
+  a.service .stat{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-align:right;
+    color:var(--rail);text-transform:uppercase;}
+  a.service:hover .stat{color:var(--amber);}
+  a.service .stat::after{content:"›";display:inline-block;margin-left:5px;transition:transform .15s;}
+  a.service:hover .stat::after{transform:translateX(3px);}
+
+  .foot{text-align:center;margin-top:30px;font-family:'Spectral',serif;font-style:italic;color:var(--dim);font-size:13.5px;line-height:1.6;}
+  .foot .by{font-style:normal;font-family:'Fraunces',serif;letter-spacing:.05em;color:#c9c0b0;}
+  .foot a{color:var(--rail);text-decoration:none;border-bottom:1px solid rgba(90,160,172,.3);}
+  .foot a:hover{color:var(--amber);border-color:var(--amber);}
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--line) 20%,var(--line) 80%,transparent);margin:26px 0;}
+  .note{font-size:12px;color:#77726a;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">Back to all stories</a>
+
+  <div class="board">
+    <div class="board-top">
+      <span class="live">On time</span>
+      <span class="clock" id="clock">09:58</span>
+    </div>
+    <div class="board-title">
+      <div class="eyebrow">A journey in eight parts</div>
+      <h1><span class="time">The 9.58</span><span class="dest">to Wend's End</span></h1>
+      <p class="tagline">A morning train runs the length of the country to the sea. A hundred strangers, each going somewhere. One guard who sees it all — and one who sees more than he does: you.</p>
+    </div>
+    <div class="aiwrap">
+      <p class="ainote"><b>Written by me.</b> The animation is built with AI assistance.</p>
+    </div>
+
+    <div class="calls">
+      <div class="calls-head"><span>Part</span><span>Calling at</span><span>&nbsp;</span></div>
+
+      <a class="service" href="the-958-part1.html">
+        <span class="num">01</span>
+        <span class="stop"><span class="name">Departure</span><span class="sub">The 9.58 pulls out. A guard, a driver, and the first of the day's strangers.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part2.html">
+        <span class="num">02</span>
+        <span class="stop"><span class="name">The First Stop</span><span class="sub">A kind reply. A dodge. A family boards — and someone watches them too closely.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part3.html">
+        <span class="num">03</span>
+        <span class="stop"><span class="name">The Affluent Stop</span><span class="sub">A missing-passport scare, a hand half-raised, and a guard who sees everything.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part4.html">
+        <span class="num">04</span>
+        <span class="stop"><span class="name">The Airport</span><span class="sub">One family gets off, none the wiser. A sleeping man sets his watch.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part5.html">
+        <span class="num">05</span>
+        <span class="stop"><span class="name">The Parting</span><span class="sub">A quiet goodbye at a station by the sea. A small hand, an idle button.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part6.html">
+        <span class="num">06</span>
+        <span class="stop"><span class="name">The Cliffs</span><span class="sub">A held signal, an anniversary — and a number that doesn't add up.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part7.html">
+        <span class="num">07</span>
+        <span class="stop"><span class="name">The Barrier</span><span class="sub">A victorious smile that lasts exactly until the platform. A meeting lost to the dark.</span></span>
+        <span class="stat">Board</span>
+      </a>
+      <a class="service" href="the-958-part8.html">
+        <span class="num">08</span>
+        <span class="stop"><span class="name">Wend's End</span><span class="sub">End of the line. All change, please. And the day goes on — it always does.</span></span>
+        <span class="stat">Board</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="foot">
+    <p class="by">Written by Lanre Ajayi</p>
+    <p class="note">Best read in order, with sound, in a quiet moment.</p>
+    <div class="rule"></div>
+    <p>If something here moved you, you can <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a>.</p>
+  </div>
+</div>
+<script>
+  // a gentle live-ish clock that starts at 09:58 and ticks
+  (function(){
+    let m=58,h=9;const el=document.getElementById('clock');
+    setInterval(()=>{m++;if(m>=60){m=0;h++;}el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');},4000);
+  })();
+</script>
+</body>
+</html>

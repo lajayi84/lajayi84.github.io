@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The 9.58 to Wend's End — Part Four</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{ --page:#efe7d6; --ink:#33291d; --ink-soft:#6f6250; --accent:#c07a3e; --rail:#3a6b74; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{background:#0c0f12;color:var(--ink);font-family:'Spectral',Georgia,serif;
+    display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:520px;height:100dvh;max-height:920px;overflow:hidden;
+    background:#0c0f12;display:flex;flex-direction:column;cursor:pointer;}
+
+  #window{position:relative;flex:0 1 56%;min-height:44%;overflow:hidden;background:#0a0d10;}
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #window::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:
+      radial-gradient(130% 100% at 50% 46%, transparent 55%, rgba(8,10,14,.32) 86%, rgba(8,10,14,.6)),
+      linear-gradient(180deg, rgba(8,10,14,.28), transparent 16%, transparent 84%, rgba(8,10,14,.36));}
+  #grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.045;mix-blend-mode:overlay;}
+  #eyebrow{position:absolute;top:18px;left:22px;z-index:6;
+    font-family:'Fraunces',serif;font-weight:600;font-size:10px;letter-spacing:.28em;
+    text-transform:uppercase;color:rgba(239,231,214,.55);}
+  #eyebrow b{display:block;font-size:8.5px;letter-spacing:.22em;color:rgba(239,231,214,.32);font-weight:400;margin-top:3px;}
+  #fade{position:absolute;inset:0;z-index:7;background:#0c0f12;opacity:0;pointer-events:none;}
+
+  #band{flex:1 1 auto;background:var(--page);position:relative;
+    padding:24px 28px 0;overflow:hidden;display:flex;flex-direction:column;min-height:0;
+    box-shadow:0 -38px 76px rgba(0,0,0,.5);}
+  #band::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(51,41,29,.15) 18%,rgba(51,41,29,.15) 82%,transparent);}
+  #prose{font-size:15.5px;line-height:1.56;color:var(--ink);flex:1 1 auto;overflow-y:auto;overflow-x:hidden;
+    padding-bottom:60px;scrollbar-width:none;}
+  #prose::-webkit-scrollbar{display:none;}
+  #prose p{margin-bottom:.6em;opacity:0;transform:translateY(6px);animation:rise .9s cubic-bezier(.2,.7,.25,1) forwards;}
+  #prose p:nth-child(2){animation-delay:.5s;} #prose p:nth-child(3){animation-delay:.95s;}
+  #prose.first p:first-child::first-letter{font-family:'Fraunces',serif;font-weight:600;font-size:3em;line-height:.8;
+    float:left;margin:.05em .1em 0 0;color:#4a3a26;}
+  #prose em{font-style:italic;color:#5a4a34;}
+  #prose .dlg{color:#42361f;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  #foot{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:9px 0 calc(13px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(239,231,214,0),var(--page) 42%);}
+  /* progress = the train map filling carriage by carriage */
+  #trainmap{display:flex;gap:3px;align-items:center;height:14px;}
+  #trainmap .loco{width:16px;height:9px;border-radius:3px 5px 2px 2px;background:var(--rail);opacity:.9;position:relative;}
+  #trainmap .car{width:15px;height:8px;border-radius:2px;border:1px solid rgba(51,41,29,.28);background:transparent;transition:background .4s;}
+  #trainmap .car.done{background:var(--accent);border-color:var(--accent);}
+  #trainmap .car.here{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,122,62,.25);}
+  #hint{font-family:'Fraunces',serif;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--ink-soft);opacity:.5;animation:hb 2.8s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.28;}50%{opacity:.56;}}
+  #hint.hide{display:none;}
+
+  #mute{position:absolute;top:15px;right:17px;z-index:8;width:30px;height:30px;display:flex;align-items:center;
+    justify-content:center;font-size:13px;border-radius:50%;background:rgba(10,12,16,.42);
+    border:1px solid rgba(239,231,214,.2);color:rgba(239,231,214,.72);pointer-events:auto;cursor:pointer;}
+
+  .screen{position:absolute;inset:0;z-index:20;background:#0b0e11;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:38px;transition:opacity 1s;}
+  .screen.gone{opacity:0;pointer-events:none;}
+  .screen.gone *{pointer-events:none !important;}
+  .k{font-family:'Fraunces',serif;font-weight:500;font-size:10px;letter-spacing:.32em;text-transform:uppercase;
+    color:rgba(239,231,214,.5);margin-bottom:20px;}
+  .board{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,8.5vw,50px);color:#efe7d6;
+    line-height:1;letter-spacing:-.01em;}
+  .board .time{color:var(--accent);}
+  .board .dest{display:block;font-size:.58em;color:#8bb0b6;font-weight:500;letter-spacing:.02em;margin-top:.35em;}
+  .plat{font-family:'Spectral',serif;font-style:italic;font-size:13.5px;color:rgba(239,231,214,.5);margin-top:18px;}
+  .byline{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.14em;color:rgba(239,231,214,.5);margin-top:16px;font-style:normal;}
+  .btns{display:flex;gap:11px;margin-top:30px;}
+  .go{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    padding:13px 24px;border-radius:3px;border:1px solid var(--accent);background:var(--accent);color:#1a1108;
+    cursor:pointer;pointer-events:auto;}
+  .go.ghost{background:transparent;color:var(--accent);}
+  .go:active{transform:scale(.97);}
+  #endScr .board{font-size:clamp(26px,7vw,40px);}
+  #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:14.5px;color:rgba(239,231,214,.6);
+    max-width:23em;margin-top:16px;line-height:1.55;}
+  #endScr .part{font-family:'Fraunces',serif;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+    color:rgba(239,231,214,.4);margin-top:24px;}
+  #endScr .credits{font-family:'Spectral',serif;font-style:italic;font-size:12px;color:rgba(239,231,214,.4);margin-top:16px;}
+  #endScr .endbtns{display:flex;gap:11px;margin-top:26px;}
+  @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="window">
+    <canvas id="scene"></canvas>
+    <canvas id="grain"></canvas>
+    <div id="eyebrow">The 9.58 to Wend's End<b id="ebsub">Part Four · The Airport</b></div>
+    <div id="fade"></div>
+  </div>
+  <div id="mute">&#9835;</div>
+  <div id="band">
+    <div id="prose"></div>
+    <div id="foot"><div id="trainmap"></div><div id="hint">tap to continue</div></div>
+  </div>
+  <div class="screen" id="titleScr">
+    <div class="k">A journey in eight parts</div>
+    <div class="board"><span class="time">The 9.58</span><span class="dest">to Wend's End</span></div>
+    <div class="plat">Part Four — The Airport</div>
+    <div class="byline">by Lanre Ajayi</div>
+    <div class="btns"><button class="go" id="btnRead">Read</button><button class="go ghost" id="btnAuto">Play to me</button></div>
+  </div>
+  <div class="screen gone" id="endScr">
+    <div class="k">End of Part Four</div>
+    <div class="board"><span class="time">The 9.58</span><span class="dest">to Wend's End</span></div>
+    <div class="epi" id="endEpi"></div>
+    <div class="part">Part Five — The Parting</div>
+    <div class="credits">Written by Lanre Ajayi</div>
+    <div class="endbtns"><button class="go ghost" id="btnReplay">Read again</button></div>
+  </div>
+</div>
+
+<script>
+/* ===== THE 9.58 TO WEND'S END · Part One — engine (graphic register) ===== */
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('scene'),ctx=cv.getContext('2d');
+const gcv=$('grain'),gx=gcv.getContext('2d');
+let W=0,H=0,DPR=1,grainTiles=[];
+
+function size(){const r=$('window').getBoundingClientRect();
+  W=r.width;H=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*DPR;cv.height=H*DPR;gcv.width=W*DPR;gcv.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);gx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',size);
+
+function buildGrain(){grainTiles=[];
+  for(let k=0;k<3;k++){const c=document.createElement('canvas');c.width=150;c.height=150;
+    const g=c.getContext('2d'),id=g.createImageData(150,150),d=id.data;
+    for(let i=0;i<d.length;i+=4){const v=128+(Math.random()*2-1)*40;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+    g.putImageData(id,0,0);grainTiles.push(c);}}
+function drawGrain(){if(!grainTiles.length||reduce)return;
+  gx.clearRect(0,0,W,H);const t=grainTiles[(Math.random()*grainTiles.length)|0];
+  const ox=-(Math.random()*150)|0,oy=-(Math.random()*150)|0;
+  for(let y=oy;y<H;y+=150)for(let x=ox;x<W;x+=150)gx.drawImage(t,x,y);}
+
+/* ---- colour + shape helpers ---- */
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rgba=(r,g,b,a)=>`rgba(${r|0},${g|0},${b|0},${a})`;
+const rgb=c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+function vgrad(y0,y1,st){const g=ctx.createLinearGradient(0,y0,0,y1);st.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function radial(x,y,r0,r1,st){const g=ctx.createRadialGradient(x,y,r0,x,y,r1);st.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function circle(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
+
+/* ===== GRAPHIC CHARACTER SYSTEM ===== */
+/* Warm, simple, picture-book faces: rounded head, white eyes + dark pupils, brows/mouth do the emotion.
+   Each person built from: body colour, hair shape/colour, a prop, a build. Silhouette-distinct. */
+function person(x,groundY,s,P){P=P||{};
+  // ---- idle animation (layered: body vs head move independently = life) ----
+  const T=P.t||0, seed=P.seed||0;
+  const MOV=(P.sway!=null?(P.sway?1:0):(window.MOVING?1:0));                                        // train moving -> everyone rocks
+  // body: breath + subtle rock
+  const breathe=Math.sin(T*0.0019+seed)*s*0.030;                // deeper breath
+  const bodyRock=MOV*Math.sin(T*0.0022+seed*1.7)*s*0.045;       // carriage sway of the torso
+  const bobExtra=(P.bob?Math.sin(T*0.0065+seed)*s*0.035:0);     // livelier bob (baby/excited)
+  // head: its own drift + tilt, slightly out of phase with the body (the key life-giver)
+  const headSwayX=Math.sin(T*0.0016+seed*2.3)*s*0.045 + MOV*Math.sin(T*0.0022+seed*1.7+0.6)*s*0.05;
+  const headBob=Math.sin(T*0.0024+seed*1.1)*s*0.022;
+  const headTilt=Math.sin(T*0.0013+seed*0.7)*0.05 + (P.tilt||0);  // radians
+  // occasional slow head-turn (look drifts) unless a fixed look is set
+  const lookDrift=(P.look!=null)?P.look:Math.sin(T*0.0009+seed*4)*0.7;
+  groundY=groundY+breathe+bobExtra;  x=x+bodyRock;
+  // blink: quick, natural, per-person cycle
+  const blinkPhase=(T*0.001+seed*3)% (3.6+ (seed%10)*0.15);
+  const blinking=blinkPhase>(3.4+(seed%10)*0.15);
+  const skin=P.skin||[228,196,168], skinSh=P.skinSh||[196,160,132];
+  const cloth=P.cloth||[110,120,140], clothSh=P.clothSh||[80,88,106];
+  const hair=P.hair||[60,44,32];
+  const lean=P.lean||0, look=P.look||0;   // look: -1 left .. +1 right (pupil shift)
+  const sit=P.sit;                          // sitting shortens legs
+  ctx.save();ctx.translate(x,groundY);ctx.rotate(lean*0.06);
+  const bodyTop=-s*(sit?1.5:2.05), headR=s*0.42, headY=bodyTop-headR*0.7;
+  // ---- body (coat/torso) ----
+  ctx.fillStyle=rgb(clothSh);
+  ctx.beginPath();ctx.moveTo(-s*0.6,0);
+  ctx.quadraticCurveTo(-s*0.72,bodyTop*0.5,-s*0.5,bodyTop);
+  ctx.lineTo(s*0.5,bodyTop);
+  ctx.quadraticCurveTo(s*0.72,bodyTop*0.5,s*0.6,0);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=rgb(cloth);
+  ctx.beginPath();ctx.moveTo(-s*0.5,0);
+  ctx.quadraticCurveTo(-s*0.6,bodyTop*0.5,-s*0.42,bodyTop);
+  ctx.lineTo(s*0.42,bodyTop);
+  ctx.quadraticCurveTo(s*0.6,bodyTop*0.5,s*0.5,0);
+  ctx.closePath();ctx.fill();
+  // shoulders highlight
+  ctx.fillStyle=rgba(255,255,255,.06);rr(-s*0.42,bodyTop,s*0.84,s*0.3,s*0.15);ctx.fill();
+  // ---- neck ----
+  ctx.fillStyle=rgb(skinSh);rr(-s*0.13,bodyTop-s*0.18,s*0.26,s*0.28,s*0.08);ctx.fill();
+  // ---- head (own motion: sway, bob, tilt) ----
+  ctx.save();
+  ctx.translate(headSwayX,headBob);
+  ctx.translate(0,headY);ctx.rotate(headTilt);ctx.translate(0,-headY);
+  ctx.fillStyle=rgb(skin);circle(0,headY,headR);
+  // cheek shading
+  ctx.fillStyle=rgba(skinSh[0],skinSh[1],skinSh[2],.5);
+  ctx.beginPath();ctx.ellipse(headR*0.5,headY+headR*0.2,headR*0.5,headR*0.6,0,0,7);ctx.fill();
+  // ---- hair / headwear ----
+  if(P.headwear==='hijab'){ drawHijab(0,headY,headR,P.hijab||[150,132,112],P.hijabSh||[120,104,86]); }
+  else { drawHair(0,headY,headR,hair,P.hairStyle||'short'); }
+  if(P.beard){ drawBeard(0,headY,headR,P.beardCol||hair); }
+  // ---- eyes ----
+  if(P.eyesClosed||blinking){
+    ctx.strokeStyle=rgb([70,54,40]);ctx.lineWidth=Math.max(1.2,s*0.05);ctx.lineCap='round';
+    for(const sx of[-1,1]){ctx.beginPath();ctx.arc(sx*headR*0.38,headY-headR*0.02,headR*0.2,0.2,Math.PI-0.2);ctx.stroke();}
+  }else{
+    for(const sx of[-1,1]){
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*headR*0.38,headY-headR*0.05,headR*0.19,headR*0.23,0,0,7);ctx.fill();
+      ctx.fillStyle=rgb([46,34,24]);circle(sx*headR*0.38+lookDrift*headR*0.09,headY-headR*0.02,headR*0.11);
+      ctx.fillStyle='#fff';circle(sx*headR*0.38+lookDrift*headR*0.09+headR*0.03,headY-headR*0.06,headR*0.035);
+    }
+  }
+  // ---- brows (emotion) ---- browY offset & angle
+  const bw=headR*0.26, by=headY-headR*0.34, ba=(P.brow||0);
+  ctx.strokeStyle=rgb(hair);ctx.lineWidth=Math.max(1.4,s*0.055);ctx.lineCap='round';
+  for(const sx of[-1,1]){ctx.beginPath();
+    ctx.moveTo(sx*headR*0.38-bw*0.5, by+ (sx*ba)*headR*0.12 + (P.browRaise||0)*-headR*0.1);
+    ctx.lineTo(sx*headR*0.38+bw*0.5, by- (sx*ba)*headR*0.12 + (P.browRaise||0)*-headR*0.1);ctx.stroke();}
+  // ---- mouth (emotion) ---- m: -1 frown .. 0 neutral .. +1 smile
+  const m=(P.mouth==null?0.2:P.mouth), my=headY+headR*0.42;
+  ctx.strokeStyle=rgb([150,90,80]);ctx.lineWidth=Math.max(1.4,s*0.05);ctx.lineCap='round';
+  ctx.beginPath();
+  if(Math.abs(m)<0.05){ctx.moveTo(-headR*0.2,my);ctx.lineTo(headR*0.2,my);}
+  else{ctx.moveTo(-headR*0.22,my- m*headR*0.06);ctx.quadraticCurveTo(0,my+m*headR*0.26,headR*0.22,my-m*headR*0.06);}
+  ctx.stroke();
+  ctx.restore(); // end head motion
+  ctx.restore();
+  return {headY:groundY+headY, headR, bodyTop:groundY+bodyTop,
+          hx:x+headSwayX, hy:groundY+headY+headBob, tilt:headTilt};
+}
+function drawHair(cx,cy,r,col,style){
+  ctx.fillStyle=rgb(col);
+  if(style==='short'){ctx.beginPath();ctx.arc(cx,cy-r*0.12,r*1.02,Math.PI*1.02,Math.PI*1.98);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,cy-r*0.5,r*0.95,r*0.6,0,0,7);ctx.fill();}
+  else if(style==='bun'){ctx.beginPath();ctx.arc(cx,cy-r*0.2,r*1.0,Math.PI,0);ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy-r*1.05,r*0.35,0,7);ctx.fill();}
+  else if(style==='long'){ctx.beginPath();ctx.arc(cx,cy-r*0.1,r*1.05,Math.PI*0.85,Math.PI*2.15);ctx.fill();
+    rr(cx-r*1.02,cy-r*0.3,r*0.4,r*1.8,r*0.2);ctx.fill();rr(cx+r*0.62,cy-r*0.3,r*0.4,r*1.8,r*0.2);ctx.fill();}
+  else if(style==='cap'){ctx.beginPath();ctx.arc(cx,cy-r*0.1,r*1.0,Math.PI,0);ctx.fill();
+    ctx.fillStyle=rgb([40,50,70]);rr(cx-r*1.05,cy-r*0.15,r*2.1,r*0.4,r*0.15);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+r*0.2,cy-r*0.1,r*1.15,r*0.32,0,0,Math.PI);ctx.fill();}
+  else if(style==='bald'){/* nothing */}
+  else if(style==='grey'){ctx.fillStyle=rgb([200,198,196]);
+    ctx.beginPath();ctx.arc(cx,cy-r*0.12,r*1.0,Math.PI*1.05,Math.PI*1.95);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,cy-r*0.48,r*0.9,r*0.55,0,0,7);ctx.fill();}
+}
+
+/* a headscarf: frames the face, drapes past the jaw to the shoulders */
+function drawHijab(cx,cy,r,col,colSh){
+  // drape behind/around: a soft rounded shape wider than the head, down to shoulders
+  ctx.fillStyle=rgb(colSh);
+  ctx.beginPath();
+  ctx.moveTo(cx-r*1.15,cy+r*0.2);
+  ctx.quadraticCurveTo(cx-r*1.25,cy-r*1.15,cx,cy-r*1.2);
+  ctx.quadraticCurveTo(cx+r*1.25,cy-r*1.15,cx+r*1.15,cy+r*0.2);
+  ctx.quadraticCurveTo(cx+r*1.1,cy+r*1.4,cx+r*0.55,cy+r*1.7);   // drape down right
+  ctx.lineTo(cx-r*0.55,cy+r*1.7);
+  ctx.quadraticCurveTo(cx-r*1.1,cy+r*1.4,cx-r*1.15,cy+r*0.2);
+  ctx.closePath();ctx.fill();
+  // lighter top layer (the wrap over the crown)
+  ctx.fillStyle=rgb(col);
+  ctx.beginPath();
+  ctx.moveTo(cx-r*1.02,cy+r*0.1);
+  ctx.quadraticCurveTo(cx-r*1.12,cy-r*1.05,cx,cy-r*1.08);
+  ctx.quadraticCurveTo(cx+r*1.12,cy-r*1.05,cx+r*1.02,cy+r*0.1);
+  // the opening around the face (cut back in)
+  ctx.quadraticCurveTo(cx+r*0.9,cy-r*0.25,cx+r*0.62,cy-r*0.4);
+  ctx.quadraticCurveTo(cx,cy-r*0.62,cx-r*0.62,cy-r*0.4);
+  ctx.quadraticCurveTo(cx-r*0.9,cy-r*0.25,cx-r*1.02,cy+r*0.1);
+  ctx.closePath();ctx.fill();
+  // a soft fold highlight
+  ctx.strokeStyle=rgba(255,255,255,.10);ctx.lineWidth=r*0.06;
+  ctx.beginPath();ctx.moveTo(cx-r*0.5,cy-r*0.9);ctx.quadraticCurveTo(cx-r*0.95,cy-r*0.2,cx-r*0.85,cy+r*0.6);ctx.stroke();
+  // subtle sleeve/edge embroidery hint at the drape edge
+  ctx.strokeStyle=rgba(255,240,220,.16);ctx.lineWidth=r*0.03;
+  ctx.beginPath();ctx.moveTo(cx-r*0.5,cy+r*1.6);ctx.lineTo(cx+r*0.5,cy+r*1.6);ctx.stroke();
+}
+/* a neat full beard: fills the jaw line under the face */
+function drawBeard(cx,cy,r,col){
+  ctx.fillStyle=rgb(col);
+  ctx.beginPath();
+  ctx.moveTo(cx-r*0.82,cy-r*0.05);
+  ctx.quadraticCurveTo(cx-r*0.9,cy+r*0.7,cx-r*0.4,cy+r*1.05);
+  ctx.quadraticCurveTo(cx,cy+r*1.25,cx+r*0.4,cy+r*1.05);
+  ctx.quadraticCurveTo(cx+r*0.9,cy+r*0.7,cx+r*0.82,cy-r*0.05);
+  // upper edge follows the cheeks
+  ctx.quadraticCurveTo(cx+r*0.55,cy+r*0.2,cx+r*0.4,cy+r*0.15);
+  ctx.quadraticCurveTo(cx,cy+r*0.32,cx-r*0.4,cy+r*0.15);
+  ctx.quadraticCurveTo(cx-r*0.55,cy+r*0.2,cx-r*0.82,cy-r*0.05);
+  ctx.closePath();ctx.fill();
+  // moustache
+  ctx.beginPath();ctx.ellipse(cx,cy+r*0.28,r*0.34,r*0.12,0,0,Math.PI);ctx.fill();
+}
+
+/* a guard's peaked cap + hi-vis detail overlay (call after person) */
+function guardCap(head,r){
+  ctx.save();
+  ctx.translate(head.hx,head.hy);ctx.rotate(head.tilt||0);
+  ctx.fillStyle=rgb([30,44,70]);ctx.beginPath();ctx.arc(0,-r*0.15,r*1.02,Math.PI,0);ctx.fill();
+  ctx.fillStyle=rgb([22,32,52]);ctx.beginPath();ctx.ellipse(r*0.15,-r*0.12,r*1.2,r*0.34,0,0,Math.PI);ctx.fill();
+  ctx.fillStyle=rgb([210,180,70]);rr(-r*0.9,-r*0.28,r*1.8,r*0.16,r*0.06);ctx.fill(); // band
+  ctx.restore();
+}
+
+/* ===== settings: platform, carriage interior, streaming window ===== */
+
+/* the station platform at 9.58am — morning, not night. Warm daylight. */
+function platform(t,opt){opt=opt||{};
+  // morning sky through the station roof
+  ctx.fillStyle=vgrad(0,H*.5,[[0,'#bcd0dd'],[1,'#dfe4de']]);ctx.fillRect(0,0,W,H*.5);
+  // station canopy girders
+  ctx.fillStyle='#20262e';ctx.fillRect(0,0,W,H*.12);
+  ctx.strokeStyle='rgba(40,48,58,.6)';ctx.lineWidth=3;
+  for(let i=0;i<8;i++){const x=i*(W/7);ctx.beginPath();ctx.moveTo(x,H*.12);ctx.lineTo(x,H*.18);ctx.stroke();}
+  // soft light shafts from the canopy gaps
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<4;i++){const x=W*(.15+i*.24);
+    ctx.fillStyle=radial(x,H*.1,4,W*.3,[[0,'rgba(255,240,200,.10)'],[1,'rgba(255,240,200,0)']]);ctx.fillRect(0,0,W,H*.7);}
+  ctx.restore();
+  // platform floor
+  ctx.fillStyle=vgrad(H*.62,H,[[0,'#8a8378'],[1,'#6f685d']]);ctx.fillRect(0,H*.62,W,H*.38);
+  ctx.fillStyle='rgba(0,0,0,.06)';for(let x=0;x<W;x+=W*.14)ctx.fillRect(x,H*.62,2,H*.38); // paving lines
+  ctx.fillStyle='rgba(210,170,70,.8)';ctx.fillRect(0,H*.70,W,3); // yellow line
+  // the TRAIN alongside — right side / upper, warm-lit windows
+  const ty=H*.62, carTop=H*.16;
+  ctx.fillStyle=vgrad(carTop,ty,[[0,'#3f4a56'],[.5,'#333d48'],[1,'#232a32']]);ctx.fillRect(-W*.05,carTop,W*1.1,ty-carTop);
+  ctx.fillStyle='#5aa0ac';ctx.fillRect(-W*.05,carTop,W*1.1,H*.02); // livery stripe (rail teal)
+  ctx.fillStyle='rgba(150,170,190,.12)';ctx.fillRect(-W*.05,carTop,W*1.1,3);
+  // windows + doors
+  for(let k=0;k<4;k++){const wx=W*.03+k*(W*.25),ww=W*.15,wy=carTop+H*.05,wh=(ty-carTop)*.42;
+    ctx.fillStyle=vgrad(wy,wy+wh,[[0,'#eaf0f2'],[1,'#c3d0d6']]);rr(wx,wy,ww,wh,4);ctx.fill();
+    ctx.fillStyle='rgba(60,80,90,.15)';rr(wx,wy,ww,wh*.4,4);ctx.fill();
+    ctx.strokeStyle='rgba(20,26,32,.5)';ctx.lineWidth=1.5;rr(wx,wy,ww,wh,4);ctx.stroke();}
+  // a door, open
+  const dx=opt.doorX!=null?opt.doorX:W*.42;
+  ctx.fillStyle='#1a2028';rr(dx,carTop+H*.03,W*.12,ty-carTop-H*.03,3);ctx.fill();
+  ctx.fillStyle=vgrad(carTop,ty,[[0,'rgba(255,236,190,.5)'],[1,'rgba(255,236,190,.15)']]);
+  rr(dx+W*.01,carTop+H*.05,W*.10,ty-carTop-H*.08,2);ctx.fill();
+  // warm spill from the door onto the platform
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(dx+W*.06,ty,4,W*.28,[[0,'rgba(255,214,140,.14)'],[1,'rgba(255,214,140,0)']]);
+  ctx.fillRect(0,H*.5,W,H*.5);ctx.restore();
+  return {ty,carTop,doorX:dx};
+}
+
+/* carriage interior — warm morning light, seats, a big window (fills with streaming view) */
+function carriage(t,opt){opt=opt||{};
+  const warm=opt.warm==null?1:opt.warm;
+  // walls
+  ctx.fillStyle=vgrad(0,H,[[0,'#d8c9ac'],[.5,'#cbbb9c'],[1,'#b3a487']]);ctx.fillRect(0,0,W,H);
+  // ceiling with light strip
+  ctx.fillStyle=vgrad(0,H*.14,[[0,'#e6dcc4'],[1,'#d3c6a8']]);ctx.fillRect(0,0,W,H*.14);
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(W*.5,-H*.04,4,W*.85,[[0,rgba(255,240,205,.22*warm)],[1,'rgba(255,240,205,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+  ctx.fillStyle=rgba(255,244,215,.35*warm);rr(W*.2,H*.02,W*.6,H*.012,3);ctx.fill();
+  // floor
+  ctx.fillStyle=vgrad(H*.8,H,[[0,'#5f5344'],[1,'#463d31']]);ctx.fillRect(0,H*.8,W,H*.2);
+  return {warm};
+}
+
+/* the big carriage window with landscape streaming (graphic-register countryside, morning) */
+function streamWindow(t,x,y,w,h,opt){opt=opt||{};const spd=opt.spd==null?1:opt.spd;
+  ctx.save();rr(x,y,w,h,7);ctx.clip();
+  // morning sky
+  ctx.fillStyle=vgrad(y,y+h,[[0,'#aecbe0'],[.55,'#c9dceb'],[1,'#e8ece2']]);ctx.fillRect(x,y,w,h);
+  // sun glow
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(x+w*.8,y+h*.2,4,w*.5,[[0,'rgba(255,246,210,.5)'],[1,'rgba(255,246,210,0)']]);ctx.fillRect(x,y,w,h);ctx.restore();
+  // far hills (slow) — two layers
+  function hills(off,base,amp,col,s){const sc=(t*s*spd)%(w*2);
+    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-w,y+h);
+    for(let px=x-w;px<=x+w*2;px+=10){const k=(px+sc)*0.010+off;
+      ctx.lineTo(px,y+h*base-Math.sin(k)*amp-Math.sin(k*2.3+off)*amp*0.4);}
+    ctx.lineTo(x+w*2,y+h);ctx.closePath();ctx.fill();}
+  hills(0.4,0.60,h*.10,'#9ab48c',0.05);
+  hills(1.9,0.68,h*.08,'#7ea074',0.09);
+  // fields band
+  ctx.fillStyle=vgrad(y+h*.66,y+h,[[0,'#8bab6e'],[1,'#6f9256']]);ctx.fillRect(x,y+h*.66,w,h*.34);
+  // hedge rows sweeping (mid)
+  const ts=(t*0.34*spd)%(w*.44);
+  ctx.fillStyle='#5c7d47';
+  for(let i=-1;i<8;i++){const hx=x+i*(w*.44)-ts;
+    ctx.beginPath();ctx.moveTo(hx,y+h*.80);ctx.quadraticCurveTo(hx+w*.11,y+h*.62,hx+w*.22,y+h*.80);ctx.closePath();ctx.fill();
+    // a tree
+    ctx.fillStyle='#4d6b3c';circle(hx+w*.05,y+h*.66,h*.05);ctx.fillStyle='#5c7d47';}
+  // near fence posts / blur (fast)
+  const ps=(t*1.3*spd)%(w*.12);
+  ctx.strokeStyle='rgba(70,58,42,.8)';ctx.lineWidth=2.4;
+  for(let i=-1;i<12;i++){const fx=x+i*(w*.12)-ps;ctx.beginPath();ctx.moveTo(fx,y+h*.74);ctx.lineTo(fx,y+h*.92);ctx.stroke();}
+  ctx.strokeStyle='rgba(120,140,110,.10)';ctx.lineWidth=1;
+  for(let i=0;i<9;i++){const yy=y+h*.7+((i*13+t*0.9*spd)%(h*.28));
+    const xx=x+((i*61+t*3.6*spd)%(w*1.3))-w*.15;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+28,yy);ctx.stroke();}
+  ctx.restore();
+  // frame
+  ctx.strokeStyle='rgba(70,58,44,.9)';ctx.lineWidth=6;rr(x,y,w,h,7);ctx.stroke();
+  ctx.strokeStyle='rgba(255,238,200,.18)';ctx.lineWidth=1.4;rr(x+3,y+3,w-6,h-6,6);ctx.stroke();
+  // sill
+  ctx.fillStyle='#5a4c39';rr(x-4,y+h,w+8,10,3);ctx.fill();
+}
+
+/* a seat unit (side-on, for compartments) */
+function seat(x,y,w,h,col,colSh){col=col||[150,70,64];colSh=colSh||[110,48,44];
+  ctx.fillStyle=rgb(colSh);rr(x,y,w,h,8);ctx.fill();
+  ctx.fillStyle=rgb(col);rr(x+w*.05,y+h*.05,w*.9,h*.6,6);ctx.fill();      // back
+  ctx.fillStyle=rgb(col);rr(x+w*.05,y+h*.62,w*.9,h*.33,6);ctx.fill();     // seat
+  ctx.fillStyle=rgba(255,255,255,.06);rr(x+w*.05,y+h*.05,w*.9,h*.14,6);ctx.fill();
+}
+
+/* ===== THE 9.58 TO WEND'S END · Part Four — 12 scenes ===== */
+/* Beats: airport family LEAVES (oblivious) · evader dodge/near-miss · watch-man settles, dozing. Lighter, breathing part. */
+
+const CH={
+  guard:{skin:[210,180,150],skinSh:[176,144,116],cloth:[34,52,84],clothSh:[24,38,64],hair:[54,40,28],hairStyle:'short'},
+  elderly:{skin:[226,206,186],skinSh:[196,172,150],cloth:[126,110,140],clothSh:[96,82,110],hair:[210,208,206],hairStyle:'grey'},
+  mother:{skin:[214,168,132],skinSh:[178,134,100],cloth:[196,120,86],clothSh:[160,90,60],hair:[40,30,24],hairStyle:'bun'},
+  evader:{skin:[204,172,150],skinSh:[168,138,116],cloth:[70,96,88],clothSh:[50,72,66],hair:[36,30,26],hairStyle:'cap'},
+  watcher:{skin:[206,176,150],skinSh:[170,142,118],cloth:[92,88,80],clothSh:[68,64,58],hair:[120,116,110],hairStyle:'short'},
+  inspector:{skin:[206,172,140],skinSh:[170,138,110],cloth:[60,70,92],clothSh:[42,50,68],hair:[50,40,32],hairStyle:'short'},
+  dad:{skin:[182,138,102],skinSh:[148,108,74],cloth:[216,198,166],clothSh:[184,166,134],hair:[28,22,18],hairStyle:'short',beard:true,beardCol:[26,20,16]},
+  mum:{skin:[186,142,106],skinSh:[150,110,78],cloth:[36,42,66],clothSh:[26,30,50],headwear:'hijab',hijab:[176,158,134],hijabSh:[146,128,106]},
+  son1:{skin:[184,140,104],skinSh:[150,110,76],cloth:[40,58,96],clothSh:[28,42,74],hair:[26,20,16],hairStyle:'short'},
+  son2:{skin:[188,144,108],skinSh:[152,112,78],cloth:[214,196,164],clothSh:[182,164,132],hair:[26,20,16],hairStyle:'short'},
+  watchman:{skin:[212,176,148],skinSh:[176,140,112],cloth:[60,58,66],clothSh:[42,40,48],hair:[90,84,80],hairStyle:'short'}
+};
+
+function digiWatch(x,y,s,lit){ctx.fillStyle=rgb([30,32,38]);rr(x-s,y-s*.7,s*2,s*1.4,s*.3);ctx.fill();
+  ctx.fillStyle=lit?rgb([120,210,180]):rgb([40,60,56]);rr(x-s*.7,y-s*.45,s*1.4,s*.9,s*.15);ctx.fill();
+  if(lit){ctx.fillStyle=rgb([20,40,36]);ctx.fillRect(x-s*.5,y-s*.1,s*1,s*.14);}}
+
+const SCENES=[
+ // 1 — mid-journey; the airport approaches; the family gets ready
+ {first:true,map:0,
+  prose:[["p","An hour on, the country began to give way to the edges of somewhere bigger — retail parks, a ring road, the tall grey shoulder of a multi-storey, and then, unmistakable, the flat sprawl and winking lights of an airport."],
+         ["p","At the family's table, the mood shifted up a gear. Bags were zipped. The younger boy was told, twice, to put his shoes back on. <em>They were nearly there. The first bit of the adventure was almost done.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.13,W*.36,H*.26,{spd:1.1});
+    seat(W*.0,H*.5,W*.32,H*.36,[86,132,120],[62,104,94]);
+    seat(W*.68,H*.5,W*.32,H*.36,[86,132,120],[62,104,94]);
+    person(W*.16,H*.84,H*.095,{...CH.dad,sit:true,mouth:.4,t:t,seed:6.1,sway:true});
+    person(W*.32,H*.85,H*.09,{...CH.mum,sit:true,mouth:.4,t:t,seed:6.2,sway:true});
+    person(W*.7,H*.85,H*.075,{...CH.son1,sit:true,mouth:.45,t:t,seed:6.3,sway:true});
+    person(W*.85,H*.86,H*.06,{...CH.son2,sit:true,mouth:.5,bob:true,t:t,seed:6.4,sway:true});
+    ctx.fillStyle=rgb([120,96,68]);rr(W*.4,H*.7,W*.2,H*.03,H*.01);ctx.fill();}},
+
+ // 2 — the watcher, one last look
+ {map:0,
+  prose:[["p","One row back, the man in the grey coat watched them gather their things. He'd said nothing, in the end. He'd not quite had the nerve, or the excuse, and the moment had passed him by."],
+         ["p","Now he watched them prepare to leave with an expression that had given up on whatever it had been reaching for. <em>Not shame. Nothing so useful as shame. Just a man returning to his newspaper, his small suspicion neither confirmed nor examined.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.06,H*.13,W*.26,H*.22,{spd:1.1});
+    // family mid-ground (small, left) gathering
+    person(W*.22,H*.72,H*.06,{...CH.mum,sit:true,mouth:.35,t:t,seed:6.2,sway:true});
+    person(W*.34,H*.72,H*.06,{...CH.dad,sit:true,mouth:.35,t:t,seed:6.1,sway:true});
+    // watcher foreground right
+    person(W*.68,H*.87,H*.12,{...CH.watcher,sit:true,mouth:-.05,brow:.1,look:-.4,t:t,seed:7.7,sway:true});
+    ctx.fillStyle=rgb([220,214,200]);rr(W*.58,H*.72,W*.24,H*.14,H*.006);ctx.fill();
+    ctx.strokeStyle='rgba(60,56,48,.4)';ctx.lineWidth=1;
+    for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(W*.6,H*.75+i*H*.02);ctx.lineTo(W*.78,H*.75+i*H*.02);ctx.stroke();}}},
+
+ // 3 — the airport stop; the family gets off, happy
+ {map:1,
+  prose:[["p","The 9.58 pulled in under a great glass canopy, and the doors opened onto the particular bustle of an airport station — wheeled cases, tannoy announcements, the whole world apparently going on holiday at once."],
+         ["p","The family spilled out in a happy tangle, counting heads and bags, the younger boy hoisted onto his father's shoulders for the walk to Departures. <em>They were laughing about the passports already. It was going to be a story.</em>"]],
+  paint:t=>{const p=platform(t,{doorX:W*.44});
+    // airport canopy hint: brighter, more glass
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.5,H*.05,10,W*.8,[[0,'rgba(220,235,245,.16)'],[1,'rgba(220,235,245,0)']]);ctx.fillRect(0,0,W,H*.6);ctx.restore();
+    // family on the platform, leaving
+    person(W*.34,H*.87,H*.095,{...CH.dad,mouth:.5,look:.2,t:t,seed:6.1});
+    // younger son on dad's shoulders (small, above dad)
+    person(W*.34,H*.87-H*.19,H*.05,{...CH.son2,mouth:.6,bob:true,t:t,seed:6.4});
+    person(W*.48,H*.88,H*.09,{...CH.mum,mouth:.45,look:.1,t:t,seed:6.2});
+    person(W*.58,H*.9,H*.072,{...CH.son1,mouth:.5,look:.3,t:t,seed:6.3});
+    // luggage
+    ctx.fillStyle=rgb([120,80,60]);rr(W*.26,H*.82,H*.06,H*.08,H*.01);ctx.fill();
+    ctx.fillStyle=rgb([80,100,130]);rr(W*.64,H*.84,H*.05,H*.07,H*.01);ctx.fill();}},
+
+ // 4 — they're gone; Frank watches them go; a small grace
+ {map:2,
+  prose:[["p","Frank stood in the doorway and watched the little family thread away into the crowd, the boy on the shoulders turning to wave at the train, at Frank, at no one — waving for the joy of it."],
+         ["p","Frank waved back."],
+         ["p","<em>They would never know how close their morning had come to a different shape. That was the best possible outcome, Frank thought. The ones who never find out are the lucky ones.</em>"]],
+  paint:t=>{const p=platform(t,{doorX:W*.44});
+    // Frank in the doorway (right), waving
+    const g=person(W*.7,H*.88,H*.115,{...CH.guard,mouth:.35,look:-.6,t:t,seed:8.8});
+    guardCap(g,CH_r(H*.115));
+    // family small, receding into crowd (left)
+    person(W*.2,H*.8,H*.055,{...CH.dad,mouth:.3,t:t,seed:6.1});
+    person(W*.2,H*.8-H*.11,H*.03,{...CH.son2,mouth:.5,t:t,seed:6.4});
+    person(W*.28,H*.81,H*.05,{...CH.mum,mouth:.3,t:t,seed:6.2});
+    // crowd hints (grey blobs)
+    ctx.fillStyle='rgba(60,60,66,.4)';
+    for(let i=0;i<5;i++){const cx=W*(.1+i*.09);ctx.beginPath();ctx.ellipse(cx,H*.82,H*.03,H*.07,0,0,7);ctx.fill();}}},
+
+ // 5 — down the train: the evader, and a closer call
+ {map:2,
+  prose:[["p","Three carriages back, the man in the green jacket was pushing his luck."],
+         ["p","He'd got comfortable — too comfortable — and had not noticed the young inspector working steadily up the carriage until there was really nowhere good to go. Ahead: the inspector. Behind: a family with a sleeping toddler blocking the aisle with a mountain of gear."],
+         ["p","<em>For the first time all morning, the green jacket looked something other than serene.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.06,H*.13,W*.24,H*.2,{spd:1});
+    // inspector approaching from far (small, left)
+    person(W*.16,H*.66,H*.06,{...CH.inspector,mouth:0,look:.5,t:t,seed:9.1,sway:true});
+    // evader foreground, first flicker of worry
+    person(W*.5,H*.88,H*.12,{...CH.evader,mouth:-.1,brow:.3,browRaise:.3,look:.4,t:t,seed:3.3,sway:true});
+    // gear blocking behind (right)
+    ctx.fillStyle=rgb([120,90,70]);rr(W*.76,H*.78,H*.1,H*.12,H*.015);ctx.fill();
+    ctx.fillStyle=rgb([90,110,140]);rr(W*.84,H*.82,H*.07,H*.09,H*.012);ctx.fill();}},
+
+ // 6 — the evader's escape: the luggage van
+ {map:3,
+  prose:[["p","He did the only thing left to do. He stood, stretched with theatrical unconcern, and slipped sideways through a door marked in a way that suggested passengers really shouldn't — into the cool dim of the luggage van, among the cases and the parcels and the one enormous bicycle in a bag."],
+         ["p","He crouched behind a stack of mail sacks and waited, grinning again now, the danger passed. <em>Nobody checked tickets in the luggage van. Nobody came in here at all.</em>"]],
+  paint:t=>{
+    // luggage van: dim, cool, stacks of cases
+    ctx.fillStyle=vgrad(0,H,[[0,'#4a4640'],[.5,'#3a3630'],[1,'#26231e']]);ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=rgb([30,28,24]);ctx.fillRect(0,0,W,H*.1);ctx.fillRect(0,H*.9,W,H*.1);
+    // stacked cases
+    const cases=[[.1,.5,.7,.55],[.14,.62,.65,.5],[.7,.48,.5,.6],[.76,.6,.55,.48],[.44,.55,.48,.52]];
+    cases.forEach((c,i)=>{ctx.fillStyle=rgb([[120,80,60],[90,100,130],[80,70,66],[110,90,70],[70,84,100]][i%5]);
+      rr(W*c[0],H*c[1],W*0.16,H*0.16,H*.01);ctx.fill();});
+    // bike-in-bag (tall shape, right)
+    ctx.fillStyle=rgb([50,54,58]);rr(W*.86,H*.3,W*.1,H*.5,H*.03);ctx.fill();
+    // mail sacks (foreground)
+    ctx.fillStyle=rgb([120,110,90]);ctx.beginPath();ctx.ellipse(W*.35,H*.86,W*.16,H*.1,0,0,7);ctx.fill();
+    // evader crouched behind, grinning, peeking
+    person(W*.5,H*.84,H*.09,{...CH.evader,sit:true,mouth:.5,look:.3,t:t,seed:3.3,sway:true});
+    // a thin dusty light shaft
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.2,H*.1,4,W*.4,[[0,'rgba(230,220,190,.08)'],[1,'rgba(230,220,190,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}},
+
+ // 7 — the watch-man settles for his nap (the PLANT tightens)
+ {map:4,
+  prose:[["p","Meanwhile, by his favourite window, the man with the watch was doing what he did every Friday around this point in the journey."],
+         ["p","He checked the fat digital watch. He pressed the little button on the side — <em>the button he was so proud of</em> — and a tiny confirmation blinked on the display. Alarm set. Forty-five seconds before Wend's End. Then he folded his hands, tipped his head back against the glass, and closed his eyes."],
+         ["p","<em>He'd done it a thousand times. It had never once let him down.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.6,H*.48,W*.36,H*.36,[150,80,70],[116,58,52]);
+    // watch-man setting the watch, about to nap
+    person(W*.5,H*.85,H*.105,{...CH.watchman,sit:true,mouth:.2,look:-.2,t:t,seed:10.1,sway:true});
+    // watch held, pressing button, lit
+    digiWatch(W*.4,H*.68,H*.03,true);
+    // his finger on the button (small)
+    ctx.fillStyle=rgb([212,176,148]);circle(W*.44,H*.66,H*.014);}},
+
+ // 8 — he sleeps; the watch on show
+ {map:4,
+  prose:[["p","Within a minute he was gone — properly asleep, head back, mouth slightly open, the sleep of a man with an untroubled system and a gig to play at the other end."],
+         ["p","His arm had come to rest on the little table, hand open, the watch face turned up to the carriage lights for anyone to see. <em>The alarm sat inside it, patient, forty-five seconds of warning coiled and ready.</em>"],
+         ["p","<em>All it needed was to be left alone.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.6,H*.48,W*.36,H*.36,[150,80,70],[116,58,52]);
+    // watch-man asleep, head back
+    person(W*.5,H*.85,H*.105,{...CH.watchman,sit:true,eyesClosed:true,mouth:.05,tilt:-.12,t:t,seed:10.1,sway:true});
+    // arm + watch on the table, face up, lit
+    ctx.fillStyle=rgb([212,176,148]);rr(W*.34,H*.72,H*.12,H*.03,H*.014);ctx.fill(); // forearm
+    digiWatch(W*.36,H*.71,H*.032,true);}},
+
+ // 9 — the wider train; the sea gets closer
+ {map:5,
+  prose:[["p","The 9.58 ran on, lighter now by one family, and began the long slow climb the line takes toward the coast — the country opening out, the trees thinning, the first faint grey suggestion of the sea somewhere far ahead."],
+         ["p","Frank came through, quieter than before. He passed the sleeping man with the watch, and smiled, and did not disturb him. He passed the empty table where the family had been, still scattered with the crumbs of a snack. <em>He passed the compartment near the front without looking in.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.2,H*.14,W*.56,H*.32,{spd:1.1});
+    // Frank walking through (corridor, mid)
+    ctx.fillStyle=vgrad(H*.14,H,[[0,'rgba(180,150,110,.12)'],[1,'rgba(90,74,54,.2)']]);
+    ctx.beginPath();ctx.moveTo(W*.44,H*.34);ctx.lineTo(W*.56,H*.34);ctx.lineTo(W*.68,H*.78);ctx.lineTo(W*.32,H*.78);ctx.closePath();ctx.fill();
+    const g=person(W*.5,H*.72,H*.085,{...CH.guard,mouth:.2,t:t,seed:8.8,sway:true});
+    guardCap(g,CH_r(H*.085));}},
+
+ // 10 — the evader emerges, victorious, unaware of what's ahead
+ {map:5,
+  prose:[["p","In the luggage van, the man in the green jacket judged it safe, straightened his jacket, and slipped back out into the carriage as though he'd merely been for a stroll."],
+         ["p","He'd done it again. Beaten the system, all the way to the coast. He found a seat, put his feet up on the one opposite, and watched the sea grow on the horizon with the deep contentment of a man who has got away with something."],
+         ["p","<em>Nearly there now. A few more stops and he'd be off, scot-free, another Friday beaten. He could taste it.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.28,H*.14,W*.44,H*.3,{spd:1.1});
+    seat(W*.6,H*.5,W*.36,H*.34,[150,80,70],[116,58,52]);
+    // evader lounging, feet up, smug
+    person(W*.46,H*.84,H*.1,{...CH.evader,sit:true,mouth:.5,look:.3,tilt:.06,t:t,seed:3.3,sway:true});
+    // feet up hint (a shape on the opposite seat)
+    ctx.fillStyle=rgb([50,72,66]);rr(W*.2,H*.74,H*.14,H*.05,H*.02);ctx.fill();
+    // sea on the horizon (in the window handled by streamWindow; add a grey band hint)
+    }},
+
+ // 11 — the front compartment; the elderly woman, and time passing
+ {map:6,
+  prose:[["p","Near the front, nothing had changed and everything was a little further along. The baby had woken and been fed and gone down again. The mother had read the same page of a magazine four times. And the elderly woman sat with the container in her lap, watching the light change over the hills as the morning wore toward noon."],
+         ["p","<em>Her stop was coming. Not the last one — she wasn't going all the way to Wend's End. A smaller place, a stop or two before. She had checked the map when she boarded, and she knew exactly where she was going.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.44,H*.3,{spd:1});
+    seat(W*.02,H*.46,W*.28,H*.36,[120,100,140],[96,80,112]);
+    seat(W*.7,H*.46,W*.28,H*.36,[150,80,70],[116,58,52]);
+    person(W*.16,H*.8,H*.10,{...CH.elderly,sit:true,mouth:.12,look:.4,t:t,seed:1.1,sway:true});
+    // vase
+    ctx.fillStyle=rgb([180,180,186]);rr(W*.16-H*.028,H*.72-H*.055,H*.056,H*.085,H*.012);ctx.fill();
+    ctx.fillStyle=rgb([150,150,158]);rr(W*.16-H*.028,H*.72-H*.055,H*.056,H*.016,H*.008);ctx.fill();
+    person(W*.84,H*.82,H*.10,{...CH.mother,sit:true,mouth:.1,t:t,seed:2.2,sway:true});
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.72,H*.03);
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.3,H*.4,4,W*.4,[[0,'rgba(255,236,200,.12)'],[1,'rgba(255,236,200,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}},
+
+ // 12 — button: the afternoon, the sea ahead, thread-lines converging
+ {map:6,last:true,
+  prose:[["p","And so the 9.58 carried its remaining cargo on toward the water — a sleeping man who never missed his stop, a fare-dodger almost home, a woman with a small ceramic container and a plan."],
+         ["p","The sea was properly visible now, a hard bright line under the sky, getting closer with every mile of track. Two more stops, maybe three. The best part of the journey, some would say — the part where you can smell the salt."],
+         ["p","<em>Ahead, at a small station with a view of the water, a platform was waiting. Beyond the platform, the cliffs. But nobody on the 9.58 was thinking about that yet.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.24,H*.14,W*.52,H*.32,{spd:1.1});
+    // corridor, Frank small up the aisle
+    ctx.fillStyle=vgrad(H*.14,H,[[0,'rgba(180,150,110,.12)'],[1,'rgba(90,74,54,.2)']]);
+    ctx.beginPath();ctx.moveTo(W*.44,H*.32);ctx.lineTo(W*.56,H*.32);ctx.lineTo(W*.64,H*.7);ctx.lineTo(W*.36,H*.7);ctx.closePath();ctx.fill();
+    // a hint of sea-grey in the far window
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.5,H*.2,4,W*.5,[[0,'rgba(200,220,225,.10)'],[1,'rgba(200,220,225,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}}
+];
+
+function CH_r(s){return s*0.42;}
+
+/* ===== THE 9.58 TO WEND'S END · Part One — runner ===== */
+let idx=-1,auto=false,paused=false,fin=false,running=false;
+let sceneT0=0,transT0=0,prevTs=0,dwell=9,muted=false;
+
+/* train-map progress: loco + 6 carriages fill as you go */
+const NCARS=6;
+function buildMap(){const m=$('trainmap');if(!m)return;m.innerHTML='';
+  const loco=document.createElement('div');loco.className='loco';m.appendChild(loco);
+  for(let i=0;i<NCARS;i++){const c=document.createElement('div');c.className='car';c.dataset.i=i;m.appendChild(c);}}
+function setMap(n){const cars=document.querySelectorAll('#trainmap .car');
+  cars.forEach((c,i)=>{c.classList.toggle('done',i<n);c.classList.toggle('here',i===n-1&&n>0);});}
+
+/* ---- audio: morning bed + rail rhythm + station ambience ---- */
+let AC=null,master=null,bed=[],railTimer=null;
+function aInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();master.gain.value=muted?0:0.75;master.connect(AC.destination);}catch(e){AC=null;}}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,sr*d,sr),x=b.getChannelData(0);
+  for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function startBed(){if(!AC)return;
+  const o=AC.createOscillator();o.type='sine';o.frequency.value=58;const g=AC.createGain();g.gain.value=.0001;
+  g.gain.linearRampToValueAtTime(.04,AC.currentTime+3);o.connect(g);g.connect(master);o.start();bed.push(o,g);}
+/* rail-joint rhythm: soft periodic thumps, begins when the train moves (scene 9+) */
+function railOn(on){if(!AC)return;
+  if(on&&!railTimer){let step=0;railTimer=setInterval(()=>{if(muted||!AC)return;
+    const now=AC.currentTime;[0,0.16].forEach((off,k)=>{
+      const s=AC.createBufferSource();s.buffer=nbuf(0.08);
+      const bp=AC.createBiquadFilter();bp.type='lowpass';bp.frequency.value=180;
+      const g=AC.createGain();g.gain.setValueAtTime(.0001,now+off);
+      g.gain.linearRampToValueAtTime(k?0.03:0.05,now+off+0.005);
+      g.gain.exponentialRampToValueAtTime(.0001,now+off+0.09);
+      s.connect(bp);bp.connect(g);g.connect(master);s.start(now+off);s.stop(now+off+0.1);});
+    step++;},680);}
+  else if(!on&&railTimer){clearInterval(railTimer);railTimer=null;}}
+function stopAll(){if(!AC)return;bed.forEach(n=>{if(n.gain)try{n.gain.linearRampToValueAtTime(.0001,AC.currentTime+.5);}catch(e){}});railOn(false);}
+
+/* ---- text band ---- */
+function renderProse(sc){const el=$('prose');el.className=sc.first?'first':'';
+  el.innerHTML=sc.prose.map(p=>`<${p[0]}>${p[1]}</${p[0]}>`).join('');}
+function wordCount(sc){return sc.prose.reduce((n,p)=>n+p[1].replace(/<[^>]+>/g,'').split(/\s+/).length,0);}
+function calcDwell(sc){return Math.max(7,Math.min(16,3+wordCount(sc)*0.3));}
+
+function enter(i){idx=i;const sc=SCENES[i];sceneT0=performance.now();transT0=performance.now();
+  renderProse(sc);dwell=calcDwell(sc);
+  if(sc.map!=null)setMap(sc.map);
+  const stopped=[2,3].includes(i); railOn(!stopped);window.MOVING=!stopped; // P4: moving except the airport-stop scenes
+  paused=false;
+  const hint=$('hint');hint.classList.remove('hide');
+  hint.textContent=auto?(sc.last?'':'tap to pause'):(sc.last?'tap to finish':'tap to continue');}
+function advance(){if(fin)return;if(idx>=SCENES.length-1){finish();return;}enter(idx+1);}
+function finish(){fin=true;$('hint').classList.add('hide');stopAll();
+  $('endEpi').textContent='A sleeping man who never misses his stop, a fare-dodger almost home, a woman with a small container and a plan. The sea, getting closer.';
+  const f=$('fade');f.style.transition='opacity 1.3s';f.style.opacity='1';
+  setTimeout(()=>{$('endScr').classList.remove('gone');},1400);}
+function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
+  aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
+  if(!running){running=true;requestAnimationFrame(loop);}}
+function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
+  $('hint').textContent=paused?'tap to resume':'tap to pause';}
+
+let lastInput=0;
+function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
+  if(paused&&idx>=0)sceneT0+=dt;
+  const t=now-sceneT0;const sc=idx>=0?SCENES[idx]:null;
+  try{ctx.clearRect(0,0,W,H);if(sc)sc.paint(t);}catch(e){}
+  drawGrain();
+  const tr=Math.max(0,1-(now-transT0)/600);
+  if(tr>0&&!fin){$('fade').style.opacity=(tr*tr*0.85).toFixed(3);}else if(!fin){$('fade').style.opacity='0';}
+  if(auto&&!paused&&!fin&&idx>=0&&t>=dwell*1000)advance();
+  requestAnimationFrame(loop);}
+
+$('app').addEventListener('click',e=>{
+  if(e.target.closest('.screen'))return;
+  if(['btnRead','btnAuto','btnReplay','mute'].includes(e.target.id))return;
+  if(!$('titleScr').classList.contains('gone'))return;
+  if(!$('endScr').classList.contains('gone'))return;
+  const now=Date.now();if(now-lastInput<350)return;lastInput=now;
+  if(auto)togglePause();else advance();});
+$('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
+$('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});
+$('btnReplay').addEventListener('click',e=>{e.stopPropagation();start(auto);});
+$('mute').addEventListener('click',e=>{e.stopPropagation();muted=!muted;
+  $('mute').innerHTML=muted?'&#128263;':'&#9835;';if(master)master.gain.value=muted?0:0.75;
+  if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();
+  if(!$('titleScr').classList.contains('gone'))start(false);
+  else if($('endScr').classList.contains('gone')){if(auto)togglePause();else advance();}}});
+
+buildMap();size();running=true;requestAnimationFrame(loop);
+
+</script></body></html>

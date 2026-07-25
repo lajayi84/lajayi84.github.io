@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The 9.58 to Wend's End — Part One</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{ --page:#efe7d6; --ink:#33291d; --ink-soft:#6f6250; --accent:#c07a3e; --rail:#3a6b74; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{background:#0c0f12;color:var(--ink);font-family:'Spectral',Georgia,serif;
+    display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:520px;height:100dvh;max-height:920px;overflow:hidden;
+    background:#0c0f12;display:flex;flex-direction:column;cursor:pointer;}
+
+  #window{position:relative;flex:0 1 56%;min-height:44%;overflow:hidden;background:#0a0d10;}
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #window::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:
+      radial-gradient(130% 100% at 50% 46%, transparent 55%, rgba(8,10,14,.32) 86%, rgba(8,10,14,.6)),
+      linear-gradient(180deg, rgba(8,10,14,.28), transparent 16%, transparent 84%, rgba(8,10,14,.36));}
+  #grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.045;mix-blend-mode:overlay;}
+  #eyebrow{position:absolute;top:18px;left:22px;z-index:6;
+    font-family:'Fraunces',serif;font-weight:600;font-size:10px;letter-spacing:.28em;
+    text-transform:uppercase;color:rgba(239,231,214,.55);}
+  #eyebrow b{display:block;font-size:8.5px;letter-spacing:.22em;color:rgba(239,231,214,.32);font-weight:400;margin-top:3px;}
+  #fade{position:absolute;inset:0;z-index:7;background:#0c0f12;opacity:0;pointer-events:none;}
+
+  #band{flex:1 1 auto;background:var(--page);position:relative;
+    padding:24px 28px 0;overflow:hidden;display:flex;flex-direction:column;min-height:0;
+    box-shadow:0 -38px 76px rgba(0,0,0,.5);}
+  #band::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(51,41,29,.15) 18%,rgba(51,41,29,.15) 82%,transparent);}
+  #prose{font-size:15.5px;line-height:1.56;color:var(--ink);flex:1 1 auto;overflow-y:auto;overflow-x:hidden;
+    padding-bottom:60px;scrollbar-width:none;}
+  #prose::-webkit-scrollbar{display:none;}
+  #prose p{margin-bottom:.6em;opacity:0;transform:translateY(6px);animation:rise .9s cubic-bezier(.2,.7,.25,1) forwards;}
+  #prose p:nth-child(2){animation-delay:.5s;} #prose p:nth-child(3){animation-delay:.95s;}
+  #prose.first p:first-child::first-letter{font-family:'Fraunces',serif;font-weight:600;font-size:3em;line-height:.8;
+    float:left;margin:.05em .1em 0 0;color:#4a3a26;}
+  #prose em{font-style:italic;color:#5a4a34;}
+  #prose .dlg{color:#42361f;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  #foot{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:9px 0 calc(13px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(239,231,214,0),var(--page) 42%);}
+  /* progress = the train map filling carriage by carriage */
+  #trainmap{display:flex;gap:3px;align-items:center;height:14px;}
+  #trainmap .loco{width:16px;height:9px;border-radius:3px 5px 2px 2px;background:var(--rail);opacity:.9;position:relative;}
+  #trainmap .car{width:15px;height:8px;border-radius:2px;border:1px solid rgba(51,41,29,.28);background:transparent;transition:background .4s;}
+  #trainmap .car.done{background:var(--accent);border-color:var(--accent);}
+  #trainmap .car.here{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,122,62,.25);}
+  #hint{font-family:'Fraunces',serif;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--ink-soft);opacity:.5;animation:hb 2.8s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.28;}50%{opacity:.56;}}
+  #hint.hide{display:none;}
+
+  #mute{position:absolute;top:15px;right:17px;z-index:8;width:30px;height:30px;display:flex;align-items:center;
+    justify-content:center;font-size:13px;border-radius:50%;background:rgba(10,12,16,.42);
+    border:1px solid rgba(239,231,214,.2);color:rgba(239,231,214,.72);pointer-events:auto;cursor:pointer;}
+
+  .screen{position:absolute;inset:0;z-index:20;background:#0b0e11;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:38px;transition:opacity 1s;}
+  .screen.gone{opacity:0;pointer-events:none;}
+  .screen.gone *{pointer-events:none !important;}
+  .k{font-family:'Fraunces',serif;font-weight:500;font-size:10px;letter-spacing:.32em;text-transform:uppercase;
+    color:rgba(239,231,214,.5);margin-bottom:20px;}
+  .board{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,8.5vw,50px);color:#efe7d6;
+    line-height:1;letter-spacing:-.01em;}
+  .board .time{color:var(--accent);}
+  .board .dest{display:block;font-size:.58em;color:#8bb0b6;font-weight:500;letter-spacing:.02em;margin-top:.35em;}
+  .plat{font-family:'Spectral',serif;font-style:italic;font-size:13.5px;color:rgba(239,231,214,.5);margin-top:18px;}
+  .byline{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.14em;color:rgba(239,231,214,.5);margin-top:16px;font-style:normal;}
+  .btns{display:flex;gap:11px;margin-top:30px;}
+  .go{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    padding:13px 24px;border-radius:3px;border:1px solid var(--accent);background:var(--accent);color:#1a1108;
+    cursor:pointer;pointer-events:auto;}
+  .go.ghost{background:transparent;color:var(--accent);}
+  .go:active{transform:scale(.97);}
+  #endScr .board{font-size:clamp(26px,7vw,40px);}
+  #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:14.5px;color:rgba(239,231,214,.6);
+    max-width:23em;margin-top:16px;line-height:1.55;}
+  #endScr .part{font-family:'Fraunces',serif;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+    color:rgba(239,231,214,.4);margin-top:24px;}
+  #endScr .credits{font-family:'Spectral',serif;font-style:italic;font-size:12px;color:rgba(239,231,214,.4);margin-top:16px;}
+  #endScr .endbtns{display:flex;gap:11px;margin-top:26px;}
+  @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="window">
+    <canvas id="scene"></canvas>
+    <canvas id="grain"></canvas>
+    <div id="eyebrow">The 9.58 to Wend's End<b id="ebsub">Part One · Departure</b></div>
+    <div id="fade"></div>
+  </div>
+  <div id="mute">&#9835;</div>
+  <div id="band">
+    <div id="prose"></div>
+    <div id="foot"><div id="trainmap"></div><div id="hint">tap to continue</div></div>
+  </div>
+  <div class="screen" id="titleScr">
+    <div class="k">A journey in eight parts</div>
+    <div class="board"><span class="time">The 9.58</span><span class="dest">to Wend's End</span></div>
+    <div class="plat">Part One — Departure</div>
+    <div class="byline">by Lanre Ajayi</div>
+    <div class="btns"><button class="go" id="btnRead">Read</button><button class="go ghost" id="btnAuto">Play to me</button></div>
+  </div>
+  <div class="screen gone" id="endScr">
+    <div class="k">End of Part One</div>
+    <div class="board"><span class="time">The 9.58</span><span class="dest">to Wend's End</span></div>
+    <div class="epi" id="endEpi"></div>
+    <div class="part">Part Two — The First Stop</div>
+    <div class="credits">Written by Lanre Ajayi</div>
+    <div class="endbtns"><button class="go ghost" id="btnReplay">Read again</button></div>
+  </div>
+</div>
+
+<script>
+/* ===== THE 9.58 TO WEND'S END · Part One — engine (graphic register) ===== */
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('scene'),ctx=cv.getContext('2d');
+const gcv=$('grain'),gx=gcv.getContext('2d');
+let W=0,H=0,DPR=1,grainTiles=[];
+
+function size(){const r=$('window').getBoundingClientRect();
+  W=r.width;H=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*DPR;cv.height=H*DPR;gcv.width=W*DPR;gcv.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);gx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',size);
+
+function buildGrain(){grainTiles=[];
+  for(let k=0;k<3;k++){const c=document.createElement('canvas');c.width=150;c.height=150;
+    const g=c.getContext('2d'),id=g.createImageData(150,150),d=id.data;
+    for(let i=0;i<d.length;i+=4){const v=128+(Math.random()*2-1)*40;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+    g.putImageData(id,0,0);grainTiles.push(c);}}
+function drawGrain(){if(!grainTiles.length||reduce)return;
+  gx.clearRect(0,0,W,H);const t=grainTiles[(Math.random()*grainTiles.length)|0];
+  const ox=-(Math.random()*150)|0,oy=-(Math.random()*150)|0;
+  for(let y=oy;y<H;y+=150)for(let x=ox;x<W;x+=150)gx.drawImage(t,x,y);}
+
+/* ---- colour + shape helpers ---- */
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rgba=(r,g,b,a)=>`rgba(${r|0},${g|0},${b|0},${a})`;
+const rgb=c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+function vgrad(y0,y1,st){const g=ctx.createLinearGradient(0,y0,0,y1);st.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function radial(x,y,r0,r1,st){const g=ctx.createRadialGradient(x,y,r0,x,y,r1);st.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function circle(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
+
+/* ===== GRAPHIC CHARACTER SYSTEM ===== */
+/* Warm, simple, picture-book faces: rounded head, white eyes + dark pupils, brows/mouth do the emotion.
+   Each person built from: body colour, hair shape/colour, a prop, a build. Silhouette-distinct. */
+function person(x,groundY,s,P){P=P||{};
+  // ---- idle animation (layered: body vs head move independently = life) ----
+  const T=P.t||0, seed=P.seed||0;
+  const MOV=(P.sway!=null?(P.sway?1:0):(window.MOVING?1:0));                                        // train moving -> everyone rocks
+  // body: breath + subtle rock
+  const breathe=Math.sin(T*0.0019+seed)*s*0.030;                // deeper breath
+  const bodyRock=MOV*Math.sin(T*0.0022+seed*1.7)*s*0.045;       // carriage sway of the torso
+  const bobExtra=(P.bob?Math.sin(T*0.0065+seed)*s*0.035:0);     // livelier bob (baby/excited)
+  // head: its own drift + tilt, slightly out of phase with the body (the key life-giver)
+  const headSwayX=Math.sin(T*0.0016+seed*2.3)*s*0.045 + MOV*Math.sin(T*0.0022+seed*1.7+0.6)*s*0.05;
+  const headBob=Math.sin(T*0.0024+seed*1.1)*s*0.022;
+  const headTilt=Math.sin(T*0.0013+seed*0.7)*0.05 + (P.tilt||0);  // radians
+  // occasional slow head-turn (look drifts) unless a fixed look is set
+  const lookDrift=(P.look!=null)?P.look:Math.sin(T*0.0009+seed*4)*0.7;
+  groundY=groundY+breathe+bobExtra;  x=x+bodyRock;
+  // blink: quick, natural, per-person cycle
+  const blinkPhase=(T*0.001+seed*3)% (3.6+ (seed%10)*0.15);
+  const blinking=blinkPhase>(3.4+(seed%10)*0.15);
+  const skin=P.skin||[228,196,168], skinSh=P.skinSh||[196,160,132];
+  const cloth=P.cloth||[110,120,140], clothSh=P.clothSh||[80,88,106];
+  const hair=P.hair||[60,44,32];
+  const lean=P.lean||0, look=P.look||0;   // look: -1 left .. +1 right (pupil shift)
+  const sit=P.sit;                          // sitting shortens legs
+  ctx.save();ctx.translate(x,groundY);ctx.rotate(lean*0.06);
+  const bodyTop=-s*(sit?1.5:2.05), headR=s*0.42, headY=bodyTop-headR*0.7;
+  // ---- body (coat/torso) ----
+  ctx.fillStyle=rgb(clothSh);
+  ctx.beginPath();ctx.moveTo(-s*0.6,0);
+  ctx.quadraticCurveTo(-s*0.72,bodyTop*0.5,-s*0.5,bodyTop);
+  ctx.lineTo(s*0.5,bodyTop);
+  ctx.quadraticCurveTo(s*0.72,bodyTop*0.5,s*0.6,0);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=rgb(cloth);
+  ctx.beginPath();ctx.moveTo(-s*0.5,0);
+  ctx.quadraticCurveTo(-s*0.6,bodyTop*0.5,-s*0.42,bodyTop);
+  ctx.lineTo(s*0.42,bodyTop);
+  ctx.quadraticCurveTo(s*0.6,bodyTop*0.5,s*0.5,0);
+  ctx.closePath();ctx.fill();
+  // shoulders highlight
+  ctx.fillStyle=rgba(255,255,255,.06);rr(-s*0.42,bodyTop,s*0.84,s*0.3,s*0.15);ctx.fill();
+  // ---- neck ----
+  ctx.fillStyle=rgb(skinSh);rr(-s*0.13,bodyTop-s*0.18,s*0.26,s*0.28,s*0.08);ctx.fill();
+  // ---- head (own motion: sway, bob, tilt) ----
+  ctx.save();
+  ctx.translate(headSwayX,headBob);
+  ctx.translate(0,headY);ctx.rotate(headTilt);ctx.translate(0,-headY);
+  ctx.fillStyle=rgb(skin);circle(0,headY,headR);
+  // cheek shading
+  ctx.fillStyle=rgba(skinSh[0],skinSh[1],skinSh[2],.5);
+  ctx.beginPath();ctx.ellipse(headR*0.5,headY+headR*0.2,headR*0.5,headR*0.6,0,0,7);ctx.fill();
+  // ---- hair ----
+  drawHair(0,headY,headR,hair,P.hairStyle||'short');
+  // ---- eyes ----
+  if(P.eyesClosed||blinking){
+    ctx.strokeStyle=rgb([70,54,40]);ctx.lineWidth=Math.max(1.2,s*0.05);ctx.lineCap='round';
+    for(const sx of[-1,1]){ctx.beginPath();ctx.arc(sx*headR*0.38,headY-headR*0.02,headR*0.2,0.2,Math.PI-0.2);ctx.stroke();}
+  }else{
+    for(const sx of[-1,1]){
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*headR*0.38,headY-headR*0.05,headR*0.19,headR*0.23,0,0,7);ctx.fill();
+      ctx.fillStyle=rgb([46,34,24]);circle(sx*headR*0.38+lookDrift*headR*0.09,headY-headR*0.02,headR*0.11);
+      ctx.fillStyle='#fff';circle(sx*headR*0.38+lookDrift*headR*0.09+headR*0.03,headY-headR*0.06,headR*0.035);
+    }
+  }
+  // ---- brows (emotion) ---- browY offset & angle
+  const bw=headR*0.26, by=headY-headR*0.34, ba=(P.brow||0);
+  ctx.strokeStyle=rgb(hair);ctx.lineWidth=Math.max(1.4,s*0.055);ctx.lineCap='round';
+  for(const sx of[-1,1]){ctx.beginPath();
+    ctx.moveTo(sx*headR*0.38-bw*0.5, by+ (sx*ba)*headR*0.12 + (P.browRaise||0)*-headR*0.1);
+    ctx.lineTo(sx*headR*0.38+bw*0.5, by- (sx*ba)*headR*0.12 + (P.browRaise||0)*-headR*0.1);ctx.stroke();}
+  // ---- mouth (emotion) ---- m: -1 frown .. 0 neutral .. +1 smile
+  const m=(P.mouth==null?0.2:P.mouth), my=headY+headR*0.42;
+  ctx.strokeStyle=rgb([150,90,80]);ctx.lineWidth=Math.max(1.4,s*0.05);ctx.lineCap='round';
+  ctx.beginPath();
+  if(Math.abs(m)<0.05){ctx.moveTo(-headR*0.2,my);ctx.lineTo(headR*0.2,my);}
+  else{ctx.moveTo(-headR*0.22,my- m*headR*0.06);ctx.quadraticCurveTo(0,my+m*headR*0.26,headR*0.22,my-m*headR*0.06);}
+  ctx.stroke();
+  ctx.restore(); // end head motion
+  ctx.restore();
+  return {headY:groundY+headY, headR, bodyTop:groundY+bodyTop,
+          hx:x+headSwayX, hy:groundY+headY+headBob, tilt:headTilt};
+}
+function drawHair(cx,cy,r,col,style){
+  ctx.fillStyle=rgb(col);
+  if(style==='short'){ctx.beginPath();ctx.arc(cx,cy-r*0.12,r*1.02,Math.PI*1.02,Math.PI*1.98);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,cy-r*0.5,r*0.95,r*0.6,0,0,7);ctx.fill();}
+  else if(style==='bun'){ctx.beginPath();ctx.arc(cx,cy-r*0.2,r*1.0,Math.PI,0);ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy-r*1.05,r*0.35,0,7);ctx.fill();}
+  else if(style==='long'){ctx.beginPath();ctx.arc(cx,cy-r*0.1,r*1.05,Math.PI*0.85,Math.PI*2.15);ctx.fill();
+    rr(cx-r*1.02,cy-r*0.3,r*0.4,r*1.8,r*0.2);ctx.fill();rr(cx+r*0.62,cy-r*0.3,r*0.4,r*1.8,r*0.2);ctx.fill();}
+  else if(style==='cap'){ctx.beginPath();ctx.arc(cx,cy-r*0.1,r*1.0,Math.PI,0);ctx.fill();
+    ctx.fillStyle=rgb([40,50,70]);rr(cx-r*1.05,cy-r*0.15,r*2.1,r*0.4,r*0.15);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+r*0.2,cy-r*0.1,r*1.15,r*0.32,0,0,Math.PI);ctx.fill();}
+  else if(style==='bald'){/* nothing */}
+  else if(style==='grey'){ctx.fillStyle=rgb([200,198,196]);
+    ctx.beginPath();ctx.arc(cx,cy-r*0.12,r*1.0,Math.PI*1.05,Math.PI*1.95);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,cy-r*0.48,r*0.9,r*0.55,0,0,7);ctx.fill();}
+}
+
+/* a guard's peaked cap + hi-vis detail overlay (call after person) */
+function guardCap(head,r){
+  ctx.save();
+  ctx.translate(head.hx,head.hy);ctx.rotate(head.tilt||0);
+  ctx.fillStyle=rgb([30,44,70]);ctx.beginPath();ctx.arc(0,-r*0.15,r*1.02,Math.PI,0);ctx.fill();
+  ctx.fillStyle=rgb([22,32,52]);ctx.beginPath();ctx.ellipse(r*0.15,-r*0.12,r*1.2,r*0.34,0,0,Math.PI);ctx.fill();
+  ctx.fillStyle=rgb([210,180,70]);rr(-r*0.9,-r*0.28,r*1.8,r*0.16,r*0.06);ctx.fill(); // band
+  ctx.restore();
+}
+
+/* ===== settings: platform, carriage interior, streaming window ===== */
+
+/* the station platform at 9.58am — morning, not night. Warm daylight. */
+function platform(t,opt){opt=opt||{};
+  // morning sky through the station roof
+  ctx.fillStyle=vgrad(0,H*.5,[[0,'#bcd0dd'],[1,'#dfe4de']]);ctx.fillRect(0,0,W,H*.5);
+  // station canopy girders
+  ctx.fillStyle='#20262e';ctx.fillRect(0,0,W,H*.12);
+  ctx.strokeStyle='rgba(40,48,58,.6)';ctx.lineWidth=3;
+  for(let i=0;i<8;i++){const x=i*(W/7);ctx.beginPath();ctx.moveTo(x,H*.12);ctx.lineTo(x,H*.18);ctx.stroke();}
+  // soft light shafts from the canopy gaps
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<4;i++){const x=W*(.15+i*.24);
+    ctx.fillStyle=radial(x,H*.1,4,W*.3,[[0,'rgba(255,240,200,.10)'],[1,'rgba(255,240,200,0)']]);ctx.fillRect(0,0,W,H*.7);}
+  ctx.restore();
+  // platform floor
+  ctx.fillStyle=vgrad(H*.62,H,[[0,'#8a8378'],[1,'#6f685d']]);ctx.fillRect(0,H*.62,W,H*.38);
+  ctx.fillStyle='rgba(0,0,0,.06)';for(let x=0;x<W;x+=W*.14)ctx.fillRect(x,H*.62,2,H*.38); // paving lines
+  ctx.fillStyle='rgba(210,170,70,.8)';ctx.fillRect(0,H*.70,W,3); // yellow line
+  // the TRAIN alongside — right side / upper, warm-lit windows
+  const ty=H*.62, carTop=H*.16;
+  ctx.fillStyle=vgrad(carTop,ty,[[0,'#3f4a56'],[.5,'#333d48'],[1,'#232a32']]);ctx.fillRect(-W*.05,carTop,W*1.1,ty-carTop);
+  ctx.fillStyle='#5aa0ac';ctx.fillRect(-W*.05,carTop,W*1.1,H*.02); // livery stripe (rail teal)
+  ctx.fillStyle='rgba(150,170,190,.12)';ctx.fillRect(-W*.05,carTop,W*1.1,3);
+  // windows + doors
+  for(let k=0;k<4;k++){const wx=W*.03+k*(W*.25),ww=W*.15,wy=carTop+H*.05,wh=(ty-carTop)*.42;
+    ctx.fillStyle=vgrad(wy,wy+wh,[[0,'#eaf0f2'],[1,'#c3d0d6']]);rr(wx,wy,ww,wh,4);ctx.fill();
+    ctx.fillStyle='rgba(60,80,90,.15)';rr(wx,wy,ww,wh*.4,4);ctx.fill();
+    ctx.strokeStyle='rgba(20,26,32,.5)';ctx.lineWidth=1.5;rr(wx,wy,ww,wh,4);ctx.stroke();}
+  // a door, open
+  const dx=opt.doorX!=null?opt.doorX:W*.42;
+  ctx.fillStyle='#1a2028';rr(dx,carTop+H*.03,W*.12,ty-carTop-H*.03,3);ctx.fill();
+  ctx.fillStyle=vgrad(carTop,ty,[[0,'rgba(255,236,190,.5)'],[1,'rgba(255,236,190,.15)']]);
+  rr(dx+W*.01,carTop+H*.05,W*.10,ty-carTop-H*.08,2);ctx.fill();
+  // warm spill from the door onto the platform
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(dx+W*.06,ty,4,W*.28,[[0,'rgba(255,214,140,.14)'],[1,'rgba(255,214,140,0)']]);
+  ctx.fillRect(0,H*.5,W,H*.5);ctx.restore();
+  return {ty,carTop,doorX:dx};
+}
+
+/* carriage interior — warm morning light, seats, a big window (fills with streaming view) */
+function carriage(t,opt){opt=opt||{};
+  const warm=opt.warm==null?1:opt.warm;
+  // walls
+  ctx.fillStyle=vgrad(0,H,[[0,'#d8c9ac'],[.5,'#cbbb9c'],[1,'#b3a487']]);ctx.fillRect(0,0,W,H);
+  // ceiling with light strip
+  ctx.fillStyle=vgrad(0,H*.14,[[0,'#e6dcc4'],[1,'#d3c6a8']]);ctx.fillRect(0,0,W,H*.14);
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(W*.5,-H*.04,4,W*.85,[[0,rgba(255,240,205,.22*warm)],[1,'rgba(255,240,205,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+  ctx.fillStyle=rgba(255,244,215,.35*warm);rr(W*.2,H*.02,W*.6,H*.012,3);ctx.fill();
+  // floor
+  ctx.fillStyle=vgrad(H*.8,H,[[0,'#5f5344'],[1,'#463d31']]);ctx.fillRect(0,H*.8,W,H*.2);
+  return {warm};
+}
+
+/* the big carriage window with landscape streaming (graphic-register countryside, morning) */
+function streamWindow(t,x,y,w,h,opt){opt=opt||{};const spd=opt.spd==null?1:opt.spd;
+  ctx.save();rr(x,y,w,h,7);ctx.clip();
+  // morning sky
+  ctx.fillStyle=vgrad(y,y+h,[[0,'#aecbe0'],[.55,'#c9dceb'],[1,'#e8ece2']]);ctx.fillRect(x,y,w,h);
+  // sun glow
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(x+w*.8,y+h*.2,4,w*.5,[[0,'rgba(255,246,210,.5)'],[1,'rgba(255,246,210,0)']]);ctx.fillRect(x,y,w,h);ctx.restore();
+  // far hills (slow) — two layers
+  function hills(off,base,amp,col,s){const sc=(t*s*spd)%(w*2);
+    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-w,y+h);
+    for(let px=x-w;px<=x+w*2;px+=10){const k=(px+sc)*0.010+off;
+      ctx.lineTo(px,y+h*base-Math.sin(k)*amp-Math.sin(k*2.3+off)*amp*0.4);}
+    ctx.lineTo(x+w*2,y+h);ctx.closePath();ctx.fill();}
+  hills(0.4,0.60,h*.10,'#9ab48c',0.05);
+  hills(1.9,0.68,h*.08,'#7ea074',0.09);
+  // fields band
+  ctx.fillStyle=vgrad(y+h*.66,y+h,[[0,'#8bab6e'],[1,'#6f9256']]);ctx.fillRect(x,y+h*.66,w,h*.34);
+  // hedge rows sweeping (mid)
+  const ts=(t*0.34*spd)%(w*.44);
+  ctx.fillStyle='#5c7d47';
+  for(let i=-1;i<8;i++){const hx=x+i*(w*.44)-ts;
+    ctx.beginPath();ctx.moveTo(hx,y+h*.80);ctx.quadraticCurveTo(hx+w*.11,y+h*.62,hx+w*.22,y+h*.80);ctx.closePath();ctx.fill();
+    // a tree
+    ctx.fillStyle='#4d6b3c';circle(hx+w*.05,y+h*.66,h*.05);ctx.fillStyle='#5c7d47';}
+  // near fence posts / blur (fast)
+  const ps=(t*1.3*spd)%(w*.12);
+  ctx.strokeStyle='rgba(70,58,42,.8)';ctx.lineWidth=2.4;
+  for(let i=-1;i<12;i++){const fx=x+i*(w*.12)-ps;ctx.beginPath();ctx.moveTo(fx,y+h*.74);ctx.lineTo(fx,y+h*.92);ctx.stroke();}
+  ctx.strokeStyle='rgba(120,140,110,.10)';ctx.lineWidth=1;
+  for(let i=0;i<9;i++){const yy=y+h*.7+((i*13+t*0.9*spd)%(h*.28));
+    const xx=x+((i*61+t*3.6*spd)%(w*1.3))-w*.15;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+28,yy);ctx.stroke();}
+  ctx.restore();
+  // frame
+  ctx.strokeStyle='rgba(70,58,44,.9)';ctx.lineWidth=6;rr(x,y,w,h,7);ctx.stroke();
+  ctx.strokeStyle='rgba(255,238,200,.18)';ctx.lineWidth=1.4;rr(x+3,y+3,w-6,h-6,6);ctx.stroke();
+  // sill
+  ctx.fillStyle='#5a4c39';rr(x-4,y+h,w+8,10,3);ctx.fill();
+}
+
+/* a seat unit (side-on, for compartments) */
+function seat(x,y,w,h,col,colSh){col=col||[150,70,64];colSh=colSh||[110,48,44];
+  ctx.fillStyle=rgb(colSh);rr(x,y,w,h,8);ctx.fill();
+  ctx.fillStyle=rgb(col);rr(x+w*.05,y+h*.05,w*.9,h*.6,6);ctx.fill();      // back
+  ctx.fillStyle=rgb(col);rr(x+w*.05,y+h*.62,w*.9,h*.33,6);ctx.fill();     // seat
+  ctx.fillStyle=rgba(255,255,255,.06);rr(x+w*.05,y+h*.05,w*.9,h*.14,6);ctx.fill();
+}
+
+/* ===== THE 9.58 TO WEND'S END · Part One — 12 scenes ===== */
+/* Graphic register. Morning. Opening beat + first boarders (ashes pair, evader, wrong-train woman). */
+
+/* character presets — silhouette-distinct via build, hair, colour, prop */
+const CH={
+  guard:{skin:[210,180,150],skinSh:[176,144,116],cloth:[34,52,84],clothSh:[24,38,64],hair:[54,40,28],hairStyle:'short'},
+  driver:{skin:[224,190,158],skinSh:[190,154,124],cloth:[46,60,72],clothSh:[32,44,54],hair:[70,70,72],hairStyle:'grey'},
+  elderly:{skin:[226,206,186],skinSh:[196,172,150],cloth:[126,110,140],clothSh:[96,82,110],hair:[210,208,206],hairStyle:'grey'},
+  mother:{skin:[214,168,132],skinSh:[178,134,100],cloth:[196,120,86],clothSh:[160,90,60],hair:[40,30,24],hairStyle:'bun'},
+  evader:{skin:[204,172,150],skinSh:[168,138,116],cloth:[70,96,88],clothSh:[50,72,66],hair:[36,30,26],hairStyle:'cap'},
+  woman:{skin:[220,180,150],skinSh:[184,144,116],cloth:[150,72,84],clothSh:[116,50,60],hair:[58,42,32],hairStyle:'long'}
+};
+
+const SCENES=[
+ // 1 — the empty morning platform; the board reads 9.58
+ {first:true,map:0,
+  prose:[["p","There is a particular optimism to a morning train. Everyone on it is, in some small way, going toward something — a meeting, a wedding, a coast, a fresh start — and for the length of the journey the going is the only job they have."],
+         ["p","The 9.58 to Wend's End stood at Platform 4 with its doors open, breathing warm air into the cold, <em>waiting for its people.</em>"]],
+  paint:t=>{platform(t,{doorX:W*.44});}},
+
+ // 2 — the guard and the driver, before the day begins
+ {map:0,
+  prose:[["p","Two men had been there since before it did. Ray, the driver — grey and unhurried, with a flask he'd filled at home. And Frank, the guard, cap on, checking the length of the train the way he had ten thousand mornings before."],
+         ["p",'"Busy one, Frank?" Ray asked, screwing the cap back on his flask.'],
+         ["p",'<span class="dlg">"Friday," Frank said. "Everyone going somewhere at once." He nodded down the platform. "Commuters, day-trippers, the airport lot. They\'ll all be coming."</span>']],
+  paint:t=>{platform(t,{doorX:W*.44});
+    // guard mid-platform, driver near the front (left)
+    const g=person(W*.56,H*.84,H*.10,{...CH.guard,look:-0.4,mouth:.3,t:t,seed:1.37});
+    guardCap(g,CH_r(H*.11));
+    person(W*.2,H*.84,H*.10,{...CH.driver,look:.4,mouth:.25,lean:.1,t:t,seed:2.74});}},
+
+ // 3 — the elderly woman boards, holding the container
+ {map:1,
+  prose:[["p","The first up the step was an elderly woman in a lilac coat, both hands around a container she held against her, the way you hold a thing you do not intend to put down. The guard offered a hand at the step and she took it, briefly, with a nod that had thanks in it and not much else."],
+         ["p","<em>She was travelling light, otherwise. A small bag. The container. That was all.</em>"]],
+  paint:t=>{const p=platform(t,{doorX:W*.44});
+    // elderly woman at the door, holding the vase (both hands to chest)
+    const e=person(W*.46,H*.84,H*.105,{...CH.elderly,look:.1,mouth:.12,lean:-.05,t:t,seed:4.11});
+    // the container — held to her chest
+    ctx.fillStyle=rgb([180,180,186]);rr(W*.46-H*.03,H*.84-H*.22,H*.06,H*.09,H*.014);ctx.fill();
+    ctx.fillStyle=rgb([150,150,158]);rr(W*.46-H*.03,H*.84-H*.22,H*.06,H*.018,H*.008);ctx.fill();
+    // guard's hand offered (small)
+    const g=person(W*.62,H*.86,H*.092,{...CH.guard,look:-.5,mouth:.25,t:t,seed:5.48});
+    guardCap(g,CH_r(H*.10));}},
+
+ // 4 — the mother with the restless baby (the PLANT)
+ {map:1,
+  prose:[["p","Behind her, in more of a hurry, a young mother wrestled a pram, a changing bag, and a baby who had opinions. The baby was mid-grizzle, working up to something bigger, and the mother wore the particular flush of a woman apologising before anything has even happened."],
+         ["p",'<span class="dlg">"Sorry — sorry — coming through, sorry —"</span>']],
+  paint:t=>{const p=platform(t,{doorX:W*.44});
+    // mother with pram, flustered
+    const m=person(W*.4,H*.84,H*.10,{...CH.mother,look:.2,mouth:-.2,brow:.5,browRaise:.6,lean:.15,t:t,seed:6.85});
+    // pram (simple graphic)
+    ctx.fillStyle=rgb([60,66,74]);rr(W*.5,H*.74,H*.13,H*.085,H*.02);ctx.fill();
+    ctx.fillStyle=rgb([90,96,104]);rr(W*.5,H*.78,H*.14,H*.03,H*.014);ctx.fill();
+    ctx.fillStyle=rgb([40,44,50]);circle(W*.52,H*.845,H*.022);circle(W*.62,H*.845,H*.022);
+    // handle
+    ctx.strokeStyle=rgb([70,76,84]);ctx.lineWidth=H*.012;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(W*.5,H*.74);ctx.lineTo(W*.46,H*.68);ctx.stroke();}},
+
+ // 5 — they settle into the same compartment
+ {map:2,
+  prose:[["p","By chance, or by the arithmetic of a filling train, the two of them ended up in the same compartment — the elderly woman by the window, the mother opposite, the baby installed on her lap and still deciding whether to cry."],
+         ["p","The elderly woman looked at the baby. The baby looked back, mid-decision. <em>Something in the old woman's face was very far away.</em>"]],
+  paint:t=>{carriage(t,{});
+    // compartment: two seats facing, window between
+    streamWindow(t,W*.28,H*.14,W*.44,H*.30,{spd:0}); // train not moving yet (still boarding)
+    seat(W*.02,H*.46,W*.28,H*.36,[120,100,140],[96,80,112]);   // elderly's seat (left)
+    seat(W*.7,H*.46,W*.28,H*.36,[150,80,70],[116,58,52]);      // mother's seat (right)
+    // elderly by window (left), holding container
+    person(W*.16,H*.8,H*.10,{...CH.elderly,sit:true,look:.3,mouth:.1});
+    ctx.fillStyle=rgb([180,180,186]);rr(W*.16-H*.028,H*.8-H*.18,H*.056,H*.08,H*.012);ctx.fill();
+    // mother opposite (right) with baby
+    person(W*.84,H*.82,H*.10,{...CH.mother,sit:true,look:-.4,mouth:0,brow:.2});
+    // baby on lap (tiny)
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.7,H*.032);
+    ctx.fillStyle=rgb([250,240,235]);rr(W*.76-H*.03,H*.7,H*.06,H*.06,H*.02);ctx.fill();}},
+
+ // 6 — down the platform, the evader boards (guard clocks him)
+ {map:2,
+  prose:[["p","Further down, a young man in a green jacket stepped on with the light, unbothered walk of someone who has decided not to buy a ticket and made his peace with it."],
+         ["p","Frank saw him. Of course Frank saw him — Frank saw everyone. He watched the green jacket disappear down the carriage and did not move, did not hurry. <em>It was a long way to Wend's End. There was no rush at all.</em>"]],
+  paint:t=>{const p=platform(t,{doorX:W*.7});
+    // evader boarding down the train (right), jaunty
+    person(W*.72,H*.84,H*.097,{...CH.evader,look:-.3,mouth:.5,lean:-.1,t:t,seed:8.22});
+    // guard further left, watching, calm
+    const g=person(W*.28,H*.84,H*.10,{...CH.guard,look:.7,mouth:.15,t:t,seed:9.59});
+    guardCap(g,CH_r(H*.11));}},
+
+ // 7 — the woman in a hurry, on the wrong train (she doesn't know yet)
+ {map:3,
+  prose:[["p","And just before the whistle, a woman in a red coat swung aboard with a conference lanyard still around her neck and a laptop bag banging her hip, breathless, triumphant at having made it."],
+         ["p","She had made it. She had made <em>a</em> train. <em>She had not, as it happened, made the right one</em> — but that discovery was three stops of good mood away, and for now she dropped into a seat and let out the long happy sigh of the very nearly late."]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.30,H*.14,W*.46,H*.30,{spd:0});
+    seat(W*.66,H*.5,W*.3,H*.34,[150,80,70],[116,58,52]);
+    // woman in red, lanyard, relieved
+    person(W*.5,H*.84,H*.115,{...CH.woman,sit:true,look:0,mouth:.6,browRaise:.4});
+    // lanyard
+    ctx.strokeStyle=rgb([40,50,90]);ctx.lineWidth=H*.01;
+    ctx.beginPath();ctx.moveTo(W*.5-H*.03,H*.84-H*.2);ctx.lineTo(W*.5,H*.84-H*.1);ctx.moveTo(W*.5+H*.03,H*.84-H*.2);ctx.lineTo(W*.5,H*.84-H*.1);ctx.stroke();
+    ctx.fillStyle=rgb([240,240,245]);rr(W*.5-H*.015,H*.84-H*.11,H*.03,H*.04,H*.006);ctx.fill();}},
+
+ // 8 — the whistle; the guard steps aboard
+ {map:3,
+  prose:[["p","The station clock ticked to 9.58. The guard walked the length of the platform one last time, closed the doors with a run of soft clunks, and lifted his whistle."],
+         ["p","<em>The sound of it is the sound of a hundred small stories agreeing to begin.</em>"]],
+  paint:t=>{const p=platform(t,{doorX:null});
+    // guard on the platform, whistle to lips, arm raised
+    const g=person(W*.5,H*.84,H*.11,{...CH.guard,look:0,mouth:.1,t:t,seed:10.96});
+    guardCap(g,CH_r(H*.12));
+    // whistle + raised arm hint
+    ctx.strokeStyle=rgb([50,60,80]);ctx.lineWidth=H*.016;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(W*.5+H*.05,H*.9-H*.2);ctx.lineTo(W*.5+H*.12,H*.9-H*.26);ctx.stroke();
+    // clock, upper corner
+    ctx.fillStyle=rgb([245,242,230]);circle(W*.85,H*.08,H*.05);
+    ctx.strokeStyle=rgb([40,40,40]);ctx.lineWidth=2;ctx.beginPath();ctx.arc(W*.85,H*.08,H*.05,0,7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(W*.85,H*.08);ctx.lineTo(W*.85,H*.045);ctx.moveTo(W*.85,H*.08);ctx.lineTo(W*.872,H*.088);ctx.stroke();}},
+
+ // 9 — the train pulls out; the platform slides away
+ {map:4,
+  prose:[["p","With a lurch that everyone pretended not to feel, the 9.58 began to move."],
+         ["p","The platform slid backward — the coffee kiosk, the man with the trolley, the family waving at a window that wasn't the right window — and then the station mouth, and then the grey backs of the city, and then, all at once, <em>light.</em>"]],
+  paint:t=>{carriage(t,{});
+    // window now STREAMING — platform giving way to city then light
+    streamWindow(t,W*.14,H*.15,W*.62,H*.34,{spd:1.4});
+    // a passenger silhouette-ish (graphic) by the glass, watching it go
+    person(W*.82,H*.86,H*.12,{...CH.woman,sit:true,look:-.6,mouth:.3});}},
+
+ // 10 — the carriage settles; a first look at the company
+ {map:4,
+  prose:[["p","Inside, the carriage did what carriages do: it settled. Newspapers opened. Headphones went in. The baby, lulled by the motion, changed its mind about crying and fell instead into the boneless sleep of the very young."],
+         ["p","The mother exhaled. Across from her, the elderly woman smiled — <em>at the baby, or at something the baby reminded her of.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.30,H*.14,W*.44,H*.30,{spd:1});
+    seat(W*.02,H*.46,W*.28,H*.36,[120,100,140],[96,80,112]);
+    seat(W*.7,H*.46,W*.28,H*.36,[150,80,70],[116,58,52]);
+    person(W*.16,H*.8,H*.10,{...CH.elderly,sit:true,look:.3,mouth:.4}); // warm smile
+    ctx.fillStyle=rgb([180,180,186]);rr(W*.16-H*.028,H*.8-H*.18,H*.056,H*.08,H*.012);ctx.fill();
+    person(W*.84,H*.82,H*.10,{...CH.mother,sit:true,look:-.4,mouth:.3,browRaise:.2}); // relieved
+    // sleeping baby
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.71,H*.03);
+    ctx.fillStyle=rgb([250,240,235]);rr(W*.76-H*.028,H*.71,H*.056,H*.055,H*.02);ctx.fill();}},
+
+ // 11 — the guard begins his rounds
+ {map:5,
+  prose:[["p","And Frank began to walk."],
+         ["p","He would walk this train all day — up through the quiet carriage and the family carriage and the buffet, down past the sleepers and the luggage van, and back — checking tickets, answering questions, watching over a moving village of strangers who would never know each other's names."],
+         ["p","<em>He knew a few of them already. He always did.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.06,H*.14,W*.34,H*.3,{spd:1});
+    // corridor perspective: guard walking toward us down the aisle
+    ctx.fillStyle=vgrad(H*.14,H,[[0,'rgba(120,100,74,.2)'],[1,'rgba(70,58,42,.3)']]);
+    ctx.beginPath();ctx.moveTo(W*.42,H*.2);ctx.lineTo(W*.58,H*.2);ctx.lineTo(W*.8,H);ctx.lineTo(W*.2,H);ctx.closePath();ctx.fill();
+    const g=person(W*.5,H*.9,H*.135,{...CH.guard,look:0,mouth:.25,sway:true,t:t,seed:12.33});
+    guardCap(g,CH_r(H*.15));}},
+
+ // 12 — button: the day, and the container by the window
+ {map:6,last:true,
+  prose:[["p","Outside, the country opened up green and wet and going somewhere. Inside, a hundred people rode toward the coast, each carrying whatever they were carrying."],
+         ["p","By the window, in the lilac coat, the elderly woman held her container in both hands and watched the hills go by, <em>perfectly, perfectly calm.</em>"],
+         ["p","It was going to be a beautiful day for it."]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.30,H*.14,W*.44,H*.32,{spd:1});
+    seat(W*.02,H*.48,W*.28,H*.34,[120,100,140],[96,80,112]);
+    // elderly woman by window, container held, deeply calm
+    person(W*.16,H*.82,H*.105,{...CH.elderly,sit:true,look:.5,mouth:.15,eyesClosed:false});
+    ctx.fillStyle=rgb([180,180,186]);rr(W*.16-H*.028,H*.82-H*.19,H*.056,H*.085,H*.012);ctx.fill();
+    ctx.fillStyle=rgb([150,150,158]);rr(W*.16-H*.028,H*.82-H*.19,H*.056,H*.016,H*.008);ctx.fill();
+    // warm light on her from the window
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.3,H*.4,4,W*.4,[[0,'rgba(255,240,200,.14)'],[1,'rgba(255,240,200,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}}
+];
+
+/* helper: head-radius for cap placement matches person()'s headR = s*0.42 */
+function CH_r(s){return s*0.42;}
+
+/* ===== THE 9.58 TO WEND'S END · Part One — runner ===== */
+let idx=-1,auto=false,paused=false,fin=false,running=false;
+let sceneT0=0,transT0=0,prevTs=0,dwell=9,muted=false;
+
+/* train-map progress: loco + 6 carriages fill as you go */
+const NCARS=6;
+function buildMap(){const m=$('trainmap');if(!m)return;m.innerHTML='';
+  const loco=document.createElement('div');loco.className='loco';m.appendChild(loco);
+  for(let i=0;i<NCARS;i++){const c=document.createElement('div');c.className='car';c.dataset.i=i;m.appendChild(c);}}
+function setMap(n){const cars=document.querySelectorAll('#trainmap .car');
+  cars.forEach((c,i)=>{c.classList.toggle('done',i<n);c.classList.toggle('here',i===n-1&&n>0);});}
+
+/* ---- audio: morning bed + rail rhythm + station ambience ---- */
+let AC=null,master=null,bed=[],railTimer=null;
+function aInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();master.gain.value=muted?0:0.75;master.connect(AC.destination);}catch(e){AC=null;}}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,sr*d,sr),x=b.getChannelData(0);
+  for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function startBed(){if(!AC)return;
+  const o=AC.createOscillator();o.type='sine';o.frequency.value=58;const g=AC.createGain();g.gain.value=.0001;
+  g.gain.linearRampToValueAtTime(.04,AC.currentTime+3);o.connect(g);g.connect(master);o.start();bed.push(o,g);}
+/* rail-joint rhythm: soft periodic thumps, begins when the train moves (scene 9+) */
+function railOn(on){if(!AC)return;
+  if(on&&!railTimer){let step=0;railTimer=setInterval(()=>{if(muted||!AC)return;
+    const now=AC.currentTime;[0,0.16].forEach((off,k)=>{
+      const s=AC.createBufferSource();s.buffer=nbuf(0.08);
+      const bp=AC.createBiquadFilter();bp.type='lowpass';bp.frequency.value=180;
+      const g=AC.createGain();g.gain.setValueAtTime(.0001,now+off);
+      g.gain.linearRampToValueAtTime(k?0.03:0.05,now+off+0.005);
+      g.gain.exponentialRampToValueAtTime(.0001,now+off+0.09);
+      s.connect(bp);bp.connect(g);g.connect(master);s.start(now+off);s.stop(now+off+0.1);});
+    step++;},680);}
+  else if(!on&&railTimer){clearInterval(railTimer);railTimer=null;}}
+function stopAll(){if(!AC)return;bed.forEach(n=>{if(n.gain)try{n.gain.linearRampToValueAtTime(.0001,AC.currentTime+.5);}catch(e){}});railOn(false);}
+
+/* ---- text band ---- */
+function renderProse(sc){const el=$('prose');el.className=sc.first?'first':'';
+  el.innerHTML=sc.prose.map(p=>`<${p[0]}>${p[1]}</${p[0]}>`).join('');}
+function wordCount(sc){return sc.prose.reduce((n,p)=>n+p[1].replace(/<[^>]+>/g,'').split(/\s+/).length,0);}
+function calcDwell(sc){return Math.max(7,Math.min(16,3+wordCount(sc)*0.3));}
+
+function enter(i){idx=i;const sc=SCENES[i];sceneT0=performance.now();transT0=performance.now();
+  renderProse(sc);dwell=calcDwell(sc);
+  if(sc.map!=null)setMap(sc.map);
+  railOn(i>=8);window.MOVING=(i>=8); // rail rhythm + carriage sway once moving
+  paused=false;
+  const hint=$('hint');hint.classList.remove('hide');
+  hint.textContent=auto?(sc.last?'':'tap to pause'):(sc.last?'tap to finish':'tap to continue');}
+function advance(){if(fin)return;if(idx>=SCENES.length-1){finish();return;}enter(idx+1);}
+function finish(){fin=true;$('hint').classList.add('hide');stopAll();
+  $('endEpi').textContent='By the window, in the lilac coat, she watched the hills go by — perfectly calm.';
+  const f=$('fade');f.style.transition='opacity 1.3s';f.style.opacity='1';
+  setTimeout(()=>{$('endScr').classList.remove('gone');},1400);}
+function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
+  aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
+  if(!running){running=true;requestAnimationFrame(loop);}}
+function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
+  $('hint').textContent=paused?'tap to resume':'tap to pause';}
+
+let lastInput=0;
+function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
+  if(paused&&idx>=0)sceneT0+=dt;
+  const t=now-sceneT0;const sc=idx>=0?SCENES[idx]:null;
+  try{ctx.clearRect(0,0,W,H);if(sc)sc.paint(t);}catch(e){}
+  drawGrain();
+  const tr=Math.max(0,1-(now-transT0)/600);
+  if(tr>0&&!fin){$('fade').style.opacity=(tr*tr*0.85).toFixed(3);}else if(!fin){$('fade').style.opacity='0';}
+  if(auto&&!paused&&!fin&&idx>=0&&t>=dwell*1000)advance();
+  requestAnimationFrame(loop);}
+
+$('app').addEventListener('click',e=>{
+  if(e.target.closest('.screen'))return;
+  if(['btnRead','btnAuto','btnReplay','mute'].includes(e.target.id))return;
+  if(!$('titleScr').classList.contains('gone'))return;
+  if(!$('endScr').classList.contains('gone'))return;
+  const now=Date.now();if(now-lastInput<350)return;lastInput=now;
+  if(auto)togglePause();else advance();});
+$('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
+$('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});
+$('btnReplay').addEventListener('click',e=>{e.stopPropagation();start(auto);});
+$('mute').addEventListener('click',e=>{e.stopPropagation();muted=!muted;
+  $('mute').innerHTML=muted?'&#128263;':'&#9835;';if(master)master.gain.value=muted?0:0.75;
+  if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();
+  if(!$('titleScr').classList.contains('gone'))start(false);
+  else if($('endScr').classList.contains('gone')){if(auto)togglePause();else advance();}}});
+
+buildMap();size();running=true;requestAnimationFrame(loop);
+
+</script></body></html>

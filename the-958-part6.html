@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The 9.58 to Wend's End — Part Six</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{ --page:#efe7d6; --ink:#33291d; --ink-soft:#6f6250; --accent:#c07a3e; --rail:#3a6b74; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{background:#0c0f12;color:var(--ink);font-family:'Spectral',Georgia,serif;
+    display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+  #app{position:relative;width:100%;max-width:520px;height:100dvh;max-height:920px;overflow:hidden;
+    background:#0c0f12;display:flex;flex-direction:column;cursor:pointer;}
+
+  #window{position:relative;flex:0 1 56%;min-height:44%;overflow:hidden;background:#0a0d10;}
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #window::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:
+      radial-gradient(130% 100% at 50% 46%, transparent 55%, rgba(8,10,14,.32) 86%, rgba(8,10,14,.6)),
+      linear-gradient(180deg, rgba(8,10,14,.28), transparent 16%, transparent 84%, rgba(8,10,14,.36));}
+  #grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.045;mix-blend-mode:overlay;}
+  #eyebrow{position:absolute;top:18px;left:22px;z-index:6;
+    font-family:'Fraunces',serif;font-weight:600;font-size:10px;letter-spacing:.28em;
+    text-transform:uppercase;color:rgba(239,231,214,.55);}
+  #eyebrow b{display:block;font-size:8.5px;letter-spacing:.22em;color:rgba(239,231,214,.32);font-weight:400;margin-top:3px;}
+  #fade{position:absolute;inset:0;z-index:7;background:#0c0f12;opacity:0;pointer-events:none;}
+
+  #band{flex:1 1 auto;background:var(--page);position:relative;
+    padding:24px 28px 0;overflow:hidden;display:flex;flex-direction:column;min-height:0;
+    box-shadow:0 -38px 76px rgba(0,0,0,.5);}
+  #band::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(51,41,29,.15) 18%,rgba(51,41,29,.15) 82%,transparent);}
+  #prose{font-size:15.5px;line-height:1.56;color:var(--ink);flex:1 1 auto;overflow-y:auto;overflow-x:hidden;
+    padding-bottom:60px;scrollbar-width:none;}
+  #prose::-webkit-scrollbar{display:none;}
+  #prose p{margin-bottom:.6em;opacity:0;transform:translateY(6px);animation:rise .9s cubic-bezier(.2,.7,.25,1) forwards;}
+  #prose p:nth-child(2){animation-delay:.5s;} #prose p:nth-child(3){animation-delay:.95s;}
+  #prose.first p:first-child::first-letter{font-family:'Fraunces',serif;font-weight:600;font-size:3em;line-height:.8;
+    float:left;margin:.05em .1em 0 0;color:#4a3a26;}
+  #prose em{font-style:italic;color:#5a4a34;}
+  #prose .dlg{color:#42361f;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  #foot{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:9px 0 calc(13px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(239,231,214,0),var(--page) 42%);}
+  /* progress = the train map filling carriage by carriage */
+  #trainmap{display:flex;gap:3px;align-items:center;height:14px;}
+  #trainmap .loco{width:16px;height:9px;border-radius:3px 5px 2px 2px;background:var(--rail);opacity:.9;position:relative;}
+  #trainmap .car{width:15px;height:8px;border-radius:2px;border:1px solid rgba(51,41,29,.28);background:transparent;transition:background .4s;}
+  #trainmap .car.done{background:var(--accent);border-color:var(--accent);}
+  #trainmap .car.here{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,122,62,.25);}
+  #hint{font-family:'Fraunces',serif;font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--ink-soft);opacity:.5;animation:hb 2.8s ease-in-out infinite;}
+  @keyframes hb{0%,100%{opacity:.28;}50%{opacity:.56;}}
+  #hint.hide{display:none;}
+
+  #mute{position:absolute;top:15px;right:17px;z-index:8;width:30px;height:30px;display:flex;align-items:center;
+    justify-content:center;font-size:13px;border-radius:50%;background:rgba(10,12,16,.42);
+    border:1px solid rgba(239,231,214,.2);color:rgba(239,231,214,.72);pointer-events:auto;cursor:pointer;}
+
+  .screen{position:absolute;inset:0;z-index:20;background:#0b0e11;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:38px;transition:opacity 1s;}
+  .screen.gone{opacity:0;pointer-events:none;}
+  .screen.gone *{pointer-events:none !important;}
+  .k{font-family:'Fraunces',serif;font-weight:500;font-size:10px;letter-spacing:.32em;text-transform:uppercase;
+    color:rgba(239,231,214,.5);margin-bottom:20px;}
+  .board{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,8.5vw,50px);color:#efe7d6;
+    line-height:1;letter-spacing:-.01em;}
+  .board .time{color:var(--accent);}
+  .board .dest{display:block;font-size:.58em;color:#8bb0b6;font-weight:500;letter-spacing:.02em;margin-top:.35em;}
+  .plat{font-family:'Spectral',serif;font-style:italic;font-size:13.5px;color:rgba(239,231,214,.5);margin-top:18px;}
+  .byline{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.14em;color:rgba(239,231,214,.5);margin-top:16px;font-style:normal;}
+  .btns{display:flex;gap:11px;margin-top:30px;}
+  .go{font-family:'Fraunces',serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    padding:13px 24px;border-radius:3px;border:1px solid var(--accent);background:var(--accent);color:#1a1108;
+    cursor:pointer;pointer-events:auto;}
+  .go.ghost{background:transparent;color:var(--accent);}
+  .go:active{transform:scale(.97);}
+  #endScr .board{font-size:clamp(26px,7vw,40px);}
+  #endScr .epi{font-family:'Spectral',serif;font-style:italic;font-size:14.5px;color:rgba(239,231,214,.6);
+    max-width:23em;margin-top:16px;line-height:1.55;}
+  #endScr .part{font-family:'Fraunces',serif;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+    color:rgba(239,231,214,.4);margin-top:24px;}
+  #endScr .credits{font-family:'Spectral',serif;font-style:italic;font-size:12px;color:rgba(239,231,214,.4);margin-top:16px;}
+  #endScr .endbtns{display:flex;gap:11px;margin-top:26px;}
+  @media (prefers-reduced-motion:reduce){#prose p{animation-duration:.01s;}#hint{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="window">
+    <canvas id="scene"></canvas>
+    <canvas id="grain"></canvas>
+    <div id="eyebrow">The 9.58 to Wend's End<b id="ebsub">Part Six · The Cliffs</b></div>
+    <div id="fade"></div>
+  </div>
+  <div id="mute">&#9835;</div>
+  <div id="band">
+    <div id="prose"></div>
+    <div id="foot"><div id="trainmap"></div><div id="hint">tap to continue</div></div>
+  </div>
+  <div class="screen" id="titleScr">
+    <div class="k">A journey in eight parts</div>
+    <div class="board"><span class="time">The 9.58</span><span class="dest">to Wend's End</span></div>
+    <div class="plat">Part Six — The Cliffs</div>
+    <div class="byline">by Lanre Ajayi</div>
+    <div class="btns"><button class="go" id="btnRead">Read</button><button class="go ghost" id="btnAuto">Play to me</button></div>
+  </div>
+  <div class="screen gone" id="endScr">
+    <div class="k">End of Part Six</div>
+    <div class="board"><span class="time">The 9.58</span><span class="dest">to Wend's End</span></div>
+    <div class="epi" id="endEpi"></div>
+    <div class="part">Part Seven — The Barrier</div>
+    <div class="credits">Written by Lanre Ajayi</div>
+    <div class="endbtns"><button class="go ghost" id="btnReplay">Read again</button></div>
+  </div>
+</div>
+
+<script>
+/* ===== THE 9.58 TO WEND'S END · Part One — engine (graphic register) ===== */
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('scene'),ctx=cv.getContext('2d');
+const gcv=$('grain'),gx=gcv.getContext('2d');
+let W=0,H=0,DPR=1,grainTiles=[];
+
+function size(){const r=$('window').getBoundingClientRect();
+  W=r.width;H=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*DPR;cv.height=H*DPR;gcv.width=W*DPR;gcv.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);gx.setTransform(DPR,0,0,DPR,0,0);buildGrain();}
+window.addEventListener('resize',size);
+
+function buildGrain(){grainTiles=[];
+  for(let k=0;k<3;k++){const c=document.createElement('canvas');c.width=150;c.height=150;
+    const g=c.getContext('2d'),id=g.createImageData(150,150),d=id.data;
+    for(let i=0;i<d.length;i+=4){const v=128+(Math.random()*2-1)*40;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+    g.putImageData(id,0,0);grainTiles.push(c);}}
+function drawGrain(){if(!grainTiles.length||reduce)return;
+  gx.clearRect(0,0,W,H);const t=grainTiles[(Math.random()*grainTiles.length)|0];
+  const ox=-(Math.random()*150)|0,oy=-(Math.random()*150)|0;
+  for(let y=oy;y<H;y+=150)for(let x=ox;x<W;x+=150)gx.drawImage(t,x,y);}
+
+/* ---- colour + shape helpers ---- */
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rgba=(r,g,b,a)=>`rgba(${r|0},${g|0},${b|0},${a})`;
+const rgb=c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+function vgrad(y0,y1,st){const g=ctx.createLinearGradient(0,y0,0,y1);st.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function radial(x,y,r0,r1,st){const g=ctx.createRadialGradient(x,y,r0,x,y,r1);st.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function circle(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
+
+/* ===== GRAPHIC CHARACTER SYSTEM ===== */
+/* Warm, simple, picture-book faces: rounded head, white eyes + dark pupils, brows/mouth do the emotion.
+   Each person built from: body colour, hair shape/colour, a prop, a build. Silhouette-distinct. */
+function person(x,groundY,s,P){P=P||{};
+  // ---- idle animation (layered: body vs head move independently = life) ----
+  const T=P.t||0, seed=P.seed||0;
+  const MOV=(P.sway!=null?(P.sway?1:0):(window.MOVING?1:0));                                        // train moving -> everyone rocks
+  // body: breath + subtle rock
+  const breathe=Math.sin(T*0.0019+seed)*s*0.030;                // deeper breath
+  const bodyRock=MOV*Math.sin(T*0.0022+seed*1.7)*s*0.045;       // carriage sway of the torso
+  const bobExtra=(P.bob?Math.sin(T*0.0065+seed)*s*0.035:0);     // livelier bob (baby/excited)
+  // head: its own drift + tilt, slightly out of phase with the body (the key life-giver)
+  const headSwayX=Math.sin(T*0.0016+seed*2.3)*s*0.045 + MOV*Math.sin(T*0.0022+seed*1.7+0.6)*s*0.05;
+  const headBob=Math.sin(T*0.0024+seed*1.1)*s*0.022;
+  const headTilt=Math.sin(T*0.0013+seed*0.7)*0.05 + (P.tilt||0);  // radians
+  // occasional slow head-turn (look drifts) unless a fixed look is set
+  const lookDrift=(P.look!=null)?P.look:Math.sin(T*0.0009+seed*4)*0.7;
+  groundY=groundY+breathe+bobExtra;  x=x+bodyRock;
+  // blink: quick, natural, per-person cycle
+  const blinkPhase=(T*0.001+seed*3)% (3.6+ (seed%10)*0.15);
+  const blinking=blinkPhase>(3.4+(seed%10)*0.15);
+  const skin=P.skin||[228,196,168], skinSh=P.skinSh||[196,160,132];
+  const cloth=P.cloth||[110,120,140], clothSh=P.clothSh||[80,88,106];
+  const hair=P.hair||[60,44,32];
+  const lean=P.lean||0, look=P.look||0;   // look: -1 left .. +1 right (pupil shift)
+  const sit=P.sit;                          // sitting shortens legs
+  ctx.save();ctx.translate(x,groundY);ctx.rotate(lean*0.06);
+  const bodyTop=-s*(sit?1.5:2.05), headR=s*0.42, headY=bodyTop-headR*0.7;
+  // ---- body (coat/torso) ----
+  ctx.fillStyle=rgb(clothSh);
+  ctx.beginPath();ctx.moveTo(-s*0.6,0);
+  ctx.quadraticCurveTo(-s*0.72,bodyTop*0.5,-s*0.5,bodyTop);
+  ctx.lineTo(s*0.5,bodyTop);
+  ctx.quadraticCurveTo(s*0.72,bodyTop*0.5,s*0.6,0);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=rgb(cloth);
+  ctx.beginPath();ctx.moveTo(-s*0.5,0);
+  ctx.quadraticCurveTo(-s*0.6,bodyTop*0.5,-s*0.42,bodyTop);
+  ctx.lineTo(s*0.42,bodyTop);
+  ctx.quadraticCurveTo(s*0.6,bodyTop*0.5,s*0.5,0);
+  ctx.closePath();ctx.fill();
+  // shoulders highlight
+  ctx.fillStyle=rgba(255,255,255,.06);rr(-s*0.42,bodyTop,s*0.84,s*0.3,s*0.15);ctx.fill();
+  // ---- neck ----
+  ctx.fillStyle=rgb(skinSh);rr(-s*0.13,bodyTop-s*0.18,s*0.26,s*0.28,s*0.08);ctx.fill();
+  // ---- head (own motion: sway, bob, tilt) ----
+  ctx.save();
+  ctx.translate(headSwayX,headBob);
+  ctx.translate(0,headY);ctx.rotate(headTilt);ctx.translate(0,-headY);
+  ctx.fillStyle=rgb(skin);circle(0,headY,headR);
+  // cheek shading
+  ctx.fillStyle=rgba(skinSh[0],skinSh[1],skinSh[2],.5);
+  ctx.beginPath();ctx.ellipse(headR*0.5,headY+headR*0.2,headR*0.5,headR*0.6,0,0,7);ctx.fill();
+  // ---- hair / headwear ----
+  if(P.headwear==='hijab'){ drawHijab(0,headY,headR,P.hijab||[150,132,112],P.hijabSh||[120,104,86]); }
+  else { drawHair(0,headY,headR,hair,P.hairStyle||'short'); }
+  if(P.beard){ drawBeard(0,headY,headR,P.beardCol||hair); }
+  // ---- eyes ----
+  if(P.eyesClosed||blinking){
+    ctx.strokeStyle=rgb([70,54,40]);ctx.lineWidth=Math.max(1.2,s*0.05);ctx.lineCap='round';
+    for(const sx of[-1,1]){ctx.beginPath();ctx.arc(sx*headR*0.38,headY-headR*0.02,headR*0.2,0.2,Math.PI-0.2);ctx.stroke();}
+  }else{
+    for(const sx of[-1,1]){
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*headR*0.38,headY-headR*0.05,headR*0.19,headR*0.23,0,0,7);ctx.fill();
+      ctx.fillStyle=rgb([46,34,24]);circle(sx*headR*0.38+lookDrift*headR*0.09,headY-headR*0.02,headR*0.11);
+      ctx.fillStyle='#fff';circle(sx*headR*0.38+lookDrift*headR*0.09+headR*0.03,headY-headR*0.06,headR*0.035);
+    }
+  }
+  // ---- brows (emotion) ---- browY offset & angle
+  const bw=headR*0.26, by=headY-headR*0.34, ba=(P.brow||0);
+  ctx.strokeStyle=rgb(hair);ctx.lineWidth=Math.max(1.4,s*0.055);ctx.lineCap='round';
+  for(const sx of[-1,1]){ctx.beginPath();
+    ctx.moveTo(sx*headR*0.38-bw*0.5, by+ (sx*ba)*headR*0.12 + (P.browRaise||0)*-headR*0.1);
+    ctx.lineTo(sx*headR*0.38+bw*0.5, by- (sx*ba)*headR*0.12 + (P.browRaise||0)*-headR*0.1);ctx.stroke();}
+  // ---- mouth (emotion) ---- m: -1 frown .. 0 neutral .. +1 smile
+  const m=(P.mouth==null?0.2:P.mouth), my=headY+headR*0.42;
+  ctx.strokeStyle=rgb([150,90,80]);ctx.lineWidth=Math.max(1.4,s*0.05);ctx.lineCap='round';
+  ctx.beginPath();
+  if(Math.abs(m)<0.05){ctx.moveTo(-headR*0.2,my);ctx.lineTo(headR*0.2,my);}
+  else{ctx.moveTo(-headR*0.22,my- m*headR*0.06);ctx.quadraticCurveTo(0,my+m*headR*0.26,headR*0.22,my-m*headR*0.06);}
+  ctx.stroke();
+  ctx.restore(); // end head motion
+  ctx.restore();
+  return {headY:groundY+headY, headR, bodyTop:groundY+bodyTop,
+          hx:x+headSwayX, hy:groundY+headY+headBob, tilt:headTilt};
+}
+function drawHair(cx,cy,r,col,style){
+  ctx.fillStyle=rgb(col);
+  if(style==='short'){ctx.beginPath();ctx.arc(cx,cy-r*0.12,r*1.02,Math.PI*1.02,Math.PI*1.98);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,cy-r*0.5,r*0.95,r*0.6,0,0,7);ctx.fill();}
+  else if(style==='bun'){ctx.beginPath();ctx.arc(cx,cy-r*0.2,r*1.0,Math.PI,0);ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy-r*1.05,r*0.35,0,7);ctx.fill();}
+  else if(style==='long'){ctx.beginPath();ctx.arc(cx,cy-r*0.1,r*1.05,Math.PI*0.85,Math.PI*2.15);ctx.fill();
+    rr(cx-r*1.02,cy-r*0.3,r*0.4,r*1.8,r*0.2);ctx.fill();rr(cx+r*0.62,cy-r*0.3,r*0.4,r*1.8,r*0.2);ctx.fill();}
+  else if(style==='cap'){ctx.beginPath();ctx.arc(cx,cy-r*0.1,r*1.0,Math.PI,0);ctx.fill();
+    ctx.fillStyle=rgb([40,50,70]);rr(cx-r*1.05,cy-r*0.15,r*2.1,r*0.4,r*0.15);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+r*0.2,cy-r*0.1,r*1.15,r*0.32,0,0,Math.PI);ctx.fill();}
+  else if(style==='bald'){/* nothing */}
+  else if(style==='grey'){ctx.fillStyle=rgb([200,198,196]);
+    ctx.beginPath();ctx.arc(cx,cy-r*0.12,r*1.0,Math.PI*1.05,Math.PI*1.95);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,cy-r*0.48,r*0.9,r*0.55,0,0,7);ctx.fill();}
+}
+
+/* a headscarf: frames the face, drapes past the jaw to the shoulders */
+function drawHijab(cx,cy,r,col,colSh){
+  // drape behind/around: a soft rounded shape wider than the head, down to shoulders
+  ctx.fillStyle=rgb(colSh);
+  ctx.beginPath();
+  ctx.moveTo(cx-r*1.15,cy+r*0.2);
+  ctx.quadraticCurveTo(cx-r*1.25,cy-r*1.15,cx,cy-r*1.2);
+  ctx.quadraticCurveTo(cx+r*1.25,cy-r*1.15,cx+r*1.15,cy+r*0.2);
+  ctx.quadraticCurveTo(cx+r*1.1,cy+r*1.4,cx+r*0.55,cy+r*1.7);   // drape down right
+  ctx.lineTo(cx-r*0.55,cy+r*1.7);
+  ctx.quadraticCurveTo(cx-r*1.1,cy+r*1.4,cx-r*1.15,cy+r*0.2);
+  ctx.closePath();ctx.fill();
+  // lighter top layer (the wrap over the crown)
+  ctx.fillStyle=rgb(col);
+  ctx.beginPath();
+  ctx.moveTo(cx-r*1.02,cy+r*0.1);
+  ctx.quadraticCurveTo(cx-r*1.12,cy-r*1.05,cx,cy-r*1.08);
+  ctx.quadraticCurveTo(cx+r*1.12,cy-r*1.05,cx+r*1.02,cy+r*0.1);
+  // the opening around the face (cut back in)
+  ctx.quadraticCurveTo(cx+r*0.9,cy-r*0.25,cx+r*0.62,cy-r*0.4);
+  ctx.quadraticCurveTo(cx,cy-r*0.62,cx-r*0.62,cy-r*0.4);
+  ctx.quadraticCurveTo(cx-r*0.9,cy-r*0.25,cx-r*1.02,cy+r*0.1);
+  ctx.closePath();ctx.fill();
+  // a soft fold highlight
+  ctx.strokeStyle=rgba(255,255,255,.10);ctx.lineWidth=r*0.06;
+  ctx.beginPath();ctx.moveTo(cx-r*0.5,cy-r*0.9);ctx.quadraticCurveTo(cx-r*0.95,cy-r*0.2,cx-r*0.85,cy+r*0.6);ctx.stroke();
+  // subtle sleeve/edge embroidery hint at the drape edge
+  ctx.strokeStyle=rgba(255,240,220,.16);ctx.lineWidth=r*0.03;
+  ctx.beginPath();ctx.moveTo(cx-r*0.5,cy+r*1.6);ctx.lineTo(cx+r*0.5,cy+r*1.6);ctx.stroke();
+}
+/* a neat full beard: fills the jaw line under the face */
+function drawBeard(cx,cy,r,col){
+  ctx.fillStyle=rgb(col);
+  ctx.beginPath();
+  ctx.moveTo(cx-r*0.82,cy-r*0.05);
+  ctx.quadraticCurveTo(cx-r*0.9,cy+r*0.7,cx-r*0.4,cy+r*1.05);
+  ctx.quadraticCurveTo(cx,cy+r*1.25,cx+r*0.4,cy+r*1.05);
+  ctx.quadraticCurveTo(cx+r*0.9,cy+r*0.7,cx+r*0.82,cy-r*0.05);
+  // upper edge follows the cheeks
+  ctx.quadraticCurveTo(cx+r*0.55,cy+r*0.2,cx+r*0.4,cy+r*0.15);
+  ctx.quadraticCurveTo(cx,cy+r*0.32,cx-r*0.4,cy+r*0.15);
+  ctx.quadraticCurveTo(cx-r*0.55,cy+r*0.2,cx-r*0.82,cy-r*0.05);
+  ctx.closePath();ctx.fill();
+  // moustache
+  ctx.beginPath();ctx.ellipse(cx,cy+r*0.28,r*0.34,r*0.12,0,0,Math.PI);ctx.fill();
+}
+
+/* a guard's peaked cap + hi-vis detail overlay (call after person) */
+function guardCap(head,r){
+  ctx.save();
+  ctx.translate(head.hx,head.hy);ctx.rotate(head.tilt||0);
+  ctx.fillStyle=rgb([30,44,70]);ctx.beginPath();ctx.arc(0,-r*0.15,r*1.02,Math.PI,0);ctx.fill();
+  ctx.fillStyle=rgb([22,32,52]);ctx.beginPath();ctx.ellipse(r*0.15,-r*0.12,r*1.2,r*0.34,0,0,Math.PI);ctx.fill();
+  ctx.fillStyle=rgb([210,180,70]);rr(-r*0.9,-r*0.28,r*1.8,r*0.16,r*0.06);ctx.fill(); // band
+  ctx.restore();
+}
+
+/* ===== settings: platform, carriage interior, streaming window ===== */
+
+/* the station platform at 9.58am — morning, not night. Warm daylight. */
+function platform(t,opt){opt=opt||{};
+  // morning sky through the station roof
+  ctx.fillStyle=vgrad(0,H*.5,[[0,'#bcd0dd'],[1,'#dfe4de']]);ctx.fillRect(0,0,W,H*.5);
+  // station canopy girders
+  ctx.fillStyle='#20262e';ctx.fillRect(0,0,W,H*.12);
+  ctx.strokeStyle='rgba(40,48,58,.6)';ctx.lineWidth=3;
+  for(let i=0;i<8;i++){const x=i*(W/7);ctx.beginPath();ctx.moveTo(x,H*.12);ctx.lineTo(x,H*.18);ctx.stroke();}
+  // soft light shafts from the canopy gaps
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<4;i++){const x=W*(.15+i*.24);
+    ctx.fillStyle=radial(x,H*.1,4,W*.3,[[0,'rgba(255,240,200,.10)'],[1,'rgba(255,240,200,0)']]);ctx.fillRect(0,0,W,H*.7);}
+  ctx.restore();
+  // platform floor
+  ctx.fillStyle=vgrad(H*.62,H,[[0,'#8a8378'],[1,'#6f685d']]);ctx.fillRect(0,H*.62,W,H*.38);
+  ctx.fillStyle='rgba(0,0,0,.06)';for(let x=0;x<W;x+=W*.14)ctx.fillRect(x,H*.62,2,H*.38); // paving lines
+  ctx.fillStyle='rgba(210,170,70,.8)';ctx.fillRect(0,H*.70,W,3); // yellow line
+  // the TRAIN alongside — right side / upper, warm-lit windows
+  const ty=H*.62, carTop=H*.16;
+  ctx.fillStyle=vgrad(carTop,ty,[[0,'#3f4a56'],[.5,'#333d48'],[1,'#232a32']]);ctx.fillRect(-W*.05,carTop,W*1.1,ty-carTop);
+  ctx.fillStyle='#5aa0ac';ctx.fillRect(-W*.05,carTop,W*1.1,H*.02); // livery stripe (rail teal)
+  ctx.fillStyle='rgba(150,170,190,.12)';ctx.fillRect(-W*.05,carTop,W*1.1,3);
+  // windows + doors
+  for(let k=0;k<4;k++){const wx=W*.03+k*(W*.25),ww=W*.15,wy=carTop+H*.05,wh=(ty-carTop)*.42;
+    ctx.fillStyle=vgrad(wy,wy+wh,[[0,'#eaf0f2'],[1,'#c3d0d6']]);rr(wx,wy,ww,wh,4);ctx.fill();
+    ctx.fillStyle='rgba(60,80,90,.15)';rr(wx,wy,ww,wh*.4,4);ctx.fill();
+    ctx.strokeStyle='rgba(20,26,32,.5)';ctx.lineWidth=1.5;rr(wx,wy,ww,wh,4);ctx.stroke();}
+  // a door, open
+  const dx=opt.doorX!=null?opt.doorX:W*.42;
+  ctx.fillStyle='#1a2028';rr(dx,carTop+H*.03,W*.12,ty-carTop-H*.03,3);ctx.fill();
+  ctx.fillStyle=vgrad(carTop,ty,[[0,'rgba(255,236,190,.5)'],[1,'rgba(255,236,190,.15)']]);
+  rr(dx+W*.01,carTop+H*.05,W*.10,ty-carTop-H*.08,2);ctx.fill();
+  // warm spill from the door onto the platform
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(dx+W*.06,ty,4,W*.28,[[0,'rgba(255,214,140,.14)'],[1,'rgba(255,214,140,0)']]);
+  ctx.fillRect(0,H*.5,W,H*.5);ctx.restore();
+  return {ty,carTop,doorX:dx};
+}
+
+/* carriage interior — warm morning light, seats, a big window (fills with streaming view) */
+function carriage(t,opt){opt=opt||{};
+  const warm=opt.warm==null?1:opt.warm;
+  // walls
+  ctx.fillStyle=vgrad(0,H,[[0,'#d8c9ac'],[.5,'#cbbb9c'],[1,'#b3a487']]);ctx.fillRect(0,0,W,H);
+  // ceiling with light strip
+  ctx.fillStyle=vgrad(0,H*.14,[[0,'#e6dcc4'],[1,'#d3c6a8']]);ctx.fillRect(0,0,W,H*.14);
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(W*.5,-H*.04,4,W*.85,[[0,rgba(255,240,205,.22*warm)],[1,'rgba(255,240,205,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+  ctx.fillStyle=rgba(255,244,215,.35*warm);rr(W*.2,H*.02,W*.6,H*.012,3);ctx.fill();
+  // floor
+  ctx.fillStyle=vgrad(H*.8,H,[[0,'#5f5344'],[1,'#463d31']]);ctx.fillRect(0,H*.8,W,H*.2);
+  return {warm};
+}
+
+/* the big carriage window with landscape streaming (graphic-register countryside, morning) */
+function streamWindow(t,x,y,w,h,opt){opt=opt||{};const spd=opt.spd==null?1:opt.spd;
+  ctx.save();rr(x,y,w,h,7);ctx.clip();
+  // morning sky
+  ctx.fillStyle=vgrad(y,y+h,[[0,'#aecbe0'],[.55,'#c9dceb'],[1,'#e8ece2']]);ctx.fillRect(x,y,w,h);
+  // sun glow
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.fillStyle=radial(x+w*.8,y+h*.2,4,w*.5,[[0,'rgba(255,246,210,.5)'],[1,'rgba(255,246,210,0)']]);ctx.fillRect(x,y,w,h);ctx.restore();
+  // far hills (slow) — two layers
+  function hills(off,base,amp,col,s){const sc=(t*s*spd)%(w*2);
+    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-w,y+h);
+    for(let px=x-w;px<=x+w*2;px+=10){const k=(px+sc)*0.010+off;
+      ctx.lineTo(px,y+h*base-Math.sin(k)*amp-Math.sin(k*2.3+off)*amp*0.4);}
+    ctx.lineTo(x+w*2,y+h);ctx.closePath();ctx.fill();}
+  hills(0.4,0.60,h*.10,'#9ab48c',0.05);
+  hills(1.9,0.68,h*.08,'#7ea074',0.09);
+  // fields band
+  ctx.fillStyle=vgrad(y+h*.66,y+h,[[0,'#8bab6e'],[1,'#6f9256']]);ctx.fillRect(x,y+h*.66,w,h*.34);
+  // hedge rows sweeping (mid)
+  const ts=(t*0.34*spd)%(w*.44);
+  ctx.fillStyle='#5c7d47';
+  for(let i=-1;i<8;i++){const hx=x+i*(w*.44)-ts;
+    ctx.beginPath();ctx.moveTo(hx,y+h*.80);ctx.quadraticCurveTo(hx+w*.11,y+h*.62,hx+w*.22,y+h*.80);ctx.closePath();ctx.fill();
+    // a tree
+    ctx.fillStyle='#4d6b3c';circle(hx+w*.05,y+h*.66,h*.05);ctx.fillStyle='#5c7d47';}
+  // near fence posts / blur (fast)
+  const ps=(t*1.3*spd)%(w*.12);
+  ctx.strokeStyle='rgba(70,58,42,.8)';ctx.lineWidth=2.4;
+  for(let i=-1;i<12;i++){const fx=x+i*(w*.12)-ps;ctx.beginPath();ctx.moveTo(fx,y+h*.74);ctx.lineTo(fx,y+h*.92);ctx.stroke();}
+  ctx.strokeStyle='rgba(120,140,110,.10)';ctx.lineWidth=1;
+  for(let i=0;i<9;i++){const yy=y+h*.7+((i*13+t*0.9*spd)%(h*.28));
+    const xx=x+((i*61+t*3.6*spd)%(w*1.3))-w*.15;ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+28,yy);ctx.stroke();}
+  ctx.restore();
+  // frame
+  ctx.strokeStyle='rgba(70,58,44,.9)';ctx.lineWidth=6;rr(x,y,w,h,7);ctx.stroke();
+  ctx.strokeStyle='rgba(255,238,200,.18)';ctx.lineWidth=1.4;rr(x+3,y+3,w-6,h-6,6);ctx.stroke();
+  // sill
+  ctx.fillStyle='#5a4c39';rr(x-4,y+h,w+8,10,3);ctx.fill();
+}
+
+/* a seat unit (side-on, for compartments) */
+function seat(x,y,w,h,col,colSh){col=col||[150,70,64];colSh=colSh||[110,48,44];
+  ctx.fillStyle=rgb(colSh);rr(x,y,w,h,8);ctx.fill();
+  ctx.fillStyle=rgb(col);rr(x+w*.05,y+h*.05,w*.9,h*.6,6);ctx.fill();      // back
+  ctx.fillStyle=rgb(col);rr(x+w*.05,y+h*.62,w*.9,h*.33,6);ctx.fill();     // seat
+  ctx.fillStyle=rgba(255,255,255,.06);rr(x+w*.05,y+h*.05,w*.9,h*.14,6);ctx.fill();
+}
+
+/* ===== THE 9.58 TO WEND'S END · Part Six — 12 scenes ===== */
+/* THE PEAK. Two beats: the DRIVER'S ANNIVERSARY (unscheduled stop, rain, hills — pure warmth) then the CLIFFS GUT-PUNCH (geography reveal). Thread-light so the punch lands. Work-call tutting = minor third. */
+
+const CH={
+  guard:{skin:[210,180,150],skinSh:[176,144,116],cloth:[34,52,84],clothSh:[24,38,64],hair:[54,40,28],hairStyle:'short'},
+  driver:{skin:[224,190,158],skinSh:[190,154,124],cloth:[46,60,72],clothSh:[32,44,54],hair:[70,70,72],hairStyle:'grey'},
+  mother:{skin:[214,168,132],skinSh:[178,134,100],cloth:[196,120,86],clothSh:[160,90,60],hair:[40,30,24],hairStyle:'bun'},
+  // NEW passenger who boarded where the elderly woman got off — a local, knows the coast
+  local:{skin:[204,170,140],skinSh:[168,136,108],cloth:[110,96,80],clothSh:[84,72,60],hair:[80,70,60],hairStyle:'short'},
+  caller:{skin:[198,162,130],skinSh:[162,128,98],cloth:[70,80,100],clothSh:[50,58,74],hair:[46,36,28],hairStyle:'short'}
+};
+
+function digiWatch(x,y,s,lit){ctx.fillStyle=rgb([30,32,38]);rr(x-s,y-s*.7,s*2,s*1.4,s*.3);ctx.fill();
+  ctx.fillStyle=lit?rgb([120,210,180]):rgb([40,60,56]);rr(x-s*.7,y-s*.45,s*1.4,s*.9,s*.15);ctx.fill();}
+
+/* the cab window looking out — rain on glass, hills beyond. A quieter, cooler palette. */
+function cabWindow(t,x,y,w,h,rain){
+  ctx.save();rr(x,y,w,h,6);ctx.clip();
+  // wet grey-green day
+  ctx.fillStyle=vgrad(y,y+h,[[0,'#9fb0bb'],[.5,'#aebcc2'],[1,'#c2c8be']]);ctx.fillRect(x,y,w,h);
+  // distant hills — STILL (train stopped): soft, layered, receding into weather
+  function hill(base,amp,col,off){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x,y+h);
+    for(let px=x;px<=x+w;px+=8){const k=px*0.008+off;ctx.lineTo(px,y+h*base-Math.sin(k)*amp-Math.sin(k*2.1+off)*amp*.4);}
+    ctx.lineTo(x+w,y+h);ctx.closePath();ctx.fill();}
+  hill(0.5,h*.12,'rgba(120,140,140,.5)',0.3);   // faint far hill (weather-veiled)
+  hill(0.62,h*.14,'rgba(96,122,104,.75)',1.4);   // the hills — where they walked
+  hill(0.74,h*.10,'#5c7a54',2.6);                // nearer green
+  // rain ON the glass (streaks running down, since stopped)
+  if(rain){ctx.strokeStyle='rgba(200,210,215,.35)';ctx.lineWidth=1.4;
+    for(let i=0;i<40;i++){const rx=x+((i*53)%w),ry=y+((i*89+t*0.05)%h);
+      ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx-2,ry+14);ctx.stroke();}
+    // a few fat drops sliding
+    ctx.fillStyle='rgba(210,220,225,.4)';
+    for(let i=0;i<10;i++){const rx=x+((i*97)%w),ry=y+((i*140+t*0.12)%h);
+      ctx.beginPath();ctx.ellipse(rx,ry,2,5,0,0,7);ctx.fill();}}
+  ctx.restore();
+  ctx.strokeStyle='rgba(40,44,48,.9)';ctx.lineWidth=6;rr(x,y,w,h,6);ctx.stroke();
+}
+
+const SCENES=[
+ // 1 — the train slows unexpectedly, and stops. A red signal.
+ {first:true,map:0,
+  prose:[["p","And then, in the middle of nowhere in particular, the 9.58 slowed, and slowed further, and came to a complete and unhurried stop."],
+         ["p","Not a station. Just a stretch of open line under a greying sky. In the carriages, people looked up from their phones with the mild communal irritation of the delayed. A crackle, and the announcement: <em>a red signal ahead; we'll be held here a short while; apologies for the delay.</em>"],
+         ["p","<em>It happens. The railway breathes in and out. You wait.</em>"]],
+  paint:t=>{carriage(t,{});
+    // stopped: window still
+    streamWindow(t,W*.28,H*.14,W*.44,H*.3,{spd:0});
+    seat(W*.02,H*.48,W*.28,H*.34,[150,80,70],[116,58,52]);
+    seat(W*.7,H*.48,W*.28,H*.34,[120,100,140],[96,80,112]);
+    // a couple of passengers looking up, mild
+    person(W*.16,H*.82,H*.10,{...CH.mother,sit:true,mouth:.05,look:.3,t:t,seed:2.2});
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.09,H*.73,H*.028);}},
+
+ // 2 — the cab: the driver, alone, the rain starting
+ {map:0,
+  prose:[["p","Up at the front, in the cab, Ray set the brake and let his hands come off the controls for the first time in an hour. It had begun, lightly, to rain — the soft grey rain of the west coast, the kind that doesn't so much fall as arrive."],
+         ["p","He didn't reach for his phone. He didn't sigh. He just sat, in the sudden quiet of a stopped train, and looked out of the window at the country holding still."]],
+  paint:t=>{
+    // cab interior: darker, instrument glow, the big front window
+    ctx.fillStyle=vgrad(0,H,[[0,'#3a3e42'],[.5,'#2c3034'],[1,'#1e2124']]);ctx.fillRect(0,0,W,H);
+    cabWindow(t,W*.12,H*.12,W*.76,H*.4,true);
+    // instrument glow
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.5,H*.9,4,W*.5,[[0,'rgba(120,180,160,.10)'],[1,'rgba(120,180,160,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+    ctx.fillStyle=rgb([40,60,56]);rr(W*.2,H*.82,W*.6,H*.06,H*.01);ctx.fill();
+    [.28,.4,.52,.64,.72].forEach((p,i)=>{ctx.fillStyle=[ '#c96','#6c9','#9c6','#c66','#6cc'][i];circle(W*p,H*.85,H*.008);});
+    // the driver, seen from behind/side, still
+    person(W*.5,H*.86,H*.11,{...CH.driver,sit:true,mouth:.05,look:.2,t:t,seed:8.1});}},
+
+ // 3 — the hills; what they are to him
+ {map:1,
+  prose:[["p","There were hills out there, past the near fields, soft and green and going blue at the edges where the rain blurred them."],
+         ["p","He knew those hills. <em>God, he knew them.</em> That was where he'd grown up — where he and Maggie had run as kids, all knees and shouting, up and down those slopes till it went dark. Where they'd walked, later, as teenagers, not quite touching, taking the long way round on purpose. Where they'd walked again, older, hands finding each other, no longer taking the long way by accident."]],
+  paint:t=>{
+    ctx.fillStyle=vgrad(0,H,[[0,'#3a3e42'],[.5,'#2c3034'],[1,'#1e2124']]);ctx.fillRect(0,0,W,H);
+    // window bigger now — the hills the focus
+    cabWindow(t,W*.08,H*.1,W*.84,H*.48,true);
+    // soft warm memory-glow on the hills (barely)
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.5,H*.34,4,W*.5,[[0,'rgba(230,210,170,.06)'],[1,'rgba(230,210,170,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+    ctx.fillStyle=rgb([40,60,56]);rr(W*.2,H*.84,W*.6,H*.05,H*.01);ctx.fill();
+    person(W*.5,H*.88,H*.10,{...CH.driver,sit:true,mouth:.15,look:.1,t:t,seed:8.1});}},
+
+ // 4 — the anniversary; the warmth; no catastrophe
+ {map:1,
+  prose:[["p","Thirty-one years today. Married thirty-one years today, he and Maggie, and neither of them could get the day off — she was on shift at the surgery, he had the 9.58 to Wend's End and back — so they'd have it tonight instead. He'd booked the Italian. She didn't know yet."],
+         ["p","He looked at the hills where his whole life had happened, in the soft grey rain, and he smiled to himself, and he thought: <em>not a bad spot to be held up. Not a bad view to be stuck with.</em>"],
+         ["p","<em>The signal would change when it changed. He was in no hurry at all.</em>"]],
+  paint:t=>{
+    ctx.fillStyle=vgrad(0,H,[[0,'#3a3e42'],[.5,'#2c3034'],[1,'#1e2124']]);ctx.fillRect(0,0,W,H);
+    cabWindow(t,W*.08,H*.1,W*.84,H*.48,true);
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.5,H*.34,4,W*.5,[[0,'rgba(230,210,170,.07)'],[1,'rgba(230,210,170,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();
+    ctx.fillStyle=rgb([40,60,56]);rr(W*.2,H*.84,W*.6,H*.05,H*.01);ctx.fill();
+    // driver, a small private smile
+    person(W*.5,H*.88,H*.10,{...CH.driver,sit:true,mouth:.4,look:.1,tilt:.02,t:t,seed:8.1});}},
+
+ // 5 — Frank passes the cab; sees Ray quiet; doesn't know why
+ {map:2,
+  prose:[["p","Frank, coming forward on his rounds during the wait, put his head near the cab door and saw the back of Ray's head, still, facing the window."],
+         ["p",'<span class="dlg">"Alright, Ray? Won\'t be long, they reckon."</span>'],
+         ["p","\"Aye,\" said Ray, not turning round. \"No rush.\" Something in his voice, Frank thought — something soft, far away. But Frank had a train to walk and didn't ask. <em>You don't always ask. Everyone's carrying something. Even the man at the front.</em>"]],
+  paint:t=>{
+    ctx.fillStyle=vgrad(0,H,[[0,'#3a3e42'],[.5,'#2c3034'],[1,'#20242a']]);ctx.fillRect(0,0,W,H);
+    // cab from the corridor side: window small, driver's back, Frank's head at door edge
+    cabWindow(t,W*.06,H*.12,W*.5,H*.32,true);
+    person(W*.4,H*.84,H*.10,{...CH.driver,sit:true,look:.4,mouth:.15,t:t,seed:8.1}); // driver, back to us
+    // Frank leaning in from the right
+    const g=person(W*.82,H*.86,H*.10,{...CH.guard,look:-.7,mouth:.2,t:t,seed:8.8});
+    guardCap(g,CH_r(H*.10));}},
+
+ // 6 — the signal clears; the train moves again; back to the compartment
+ {map:2,
+  prose:[["p","After a few minutes the signal blinked to green somewhere up the line, and the 9.58 sighed and gathered itself and pulled away, leaving the hills behind."],
+         ["p","Back in the compartment near the front, the young mother had barely noticed the stop. She was watching the coast unspool — the shingle, the gulls, the great flat shine of the sea — and thinking, still, about the elderly woman, and about beaches, and about a day out she might have, one day, with the baby."]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.28,H*.14,W*.44,H*.3,{spd:.8});
+    seat(W*.02,H*.48,W*.28,H*.34,[120,100,140],[96,80,112]);
+    person(W*.84,H*.82,H*.10,{...CH.mother,sit:true,mouth:.2,look:-.5,t:t,seed:2.2,sway:true});
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.72,H*.03);
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.5,H*.3,4,W*.5,[[0,'rgba(215,230,235,.12)'],[1,'rgba(215,230,235,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}},
+
+ // 7 — a NEW passenger opposite; Frank comes to check the ticket
+ {map:3,
+  prose:[["p","There was someone new in the seat opposite now — a weathered, friendly-looking man who'd got on a few stops back, at the little station by the shingle, with a canvas bag and the settled look of a local going one stop up the line."],
+         ["p","Frank came through, checking tickets. He clipped the local's, nodded, and was about to move on when the mother, in the warm way of someone sharing a nice thought, spoke up."]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.02,H*.48,W*.28,H*.34,[110,96,80],[84,72,60]);
+    seat(W*.7,H*.48,W*.28,H*.34,[150,80,70],[116,58,52]);
+    // the local (left), friendly
+    person(W*.16,H*.82,H*.10,{...CH.local,sit:true,mouth:.3,look:.3,t:t,seed:13.1,sway:true});
+    // mother (right)
+    person(W*.84,H*.83,H*.098,{...CH.mother,sit:true,mouth:.25,look:-.4,t:t,seed:2.2,sway:true});
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.73,H*.03);
+    // Frank (centre, at the aisle)
+    const g=person(W*.5,H*.86,H*.09,{...CH.guard,look:.2,mouth:.2,t:t,seed:8.8,sway:true});
+    guardCap(g,CH_r(H*.09));}},
+
+ // 8 — the beach; "sorry, I don't follow"
+ {map:3,
+  prose:[["p",'<span class="dlg">"I was just thinking," </span>the mother said, <span class="dlg">"I might bring the little one back one day. To the beach. There was a lady got off earlier, going down to the water — it looked so lovely. Which stop was it, for the beach?"</span>'],
+         ["p","The local's friendly face did something small and uncertain. \"Sorry,\" he said. \"I don't follow. The beach?\""],
+         ["p",'<span class="dlg">"Where the lady got off. With the sea, right there."</span>']],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.02,H*.48,W*.28,H*.34,[110,96,80],[84,72,60]);
+    seat(W*.7,H*.48,W*.28,H*.34,[150,80,70],[116,58,52]);
+    // local, a flicker of uncertainty
+    person(W*.16,H*.82,H*.10,{...CH.local,sit:true,mouth:.05,brow:.2,look:.4,t:t,seed:13.1,sway:true});
+    person(W*.84,H*.83,H*.098,{...CH.mother,sit:true,mouth:.3,look:-.4,t:t,seed:2.2,sway:true});
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.73,H*.03);
+    const g=person(W*.5,H*.86,H*.085,{...CH.guard,look:.2,mouth:.1,t:t,seed:8.8,sway:true});
+    guardCap(g,CH_r(H*.085));}},
+
+ // 9 — the geography; the beach is AHEAD
+ {map:4,
+  prose:[["p","\"Ah,\" said the local, working it out. \"No — the beach, the proper beach, that's further on. Couple of stops up, past the point. You've not passed the beach yet.\""],
+         ["p","The mother frowned, pleasantly puzzled. \"But the lady got off <em>at</em> the sea. I saw it. Right there behind the platform.\""],
+         ["p","The local and Frank went still in the same instant. <em>Something in the air of the compartment changed, the way a room changes when a number doesn't add up.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.02,H*.48,W*.28,H*.34,[110,96,80],[84,72,60]);
+    seat(W*.7,H*.48,W*.28,H*.34,[150,80,70],[116,58,52]);
+    // local + Frank both still, dawning
+    person(W*.16,H*.82,H*.10,{...CH.local,sit:true,mouth:-.05,brow:.35,look:.3,t:t,seed:13.1,sway:true});
+    person(W*.84,H*.83,H*.098,{...CH.mother,sit:true,mouth:.1,brow:.2,look:-.4,t:t,seed:2.2,sway:true});
+    const g=person(W*.5,H*.86,H*.085,{...CH.guard,look:.3,mouth:-.05,brow:.3,t:t,seed:8.8,sway:true});
+    guardCap(g,CH_r(H*.085));}},
+
+ // 10 — "So what's at the previous stop?" — "Cliffs."
+ {map:4,
+  prose:[["p","\"So —\" the mother said slowly, the smile going out of her voice, \"the stop before? Where she actually got off? What's there?\""],
+         ["p","There was a pause that went on a half-second too long."],
+         ["p","<span class=\"dlg\">\"Cliffs,\"</span> said Frank. <em>Just the one word.</em> \"That stop. It's the cliff path. There's no beach there. There's a car park and a viewpoint and a long drop to the rocks.\""]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.02,H*.48,W*.28,H*.34,[110,96,80],[84,72,60]);
+    seat(W*.7,H*.48,W*.28,H*.34,[150,80,70],[116,58,52]);
+    person(W*.16,H*.82,H*.10,{...CH.local,sit:true,mouth:-.15,brow:.4,look:.3,t:t,seed:13.1,sway:true});
+    // mother, the smile gone, dread arriving
+    person(W*.84,H*.83,H*.098,{...CH.mother,sit:true,mouth:-.2,brow:.5,browRaise:.4,look:-.3,t:t,seed:2.2,sway:true});
+    // Frank, grave
+    const g=person(W*.5,H*.86,H*.085,{...CH.guard,look:.1,mouth:-.15,brow:.35,t:t,seed:8.8,sway:true});
+    guardCap(g,CH_r(H*.085));
+    // the light goes a touch colder
+    ctx.fillStyle='rgba(90,110,130,.06)';ctx.fillRect(0,0,W,H);}},
+
+ // 11 — the look; "someone better call the emergency services"
+ {map:5,
+  prose:[["p","Frank and the local looked at each other. Neither of them said the thing. The thing did not need saying. It was already in the compartment with them, whole and terrible: an elderly woman, calm all morning, alone, with her husband's ashes, getting off at the cliffs, walking toward the sea."],
+         ["p","<em>Going to the sea. She'd said it herself. She had told them all exactly what she was doing, and they had heard something lovely.</em>"],
+         ["p",'The local spoke first, low, to Frank. <span class="dlg">"Someone better call the emergency services."</span>']],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.3,H*.14,W*.4,H*.28,{spd:1});
+    seat(W*.02,H*.48,W*.28,H*.34,[110,96,80],[84,72,60]);
+    seat(W*.7,H*.48,W*.28,H*.34,[150,80,70],[116,58,52]);
+    // local and Frank, grave, the look between them
+    person(W*.2,H*.82,H*.10,{...CH.local,sit:true,mouth:-.15,brow:.35,look:.6,t:t,seed:13.1,sway:true});
+    const g=person(W*.5,H*.86,H*.09,{...CH.guard,look:-.6,mouth:-.15,brow:.3,t:t,seed:8.8,sway:true});
+    guardCap(g,CH_r(H*.09));
+    // mother in bg, hand to mouth (small)
+    person(W*.86,H*.84,H*.09,{...CH.mother,sit:true,mouth:-.2,brow:.4,look:-.3,t:t,seed:2.2,sway:true});
+    ctx.fillStyle='rgba(90,110,130,.07)';ctx.fillRect(0,0,W,H);}},
+
+ // 12 — button: Frank moves; the train runs on; the mother, the baby, the quiet
+ {map:6,last:true,
+  prose:[["p","Frank was already moving — up the aisle, radio in hand, his voice dropping into the flat clipped calm of a man relaying something urgent to control: a description, a station, a time she'd have got off. <em>Doing the only thing left that could be done, which was almost certainly nothing, and doing it anyway.</em>"],
+         ["p","The mother sat very still, her sleeping baby warm against her, and looked at the empty seat where the lilac coat had been, and understood, finally and completely, what she had watched leave the train."],
+         ["p","<em>Outside, the sea went on shining. The 9.58 ran on toward Wend's End. And somewhere behind them, at a stop with no beach, the tide was doing what the tide does.</em>"]],
+  paint:t=>{carriage(t,{});
+    streamWindow(t,W*.28,H*.14,W*.44,H*.3,{spd:1.1});
+    seat(W*.02,H*.48,W*.28,H*.34,[120,100,140],[96,80,112]);
+    // mother alone, still, baby
+    person(W*.84,H*.82,H*.10,{...CH.mother,sit:true,mouth:-.1,look:.4,t:t,seed:2.2,sway:true});
+    ctx.fillStyle=rgb([236,206,180]);circle(W*.76,H*.72,H*.03);
+    ctx.fillStyle=rgb([250,240,235]);rr(W*.76-H*.028,H*.72,H*.056,H*.05,H*.02);ctx.fill();
+    // cold light on the empty seat
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=radial(W*.16,H*.6,2,W*.24,[[0,'rgba(180,200,215,.12)'],[1,'rgba(180,200,215,0)']]);ctx.fillRect(0,0,W,H);ctx.restore();}}
+];
+
+function CH_r(s){return s*0.42;}
+
+/* ===== THE 9.58 TO WEND'S END · Part One — runner ===== */
+let idx=-1,auto=false,paused=false,fin=false,running=false;
+let sceneT0=0,transT0=0,prevTs=0,dwell=9,muted=false;
+
+/* train-map progress: loco + 6 carriages fill as you go */
+const NCARS=6;
+function buildMap(){const m=$('trainmap');if(!m)return;m.innerHTML='';
+  const loco=document.createElement('div');loco.className='loco';m.appendChild(loco);
+  for(let i=0;i<NCARS;i++){const c=document.createElement('div');c.className='car';c.dataset.i=i;m.appendChild(c);}}
+function setMap(n){const cars=document.querySelectorAll('#trainmap .car');
+  cars.forEach((c,i)=>{c.classList.toggle('done',i<n);c.classList.toggle('here',i===n-1&&n>0);});}
+
+/* ---- audio: morning bed + rail rhythm + station ambience ---- */
+let AC=null,master=null,bed=[],railTimer=null;
+function aInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();master.gain.value=muted?0:0.75;master.connect(AC.destination);}catch(e){AC=null;}}
+function nbuf(d){const sr=AC.sampleRate,b=AC.createBuffer(1,sr*d,sr),x=b.getChannelData(0);
+  for(let i=0;i<x.length;i++)x[i]=Math.random()*2-1;return b;}
+function startBed(){if(!AC)return;
+  const o=AC.createOscillator();o.type='sine';o.frequency.value=58;const g=AC.createGain();g.gain.value=.0001;
+  g.gain.linearRampToValueAtTime(.04,AC.currentTime+3);o.connect(g);g.connect(master);o.start();bed.push(o,g);}
+/* rail-joint rhythm: soft periodic thumps, begins when the train moves (scene 9+) */
+function railOn(on){if(!AC)return;
+  if(on&&!railTimer){let step=0;railTimer=setInterval(()=>{if(muted||!AC)return;
+    const now=AC.currentTime;[0,0.16].forEach((off,k)=>{
+      const s=AC.createBufferSource();s.buffer=nbuf(0.08);
+      const bp=AC.createBiquadFilter();bp.type='lowpass';bp.frequency.value=180;
+      const g=AC.createGain();g.gain.setValueAtTime(.0001,now+off);
+      g.gain.linearRampToValueAtTime(k?0.03:0.05,now+off+0.005);
+      g.gain.exponentialRampToValueAtTime(.0001,now+off+0.09);
+      s.connect(bp);bp.connect(g);g.connect(master);s.start(now+off);s.stop(now+off+0.1);});
+    step++;},680);}
+  else if(!on&&railTimer){clearInterval(railTimer);railTimer=null;}}
+function stopAll(){if(!AC)return;bed.forEach(n=>{if(n.gain)try{n.gain.linearRampToValueAtTime(.0001,AC.currentTime+.5);}catch(e){}});railOn(false);}
+
+/* ---- text band ---- */
+function renderProse(sc){const el=$('prose');el.className=sc.first?'first':'';
+  el.innerHTML=sc.prose.map(p=>`<${p[0]}>${p[1]}</${p[0]}>`).join('');}
+function wordCount(sc){return sc.prose.reduce((n,p)=>n+p[1].replace(/<[^>]+>/g,'').split(/\s+/).length,0);}
+function calcDwell(sc){return Math.max(7,Math.min(16,3+wordCount(sc)*0.3));}
+
+function enter(i){idx=i;const sc=SCENES[i];sceneT0=performance.now();transT0=performance.now();
+  renderProse(sc);dwell=calcDwell(sc);
+  if(sc.map!=null)setMap(sc.map);
+  const stopped=[0,1,2,3,4].includes(i); railOn(!stopped);window.MOVING=!stopped; // P6: held at signal (cab/driver beat) scenes 1-5, then moving
+  paused=false;
+  const hint=$('hint');hint.classList.remove('hide');
+  hint.textContent=auto?(sc.last?'':'tap to pause'):(sc.last?'tap to finish':'tap to continue');}
+function advance(){if(fin)return;if(idx>=SCENES.length-1){finish();return;}enter(idx+1);}
+function finish(){fin=true;$('hint').classList.add('hide');stopAll();
+  $('endEpi').textContent='She had told them all exactly what she was doing. And they had heard something lovely.';
+  const f=$('fade');f.style.transition='opacity 1.3s';f.style.opacity='1';
+  setTimeout(()=>{$('endScr').classList.remove('gone');},1400);}
+function start(a){auto=!!a;$('titleScr').classList.add('gone');$('endScr').classList.add('gone');
+  aInit();if(AC&&AC.state==='suspended')AC.resume();startBed();
+  fin=false;$('fade').style.opacity='0';lastInput=Date.now();enter(0);
+  if(!running){running=true;requestAnimationFrame(loop);}}
+function togglePause(){if(idx<0||fin||!auto)return;paused=!paused;
+  $('hint').textContent=paused?'tap to resume':'tap to pause';}
+
+let lastInput=0;
+function loop(now){if(!running)return;const dt=now-(prevTs||now);prevTs=now;
+  if(paused&&idx>=0)sceneT0+=dt;
+  const t=now-sceneT0;const sc=idx>=0?SCENES[idx]:null;
+  try{ctx.clearRect(0,0,W,H);if(sc)sc.paint(t);}catch(e){}
+  drawGrain();
+  const tr=Math.max(0,1-(now-transT0)/600);
+  if(tr>0&&!fin){$('fade').style.opacity=(tr*tr*0.85).toFixed(3);}else if(!fin){$('fade').style.opacity='0';}
+  if(auto&&!paused&&!fin&&idx>=0&&t>=dwell*1000)advance();
+  requestAnimationFrame(loop);}
+
+$('app').addEventListener('click',e=>{
+  if(e.target.closest('.screen'))return;
+  if(['btnRead','btnAuto','btnReplay','mute'].includes(e.target.id))return;
+  if(!$('titleScr').classList.contains('gone'))return;
+  if(!$('endScr').classList.contains('gone'))return;
+  const now=Date.now();if(now-lastInput<350)return;lastInput=now;
+  if(auto)togglePause();else advance();});
+$('btnRead').addEventListener('click',e=>{e.stopPropagation();start(false);});
+$('btnAuto').addEventListener('click',e=>{e.stopPropagation();start(true);});
+$('btnReplay').addEventListener('click',e=>{e.stopPropagation();start(auto);});
+$('mute').addEventListener('click',e=>{e.stopPropagation();muted=!muted;
+  $('mute').innerHTML=muted?'&#128263;':'&#9835;';if(master)master.gain.value=muted?0:0.75;
+  if(!muted&&AC&&AC.state==='suspended')AC.resume();});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();
+  if(!$('titleScr').classList.contains('gone'))start(false);
+  else if($('endScr').classList.contains('gone')){if(auto)togglePause();else advance();}}});
+
+buildMap();size();running=true;requestAnimationFrame(loop);
+
+</script></body></html>
