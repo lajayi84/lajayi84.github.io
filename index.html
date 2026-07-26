@@ -6,22 +6,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  body{font-family:'Newsreader',Georgia,serif;background:#141118;color:#f2ece2;
+  body{font-family:'Newsreader',Georgia,serif;background:#221c26;color:#f6f0e6;
     -webkit-font-smoothing:antialiased;padding-bottom:60px;
-    background-image:radial-gradient(120% 50% at 50% -5%,rgba(232,162,76,.12),transparent 60%);}
+    background-image:radial-gradient(130% 55% at 50% -5%,rgba(232,162,76,.20),transparent 62%);}
   .wrap{max-width:640px;margin:0 auto;padding:0 18px;}
   header{padding:34px 0 20px;}
   .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#e8a24c;}
   h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(38px,11vw,64px);line-height:.95;letter-spacing:-.02em;margin:10px 0 0;}
   h1 .dot{color:#e8a24c;}
-  .tag{color:#b8ad9e;font-size:16px;margin-top:12px;line-height:1.45;}
+  .tag{color:#cabfae;font-size:16px;margin-top:12px;line-height:1.45;}
   .instruct{font-style:italic;color:#8a8177;font-size:14px;margin-top:8px;}
   .ainote{margin-top:14px;padding-left:11px;border-left:2px solid rgba(159,179,194,.35);
     color:#8f8579;font-size:13px;line-height:1.5;max-width:34em;}
-  .ainote b{color:#b8ad9e;font-weight:400;}
+  .ainote b{color:#cabfae;font-weight:400;}
   .seclabel{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#7a7268;margin:26px 4px 12px;}
   .card{display:flex;text-decoration:none;color:inherit;border:1px solid rgba(255,255,255,.09);
-    border-radius:14px;overflow:hidden;background:#1e1a22;margin-bottom:11px;
+    border-radius:14px;overflow:hidden;background:#2c2632;margin-bottom:11px;
     transition:transform .15s,border-color .15s;}
   .card:active{transform:scale(.99);}
   .stripe{width:6px;flex:0 0 6px;background:var(--c);}
@@ -30,14 +30,14 @@
   h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:20px;}
   .chip{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
     color:var(--c);border:1px solid var(--c);border-radius:20px;padding:2px 9px;opacity:.85;}
-  .blurb{color:#a89e90;font-size:14.5px;line-height:1.5;margin-top:5px;}
+  .blurb{color:#bcae9c;font-size:14.5px;line-height:1.5;margin-top:5px;}
   .btns{display:flex;gap:8px;margin-top:12px;}
   .btn{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
     text-decoration:none;color:#e6ddce;background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.14);border-radius:7px;padding:9px 15px;}
   .btn:first-child{background:var(--c);color:#161009;border-color:var(--c);font-weight:700;}
   .feature{display:block;text-decoration:none;color:inherit;border:1px solid rgba(159,179,194,.28);
-    border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#1a1822,#141118);
+    border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#2a2430,#211b26);
     margin:4px 0 6px;position:relative;transition:transform .15s,border-color .15s;}
   .feature:active{transform:scale(.995);}
   .feature:hover{border-color:rgba(159,179,194,.5);}
@@ -46,6 +46,11 @@
   .feature.rail .fk{color:#5aa0ac;}
   .feature.rail h2 .em{color:#e0a038;}
   .feature.rail .fgo{color:#5aa0ac;border-color:rgba(90,160,172,.4);}
+  .feature.amber{border-color:rgba(232,162,76,.30);}
+  .feature.amber:hover{border-color:rgba(232,162,76,.6);}
+  .feature.amber .fk{color:#e8a24c;}
+  .feature.amber h2 .em{color:#e8a24c;}
+  .feature.amber .fgo{color:#e8a24c;border-color:rgba(232,162,76,.4);}
   .feature .fpad{padding:20px 20px 18px;}
   .feature .fk{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;color:#9fb3c2;}
   .feature h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px,8vw,44px);
@@ -83,7 +88,16 @@
       <div class="frow"><span class="fgo">Start the series &#9656;</span><span class="fmeta">4 parts &middot; watch in order</span></div>
     </div>
   </a>
-  <div class="seclabel">The Films &mdash; 12</div>
+  <a class="feature amber" href="td-chapters.html">
+    <div class="fpad">
+      <div class="fk">A story in fifteen chapters</div>
+      <h2>Today&rsquo;s <span class="em">Date</span></h2>
+      <p class="fblurb">One story, told by five people and a dog &mdash; each of whom sees only their own piece of it. Fifteen chapters that circle a single day, and only add up when you&rsquo;ve heard them all.</p>
+      <div class="frow"><span class="fgo">Read in order &#9656;</span><span class="fmeta">15 chapters &middot; an anthology</span></div>
+    </div>
+  </a>
+
+  <div class="seclabel">The Films &mdash; 11</div>
     <a class="card" href="alley.html" style="--c:#e8923c">
       <div class="stripe"></div>
       <div class="cbody">
@@ -162,14 +176,6 @@
         <div class="ctop"><h3>Three Knocks</h3><span class="chip">Noir</span></div>
         <p class="blurb">Three knocks, at the wrong hour. Nobody is expected.</p>
         <div class="btns"><a class="btn" href="three-knocks.html">Watch &#9656;</a><a class="btn" href="three-knocks-auto.html">Auto-play</a></div>
-      </div>
-    </a>
-    <a class="card" href="td-chapters.html" style="--c:#e8a24c">
-      <div class="stripe"></div>
-      <div class="cbody">
-        <div class="ctop"><h3>Today&rsquo;s Date <span style="font-weight:400;opacity:.6">(an anthology)</span></h3><span class="chip">15 chapters</span></div>
-        <p class="blurb">One story in fifteen chapters, told by five people and a dog &mdash; each of whom sees only their own piece of it.</p>
-        <div class="btns"><a class="btn" href="td-chapters.html">Read in order &#9656;</a><a class="btn" href="todays-date.html">Chapter 1</a></div>
       </div>
     </a>
     <a class="card" href="uncivility.html" style="--c:#c85040">
