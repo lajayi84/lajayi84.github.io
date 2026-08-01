@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Blind Lady — a series in twelve parts</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Spectral:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#dfe1de; --dim:#8b8f8a; --hull:#12161a; --brass:#c69a4e; --emg:#4fae94; --line:rgba(223,225,222,.12); }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:#070909;color:var(--ink);font-family:'Spectral',Georgia,serif;
+    min-height:100vh;display:flex;justify-content:center;padding:26px 16px 60px;
+    background-image:radial-gradient(120% 80% at 50% -10%, #171d22 0%, #070909 55%);}
+  .wrap{width:100%;max-width:560px;}
+
+  .back{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--dim);
+    text-decoration:none;display:inline-block;margin-bottom:26px;opacity:.7;}
+  .back:hover{opacity:1;color:var(--ink);}
+  .back::before{content:"← ";}
+
+  /* the hull plate */
+  .board{background:linear-gradient(180deg,#12161a,#0c1013);border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55);}
+  .board-top{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;background:linear-gradient(180deg,#1b2127,#151a1f);border-bottom:1px solid var(--line);}
+  .board-top .live{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;
+    color:var(--emg);text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+  .board-top .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--emg);
+    box-shadow:0 0 8px var(--emg);animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .board-top .lag{font-family:'Space Mono',monospace;font-size:12px;color:var(--dim);letter-spacing:.05em;}
+  .board-top .lag b{color:var(--ink);font-weight:400;}
+
+  .board-title{padding:26px 20px 8px;text-align:center;}
+  .eyebrow{font-family:'Fraunces',serif;font-weight:600;font-size:10px;letter-spacing:.34em;
+    text-transform:uppercase;color:var(--dim);}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(32px,9vw,50px);line-height:.98;
+    margin-top:12px;letter-spacing:-.01em;}
+  h1 .em{color:var(--brass);}
+  .plate{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.26em;color:#6f7873;
+    text-transform:uppercase;margin-top:14px;}
+  .tagline{font-family:'Spectral',serif;font-style:italic;font-size:15px;color:var(--dim);
+    max-width:31em;margin:16px auto 4px;line-height:1.5;padding:0 10px;}
+  .aiwrap{padding:6px 20px 22px;text-align:center;}
+  .ainote{font-family:'Spectral',serif;font-size:12.5px;color:#847f77;line-height:1.5;
+    max-width:32em;margin:0 auto;border-left:2px solid rgba(198,154,78,.4);padding-left:12px;text-align:left;display:inline-block;}
+  .ainote b{color:var(--ink);font-weight:400;}
+
+  .calls{padding:6px 0 8px;}
+  .calls-head{display:grid;grid-template-columns:50px 1fr 78px;gap:8px;padding:10px 20px;
+    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dim);border-bottom:1px solid var(--line);}
+  a.service{display:grid;grid-template-columns:50px 1fr 78px;gap:8px;align-items:center;
+    padding:15px 20px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);
+    transition:background .15s;position:relative;}
+  a.service:last-child{border-bottom:none;}
+  a.service:hover{background:rgba(198,154,78,.06);}
+  a.service .num{font-family:'Space Mono',monospace;font-size:15px;color:var(--brass);font-weight:700;}
+  a.service .stop{min-width:0;}
+  a.service .stop .name{display:block;font-family:'Fraunces',serif;font-weight:500;font-size:17px;line-height:1.15;margin-bottom:4px;}
+  a.service .stop .sub{font-family:'Spectral',serif;font-style:italic;font-size:13px;color:var(--dim);
+    margin-top:2px;line-height:1.35;}
+  a.service .stop .port{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;
+    text-transform:uppercase;color:#6b736e;display:block;margin-top:5px;}
+  a.service .stat{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-align:right;
+    color:var(--emg);text-transform:uppercase;}
+  a.service:hover .stat{color:var(--brass);}
+  a.service .stat::after{content:"›";display:inline-block;margin-left:5px;transition:transform .15s;}
+  a.service:hover .stat::after{transform:translateX(3px);}
+  a.service.turn .num{color:#6f7873;}
+
+  .foot{text-align:center;margin-top:30px;font-family:'Spectral',serif;font-style:italic;color:var(--dim);font-size:13.5px;line-height:1.6;}
+  .foot .by{font-style:normal;font-family:'Fraunces',serif;letter-spacing:.05em;color:#c5c8c3;}
+  .foot a{color:var(--brass);text-decoration:none;border-bottom:1px solid rgba(198,154,78,.3);}
+  .foot a:hover{color:var(--emg);border-color:var(--emg);}
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--line) 20%,var(--line) 80%,transparent);margin:26px 0;}
+  .note{font-size:12px;color:#6f6b64;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">Back to all stories</a>
+
+  <div class="board">
+    <div class="board-top">
+      <span class="live">In service</span>
+      <span class="lag">Signal lag <b id="lag">11h 42m</b></span>
+    </div>
+    <div class="board-title">
+      <div class="eyebrow">A series in twelve parts</div>
+      <h1>The <span class="em">Blind</span> Lady</h1>
+      <div class="plate">GJS Equity &middot; Assize-class &middot; circuit vessel</div>
+      <p class="tagline">A courtroom that travels, because nobody better will come. The last old ship on a run the new courts voted not to serve — and the people aboard her, who are the only law some of these ports will ever see.</p>
+    </div>
+    <div class="aiwrap">
+      <p class="ainote"><b>Written by me.</b> The animation is built with AI assistance.</p>
+    </div>
+
+    <div class="calls">
+      <div class="calls-head"><span>No.</span><span>The list</span><span>&nbsp;</span></div>
+
+      <a class="service" href="blindlady-ep1.html">
+        <span class="num">01</span>
+        <span class="stop"><span class="name">The Only Court There Is</span><span class="sub">Nineteen matters. One of them has waited six weeks. None of them is the reason anybody came.</span><span class="port">Calder Station</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep2.html">
+        <span class="num">02</span>
+        <span class="stop"><span class="name">Who Struck First</span><span class="sub">Two men, six seconds, no recording of any of it — and a note this ship sent eight months ago that nobody read.</span><span class="port">Halvern's Cut</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep3.html">
+        <span class="num">03</span>
+        <span class="stop"><span class="name">The House Always Wins</span><span class="sub">Three hours for a man who took four hundred and ten off nine people. Nineteen minutes for the one who told the truth.</span><span class="port">The Riddle</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep4.html">
+        <span class="num">04</span>
+        <span class="stop"><span class="name">One Road</span><span class="sub">A defendant everybody likes. A complainant who has withdrawn. And one person on the bench keeping a tally in the margin.</span><span class="port">Perrin's Gate</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep5.html">
+        <span class="num">05</span>
+        <span class="stop"><span class="name">Exclusion</span><span class="sub">A name on the list she has read standing up every morning for twenty-two years.</span><span class="port">Vantage Row</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service turn" href="blindlady-ep6.html">
+        <span class="num">06</span>
+        <span class="stop"><span class="name">Nil Return</span><span class="sub">No port. No list. Nine days of transit, and a ruling that has been chasing them the whole way.</span><span class="port">In transit</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep7.html">
+        <span class="num">07</span>
+        <span class="stop"><span class="name">A Quiet One</span><span class="sub">Forty-four matters offered, nineteen can be heard — and a man at the counter who will not accept the truth a fourth time.</span><span class="port">The Riddle</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service turn" href="blindlady-ep8.html">
+        <span class="num">08</span>
+        <span class="stop"><span class="name">Centre Four</span><span class="sub">She is invited to see how it is done properly. It is done properly. That is the problem.</span><span class="port">Universal Justice Centre 4</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep9.html">
+        <span class="num">09</span>
+        <span class="stop"><span class="name">Time Served</span><span class="sub">Eleven weeks in a room on a charge that carries six. Nobody did it to him. The ship was elsewhere.</span><span class="port">Calder Station</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep10.html">
+        <span class="num">10</span>
+        <span class="stop"><span class="name">The Assessor</span><span class="sub">She came up on a ship like this one. She left, and spent twenty years building the thing that would make it unnecessary.</span><span class="port">Halvern's Cut</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep11.html">
+        <span class="num">11</span>
+        <span class="stop"><span class="name">End of Circuit</span><span class="sub">Nine hundred and forty signatures kept her flying once. There is nothing in the finding that is untrue.</span><span class="port">Tallow's Reach</span></span>
+        <span class="stat">Sit</span>
+      </a>
+      <a class="service" href="blindlady-ep12.html">
+        <span class="num">12</span>
+        <span class="stop"><span class="name">Matter One</span><span class="sub">Four months. Five ports. Ninety matters. One adviser. She works it out on the back of a printed list.</span><span class="port">Calder Station</span></span>
+        <span class="stat">Sit</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="foot">
+    <p class="by">Written by Lanre Ajayi</p>
+    <p class="note">Best read in order, with sound, in a quiet moment.</p>
+    <div class="rule"></div>
+    <p>If something here moved you, you can <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a>.</p>
+  </div>
+</div>
+<script>
+  // the signal lag rises, because it rises for a living
+  (function(){
+    let h=11,m=42;const el=document.getElementById('lag');
+    setInterval(()=>{m++;if(m>=60){m=0;h++;}el.textContent=h+'h '+String(m).padStart(2,'0')+'m';},5000);
+  })();
+</script>
+</body>
+</html>
