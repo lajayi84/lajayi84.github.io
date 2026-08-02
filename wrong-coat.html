@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twelve Hours in the Wrong Coat — a story in eight parts</title>
+<meta name="description" content="He is four minutes late back on shift. That is the whole of it. A story in eight parts, by Lanre Ajayi.">
+<link rel="canonical" href="https://lanrestories.com/wrong-coat.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Lanre Ajayi">
+<meta property="og:title" content="Twelve Hours in the Wrong Coat">
+<meta property="og:description" content="He is four minutes late back on shift. That is the whole of it. That is where this starts.">
+<meta property="og:url" content="https://lanrestories.com/wrong-coat.html">
+<meta property="og:image" content="https://lanrestories.com/wrongcoat-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="628">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Twelve Hours in the Wrong Coat">
+<meta name="twitter:description" content="He is four minutes late back on shift. That is the whole of it.">
+<meta name="twitter:image" content="https://lanrestories.com/wrongcoat-og.png">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#e4e6e3; --dim:#868c90; --red:#c4442e; --cold:#7d94a6; --line:rgba(228,230,227,.11); }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:#08090a;color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;display:flex;justify-content:center;padding:26px 16px 60px;
+    background-image:radial-gradient(120% 80% at 50% -10%, #1a2029 0%, #08090a 55%);}
+  .wrap{width:100%;max-width:560px;}
+  .back{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--dim);
+    text-decoration:none;display:inline-block;margin-bottom:26px;opacity:.7;}
+  .back:hover{opacity:1;color:var(--ink);}
+  .back::before{content:"← ";}
+  .board{background:linear-gradient(180deg,#12161a,#0b0e11);border:1px solid var(--line);
+    border-radius:4px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+  .board-top{display:flex;align-items:center;justify-content:space-between;
+    padding:13px 18px;background:linear-gradient(180deg,#1a2027,#13181d);border-bottom:1px solid var(--line);}
+  .board-top .live{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.18em;
+    color:var(--red);text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+  .board-top .live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 8px var(--red);animation:blink 1.6s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .board-top .clk{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--ink);letter-spacing:.04em;}
+  .board-title{padding:28px 20px 8px;text-align:center;}
+  .eyebrow{font-family:'Archivo',sans-serif;font-weight:600;font-size:10px;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--red);}
+  h1{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(30px,8.6vw,48px);line-height:.94;
+    margin-top:14px;letter-spacing:-.025em;text-transform:uppercase;}
+  h1 .em{color:var(--red);}
+  .tagline{font-family:'Inter',sans-serif;font-size:14.5px;color:var(--dim);
+    max-width:28em;margin:18px auto 4px;line-height:1.55;padding:0 10px;}
+  .aiwrap{padding:6px 20px 22px;text-align:center;}
+  .ainote{font-family:'Inter',sans-serif;font-size:12.5px;color:#7e837f;line-height:1.55;
+    max-width:32em;margin:0 auto;border-left:2px solid rgba(196,68,46,.4);padding-left:12px;text-align:left;display:inline-block;}
+  .ainote b{color:var(--ink);font-weight:400;}
+  .calls{padding:4px 0 6px;}
+  .calls-head{display:grid;grid-template-columns:62px 1fr 60px;gap:8px;padding:10px 20px;
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dim);border-bottom:1px solid var(--line);}
+  a.service{display:grid;grid-template-columns:62px 1fr 60px;gap:8px;align-items:center;
+    padding:15px 20px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);
+    transition:background .15s;}
+  a.service:last-child{border-bottom:none;}
+  a.service:hover{background:rgba(196,68,46,.06);}
+  a.service .num{font-family:'Space Mono',monospace;font-size:13px;color:var(--red);font-weight:700;}
+  a.service .stop .name{display:block;font-family:'Archivo',sans-serif;font-weight:600;font-size:16.5px;
+    line-height:1.15;margin-bottom:4px;}
+  a.service .stop .sub{font-family:'Inter',sans-serif;font-size:12.5px;color:var(--dim);line-height:1.4;}
+  a.service .stat{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-align:right;
+    color:var(--cold);text-transform:uppercase;}
+  a.service:hover .stat{color:var(--red);}
+  a.service .stat::after{content:"›";display:inline-block;margin-left:4px;transition:transform .15s;}
+  a.service:hover .stat::after{transform:translateX(3px);}
+  .foot{text-align:center;margin-top:28px;font-family:'Inter',sans-serif;color:var(--dim);font-size:13px;line-height:1.6;}
+  .foot .by{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:#c3c7c3;text-transform:uppercase;}
+  .foot a{color:var(--red);text-decoration:none;border-bottom:1px solid rgba(196,68,46,.35);}
+  .foot a:hover{color:var(--cold);border-color:var(--cold);}
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--line) 20%,var(--line) 80%,transparent);margin:24px 0;}
+  .note{font-size:11.5px;color:#6f736f;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">Back to all stories</a>
+
+  <div class="board">
+    <div class="board-top">
+      <span class="live">On shift</span>
+      <span class="clk" id="clk">11:40</span>
+    </div>
+    <div class="board-title">
+      <div class="eyebrow">A story in eight parts</div>
+      <h1>Twelve Hours<br>in the <span class="em">Wrong Coat</span></h1>
+      <p class="tagline">He is four minutes late back on shift, and there are two identical navy coats on adjacent pegs, eleven inches apart. That is the whole of it. That is where this starts.</p>
+    </div>
+    <div class="aiwrap">
+      <p class="ainote"><b>Written by me.</b> The animation is built with AI assistance.</p>
+    </div>
+
+    <div class="calls">
+      <div class="calls-head"><span>Time</span><span>Part</span><span>&nbsp;</span></div>
+
+      <a class="service" href="wrong-coat-p1.html">
+        <span class="num">11:40</span>
+        <span class="stop"><span class="name">I&rsquo;ll Be There</span><span class="sub">A phone call heard from one side only. A car in the loading bay that is not wet. He looks at it for slightly too long.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p2.html">
+        <span class="num">13:10</span>
+        <span class="stop"><span class="name">Four Doors, All Locked</span><span class="sub">Nobody hits him. That is the part he will not be able to explain afterwards.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p3.html">
+        <span class="num">14:45</span>
+        <span class="stop"><span class="name">The Ordinary Solutions</span><span class="sub">He tries every ordinary thing a person would try, in the right order. They close one at a time.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p4.html">
+        <span class="num">17:44</span>
+        <span class="stop"><span class="name">The Device</span><span class="sub">He was never followed. He has been carrying it since two o&rsquo;clock, and so has everyone who has been near him.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p5.html">
+        <span class="num">18:41</span>
+        <span class="stop"><span class="name">The Fall</span><span class="sub">Twenty-two feet is not the fall from the film. It is the fall from a ladder, twice.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p6.html">
+        <span class="num">19:14</span>
+        <span class="stop"><span class="name">The Wrong Man on the Phone</span><span class="sub">One word, in his own voice, and the man on the other end carries on talking.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p7.html">
+        <span class="num">20:40</span>
+        <span class="stop"><span class="name">He Keeps the Meeting</span><span class="sub">Nobody in that room has met the man he is pretending to be.</span></span>
+        <span class="stat">Read</span>
+      </a>
+      <a class="service" href="wrong-coat-p8.html">
+        <span class="num">22:04</span>
+        <span class="stop"><span class="name">Four Pages</span><span class="sub">Nobody comes after him. He keeps waiting for it and it does not happen.</span></span>
+        <span class="stat">Read</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="foot">
+    <p class="by">Written by Lanre Ajayi</p>
+    <p class="note">Eight parts, one day. Best read in order, with sound.</p>
+    <div class="rule"></div>
+    <p>If something here moved you, you can <a href="https://ko-fi.com/lanreajayi" target="_blank" rel="noopener">leave a tip</a>.</p>
+  </div>
+</div>
+<script>
+  // the clock runs forward from 11:40 and does not stop. it only goes one way.
+  (function(){
+    let h=11,m=40;const el=document.getElementById('clk');
+    setInterval(()=>{m++;if(m>=60){m=0;h=(h+1)%24;}
+      el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');},3000);
+  })();
+</script>
+</body>
+</html>
