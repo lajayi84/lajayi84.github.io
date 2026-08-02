@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commissions — Lanre Ajayi</title>
+<meta name="description" content="Animated stories that open in a browser. No app, no download, no account. Commissions for museums, heritage, charities and publishers.">
+<link rel="canonical" href="https://lanrestories.com/commissions.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Lanre Ajayi">
+<meta property="og:title" content="Commissions — Lanre Ajayi">
+<meta property="og:description" content="Animated stories that open in a browser. No app, no download, no account. For museums, heritage, charities and publishers.">
+<meta property="og:url" content="https://lanrestories.com/commissions.html">
+<meta property="og:image" content="https://lanrestories.com/blindlady-og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lanrestories.com/blindlady-og.png">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Newsreader',Georgia,serif;background:#221c26;color:#f6f0e6;
+    -webkit-font-smoothing:antialiased;padding-bottom:60px;
+    background-image:radial-gradient(130% 55% at 50% -5%,rgba(232,162,76,.20),transparent 62%);}
+  .wrap{max-width:640px;margin:0 auto;padding:0 18px;}
+  .back{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:#8a8177;
+    text-decoration:none;display:inline-block;margin:26px 0 6px;opacity:.75;}
+  .back:hover{opacity:1;color:#f6f0e6;}
+  .back::before{content:"← ";}
+  header{padding:14px 0 8px;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#e8a24c;}
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(34px,10vw,56px);
+    line-height:.96;letter-spacing:-.02em;margin:10px 0 0;}
+  .tag{color:#cabfae;font-size:17px;margin-top:14px;line-height:1.5;max-width:30em;}
+  .tag b{color:#f6f0e6;font-weight:400;}
+  h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:22px;margin:34px 0 10px;}
+  p{color:#bcae9c;font-size:15.5px;line-height:1.6;margin-bottom:12px;}
+  p strong{color:#e6ddce;font-weight:400;}
+  .seclabel{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;
+    color:#7a7268;margin:34px 4px 12px;}
+  .panel{border:1px solid rgba(255,255,255,.09);border-radius:14px;background:#2c2632;
+    padding:18px 20px;margin-bottom:11px;}
+  .panel h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:18px;margin-bottom:6px;}
+  .panel .who{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--c,#e8a24c);border:1px solid var(--c,#e8a24c);border-radius:20px;padding:2px 9px;opacity:.85;
+    display:inline-block;margin-bottom:9px;}
+  .panel p{margin-bottom:0;font-size:14.5px;}
+  ul{list-style:none;margin:6px 0 16px;}
+  li{color:#bcae9c;font-size:15px;line-height:1.55;padding-left:18px;position:relative;margin-bottom:7px;}
+  li::before{content:"—";position:absolute;left:0;color:#e8a24c;}
+  .work{display:flex;text-decoration:none;color:inherit;border:1px solid rgba(255,255,255,.09);
+    border-radius:14px;overflow:hidden;background:#2c2632;margin-bottom:11px;transition:border-color .15s;}
+  .work:hover{border-color:rgba(232,162,76,.5);}
+  .stripe{width:6px;flex:0 0 6px;background:var(--c);}
+  .cbody{flex:1;min-width:0;padding:15px 17px;}
+  .ctop{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .work h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:19px;}
+  .chip{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--c);border:1px solid var(--c);border-radius:20px;padding:2px 9px;opacity:.85;}
+  .blurb{color:#bcae9c;font-size:14.5px;line-height:1.5;margin-top:5px;}
+  .cta{border:1px solid rgba(232,162,76,.32);border-radius:16px;
+    background:linear-gradient(160deg,#2e2733,#241e29);padding:22px 22px 20px;margin:28px 0 10px;}
+  .cta h2{margin-top:0;}
+  .cta p{color:#b0a596;}
+  .mail{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.06em;
+    display:inline-block;margin-top:10px;padding:12px 20px;border-radius:7px;
+    background:#e8a24c;color:#161009;text-decoration:none;font-weight:700;}
+  .formwrap{border:1px solid rgba(232,162,76,.28);border-radius:16px;overflow:hidden;
+    background:#f4f1ec;margin:6px 0 10px;box-shadow:0 18px 44px rgba(0,0,0,.35);}
+  .formwrap iframe{display:block;width:100%;border:0;}
+  .fallback{font-size:13px;color:#8a8177;text-align:center;margin-bottom:6px;}
+  .fallback a{color:#e8a24c;text-decoration:none;border-bottom:1px solid rgba(232,162,76,.35);}
+  .ainote{margin-top:18px;padding-left:11px;border-left:2px solid rgba(159,179,194,.35);
+    color:#8f8579;font-size:13px;line-height:1.55;max-width:34em;}
+  .ainote b{color:#cabfae;font-weight:400;}
+  footer{text-align:center;margin-top:34px;color:#6a6258;font-family:'Space Mono',monospace;
+    font-size:10px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">Back to all stories</a>
+
+  <header>
+    <div class="eyebrow">Commissions</div>
+    <h1>Stories that open<br>in a browser.</h1>
+    <p class="tag">Animated, narrated, self-contained. <b>No app. No download. No account. No data harvested.</b> One link, and it plays on whatever phone the person already has.</p>
+  </header>
+
+  <h2>What this is</h2>
+  <p>I write and build short animated stories that run entirely inside a web page. They are not video — nothing buffers, nothing streams, nothing needs a good connection. They are not an app, so nobody has to install anything or agree to anything.</p>
+  <p>Each one is a single file. It can live on your site, behind a QR code on a wall, in an email, or on a card in someone's hand. <strong>If they can open a link, they can read it.</strong></p>
+
+  <div class="seclabel">Who this tends to be for</div>
+
+  <div class="panel" style="--c:#7aa8d6">
+    <span class="who">Museums &amp; heritage</span>
+    <h3>A story for a room, or an object</h3>
+    <p>Interpretation that isn't a wall panel. Works on visitors' own phones from a QR code, and keeps working at home afterwards. No hardware to install, maintain or replace.</p>
+  </div>
+
+  <div class="panel" style="--c:#4f9e8c">
+    <span class="who">Charities &amp; campaigns</span>
+    <h3>The thing a case study can't do</h3>
+    <p>A real story, told properly, in four minutes — for supporters, funders or a campaign moment. Reaches people on low-cost data plans and old devices, which most campaign media quietly does not.</p>
+  </div>
+
+  <div class="panel" style="--c:#f0b45a">
+    <span class="who">Publishers &amp; authors</span>
+    <h3>Something to send, not something to advertise</h3>
+    <p>A prologue, a companion piece, a short original tied to a title. Shareable as a single link, with nothing between the reader and the story.</p>
+  </div>
+
+  <div class="panel" style="--c:#8ec66a">
+    <span class="who">Education &amp; public bodies</span>
+    <h3>Difficult material, made readable</h3>
+    <p>Explaining a process, a right, or a service to people who will not read a leaflet about it. Built for accessibility, and for phones rather than desktops.</p>
+  </div>
+
+  <div class="seclabel">Selected work</div>
+
+  <a class="work" href="the-blind-lady.html" style="--c:#c69a4e">
+    <div class="stripe"></div>
+    <div class="cbody">
+      <div class="ctop"><h3>The Blind Lady</h3><span class="chip">Drama · 12 parts</span></div>
+      <p class="blurb">A twelve-part ensemble drama aboard a travelling court. Written, animated, scored and built as a single continuous series.</p>
+    </div>
+  </a>
+  <a class="work" href="the-958.html" style="--c:#5aa0ac">
+    <div class="stripe"></div>
+    <div class="cbody">
+      <div class="ctop"><h3>The 9.58 to Wend's End</h3><span class="chip">Anthology · 8 parts</span></div>
+      <p class="blurb">A morning train the length of the country. An anthology of strangers, in eight parts.</p>
+    </div>
+  </a>
+  <a class="work" href="the-morning-through-the-glass.html" style="--c:#f0b45a">
+    <div class="stripe"></div>
+    <div class="cbody">
+      <div class="ctop"><h3>The Morning Through the Glass</h3><span class="chip">Picture book</span></div>
+      <p class="blurb">A read-aloud picture book for children, built in the same medium. Tap to turn, or have it read to you.</p>
+    </div>
+  </a>
+
+  <h2>How it works</h2>
+  <ul>
+    <li><strong>A conversation</strong> — what the story is, who it's for, where it will live. Usually half an hour.</li>
+    <li><strong>A written treatment</strong> — the shape of the piece, before anything is built.</li>
+    <li><strong>Script</strong> — approved by you before production starts.</li>
+    <li><strong>Build</strong> — animation, sound, accessibility pass.</li>
+    <li><strong>Delivery</strong> — a single file you own outright, plus the poster and social assets to launch it.</li>
+  </ul>
+
+  <h2>Scale and budget</h2>
+  <p>A single short piece, a series, or a set of linked stories for one site or campaign. Projects typically run from a few weeks to a few months.</p>
+  <p><strong>Budgets start in the low thousands</strong> for a single commissioned piece and scale with length, cast and accessibility scope. If you have a fixed budget, say so at the start and I'll tell you honestly what fits inside it.</p>
+  <p>Grant-funded projects welcome — I'm happy to be costed into a bid before it's submitted, and to provide what you need for the application.</p>
+
+  <div class="cta">
+    <h2>Talk to me about a project</h2>
+    <p>Tell me what the story is, roughly when you need it, and roughly what you have to spend. If it isn't a fit, I'll say so quickly &mdash; and if it is, I'll come back with a shape and a figure.</p>
+  </div>
+
+  <div class="formwrap">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScZojyQXBI2SvMxAl0q4l3YFWlXJyNUUNqmsNZc1z-Jujy6-w/viewform?embedded=true"
+      width="100%" height="1100" frameborder="0" marginheight="0" marginwidth="0"
+      title="Commission enquiry form" loading="lazy">Loading&hellip;</iframe>
+  </div>
+  <p class="fallback">Form not loading? <a href="https://docs.google.com/forms/d/e/1FAIpQLScZojyQXBI2SvMxAl0q4l3YFWlXJyNUUNqmsNZc1z-Jujy6-w/viewform" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+
+  <p class="ainote"><b>How the work is made.</b> Every story is written by me. The animation is built with AI assistance, as it is across this site. I'm happy to talk through exactly what that means for a commission, and to work to whatever your organisation's policy requires.</p>
+
+  <footer>Written by Lanre Ajayi</footer>
+</div>
+</body>
+</html>
